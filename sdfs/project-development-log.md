@@ -1,8 +1,8 @@
 # ezbind Project Development Log
 
-**Project:** EZBIND  
-**Component:** Project / EZBIND-CLI  
-**Status:** Active  
+**Project:** EZBIND
+**Component:** Project / EZBIND-CLI
+**Status:** Active
 **Date opened:** 2026-09-21
 
 ## Purpose
@@ -39,3 +39,12 @@ Requirements and operational-concept products are in draft review. No implementa
 - **Result:** Added the initial `ezbind(1)` man-page requirement and explicit canonical usage behavior for `--help`, `-h`, and invalid flags.
 - **Decision:** Help writes the canonical usage statement and help text to standard output with exit status 0; command-line usage errors write a diagnostic and the same usage statement to standard error with exit status 2 and no output replacement.
 - **Verification planned:** `TEST-CLI` and `TEST-DOC` cover the behavior and documentation.
+
+## Entry 004 — requirements acceptance and design start
+
+- **Date:** 2026-09-21
+- **Activity:** Requirements review and baseline acceptance.
+- **Result:** User accepted EZBIND-SRS-001 Revision 1.1, including man-page and canonical usage requirements.
+- **Configuration effect:** Requirements Specification advanced to client-controlled status.
+- **Design activity:** Independent backend review recommends qpdf native page/Form-XObject APIs behind a project-owned C-compatible C++ bridge; Ada remains responsible for application behavior and layout.
+- **Next gate:** Design review before implementation.

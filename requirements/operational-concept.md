@@ -1,22 +1,22 @@
 # ezbind Operational Concept Description
 
-**Project:** ezbind  
-**Document:** Operational Concept Description (OCD)  
-**Identifier:** EZBIND-OCD-001  
-**Status:** Draft for requirements review  
-**Date:** 2026-09-21  
+**Project:** ezbind
+**Document:** Operational Concept Description (OCD)
+**Identifier:** EZBIND-OCD-001
+**Status:** Draft for requirements review
+**Date:** 2026-09-21
 **Revision:** 1.0
 
 ## Contents
 
-1. Scope  
-2. Referenced documents  
-3. Current situation  
-4. Justification for change  
-5. Concept for the new system  
-6. Operational environment  
-7. Impacts  
-8. Analysis  
+1. Scope
+2. Referenced documents
+3. Current situation
+4. Justification for change
+5. Concept for the new system
+6. Operational environment
+7. Impacts
+8. Analysis
 9. Notes
 
 ## 1. Scope
@@ -27,8 +27,8 @@ This document defines the intended user workflow and physical assumptions. Detai
 
 ## 2. Referenced documents
 
-- `plan/project-plan.md`, EZBIND-SDP-001, Revision 1.0.
-- `requirements/requirements-spec.md`, EZBIND-SRS-001, Revision 1.1 draft.
+- `plan/project-plan.md`, EZBIND-SDP-001, Revision 1.1.
+- `requirements/requirements-spec.md`, EZBIND-SRS-001, Revision 1.1.
 - User-approved resolutions to the B0 open-decision register, 2026-09-21.
 
 ## 3. Current situation

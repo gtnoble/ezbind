@@ -1,10 +1,10 @@
 # ezbind Test Plan
 
-**Project:** EZBIND  
-**Document:** Software Test Plan (STP)  
-**Identifier:** EZBIND-STP-001  
-**Status:** Draft for requirements review  
-**Date:** 2026-09-21  
+**Project:** EZBIND
+**Document:** Software Test Plan (STP)
+**Identifier:** EZBIND-STP-001
+**Status:** Draft for requirements review
+**Date:** 2026-09-21
 **Revision:** 1.1
 
 ## 1. Scope
@@ -13,9 +13,9 @@ This plan covers unit, integration, component acceptance, and conditional system
 
 ## 2. Referenced documents
 
-- `plan/project-plan.md`, EZBIND-SDP-001, Revision 1.0.
+- `plan/project-plan.md`, EZBIND-SDP-001, Revision 1.1.
 - `requirements/operational-concept.md`, EZBIND-OCD-001, Revision 1.0.
-- `requirements/requirements-spec.md`, EZBIND-SRS-001, Revision 1.1 draft.
+- `requirements/requirements-spec.md`, EZBIND-SRS-001, Revision 1.1.
 
 ## 3. Test environment
 

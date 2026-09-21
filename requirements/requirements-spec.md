@@ -1,19 +1,19 @@
 # ezbind Requirements Specification
 
-**Project:** ezbind  
-**Document:** Software Requirements Specification (SRS)  
-**Identifier:** EZBIND-SRS-001  
-**Status:** Draft for client requirements review  
-**Date:** 2026-09-21  
+**Project:** ezbind
+**Document:** Software Requirements Specification (SRS)
+**Identifier:** EZBIND-SRS-001
+**Status:** Client-acknowledged baseline
+**Date:** 2026-09-21
 **Revision:** 1.1
 
 ## Contents
 
-1. Scope  
-2. Referenced documents  
-3. Definitions and conventions  
-4. Requirements  
-5. Qualification provisions and traceability  
+1. Scope
+2. Referenced documents
+3. Definitions and conventions
+4. Requirements
+5. Qualification provisions and traceability
 6. Notes
 
 ## 1. Scope
@@ -37,7 +37,7 @@ Each requirement states one primary verification method:
 
 ## 2. Referenced documents
 
-- `plan/project-plan.md`, EZBIND-SDP-001, Revision 1.0.
+- `plan/project-plan.md`, EZBIND-SDP-001, Revision 1.1.
 - `requirements/operational-concept.md`, EZBIND-OCD-001, Revision 1.0.
 - `tests/test-plan.md`, EZBIND-STP-001, Revision 1.1 draft.
 - User-approved B0 resolutions, 2026-09-21.
@@ -194,7 +194,7 @@ All requirements in this draft trace to the user initiating brief and the user-a
 
 ## 6. Notes
 
-- This specification is a draft for the requirements review gate. It is not yet client-controlled.
+- This specification was accepted by the user on 2026-09-21 and is client-controlled Revision 1.1.
 - The initial man-page scope is `ezbind(1)`; additional man pages are not required until another user-facing command or file format is introduced.
 - The PDF backend is intentionally not selected by this document; backend selection is a design activity constrained by these requirements.
 - The physical duplex flip direction must be confirmed with a printed fixture because printer driver settings vary.
@@ -207,4 +207,8 @@ All requirements in this draft trace to the user initiating brief and the user-a
 - CLI usage behavior and the `ezbind(1)` deliverable are explicitly specified and traceable to tests.
 - The scope and accepted physical baseline are represented.
 - Remaining implementation choices are identified as design decisions.
-- Result: **acceptable draft for client requirements review; not client-controlled until acknowledged.**
+- Result: **accepted as the client-controlled requirements baseline after user acknowledgement on 2026-09-21.**
+
+## 7. Requirements baseline acknowledgement
+
+The user accepted the requirements in this specification on 2026-09-21, including the `ezbind(1)` man-page requirements and canonical usage behavior. This document is now client-controlled Revision 1.1. Changes require a Problem/Change Log entry and user agreement before modification.

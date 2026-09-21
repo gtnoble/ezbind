@@ -1,10 +1,10 @@
 # ezbind Project Plan
 
-**Project:** ezbind — home bookbinding PDF preparation CLI  
-**Document:** Software Development Plan (SDP)  
-**Identifier:** EZBIND-SDP-001  
-**Status:** Client-acknowledged baseline  
-**Date:** 2026-09-21  
+**Project:** ezbind — home bookbinding PDF preparation CLI
+**Document:** Software Development Plan (SDP)
+**Identifier:** EZBIND-SDP-001
+**Status:** Client-acknowledged baseline
+**Date:** 2026-09-21
 **Revision:** 1.1
 
 ## 1. Overview
@@ -39,8 +39,8 @@ The user brief in the initiating conversation is the source of the initial proje
 ## 2. Referenced documents
 
 - User initiating brief, 2026-09-21.
-- `requirements/requirements-spec.md` — draft EZBIND-SRS-001, Revision 1.1, updated with documentation and usage requirements.
-- `design/design-description.md` — to be created after requirements review and acknowledgement.
+- `requirements/requirements-spec.md` — client-controlled EZBIND-SRS-001, Revision 1.1, accepted 2026-09-21.
+- `design/design-description.md` — draft EZBIND-SDD-001, Revision 1.0, created for design review.
 - `tests/test-plan.md` — draft EZBIND-STP-001, Revision 1.1, aligned with the updated requirements review.
 - `sdfs/project-development-log.md` — project development log.
 - `plan/problem-change-log.md` — corrective-action and change record.
@@ -198,7 +198,7 @@ At each management review report: requirements volatility; component progress; o
 
 ## 11. Resources and user participation
 
-Developer resources currently available are the local Linux development environment, Ada toolchain, Git, PDF command-line inspection/rendering tools, and the project workspace. The user is expected to review the draft requirements package, provide representative PDFs or permission to use synthetic fixtures, and acknowledge requirements and design at the defined gates.
+Developer resources currently available are the local Linux development environment, Ada toolchain, Git, PDF command-line inspection/rendering tools, and the project workspace. The user is expected to review the draft Design Description, provide representative PDFs or permission to use synthetic fixtures, and acknowledge design at the active gate.
 
 No developer-site installation, formal user training, or separate maintenance-team handover is currently planned. These remain open until confirmed.
 
@@ -260,7 +260,7 @@ Result: **accepted as the client-controlled baseline after user acknowledgement 
 
 ## 16. Current gate
 
-The B0 plan/open-decisions gate is closed by user acknowledgement on 2026-09-21. The project is now at the requirements review gate. Requirements implementation and detailed design remain blocked until the draft Requirements Specification is reviewed and acknowledged.
+The B0 plan/open-decisions gate is closed by user acknowledgement on 2026-09-21. The requirements review gate was closed by user acknowledgement on 2026-09-21. The project is now at the design review gate. Implementation remains blocked until the Design Description is reviewed and acknowledged.
 
 ## 17. Notes
 
@@ -268,4 +268,4 @@ The plan is tailored for a greenfield, software-only, single-developer project. 
 
 ## 18. Baseline acknowledgement
 
-The user acknowledged the Project Plan and accepted the proposed resolutions for all Section 13 decision items on 2026-09-21. The user subsequently requested the `ezbind(1)` man page and canonical CLI usage behavior on 2026-09-21; this authorized Revision 1.1. The plan remains client-controlled. Any further change to the accepted baseline requires a Problem/Change Log entry and user agreement.
+The user acknowledged the Project Plan and accepted the proposed resolutions for all Section 13 decision items on 2026-09-21. The user subsequently requested the `ezbind(1)` man page and canonical CLI usage behavior on 2026-09-21; this authorized Revision 1.1. The user accepted the requirements baseline on 2026-09-21; design review is now the active gate. The plan remains client-controlled. Any further change to the accepted baseline requires a Problem/Change Log entry and user agreement.
