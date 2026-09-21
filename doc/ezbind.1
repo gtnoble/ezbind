@@ -1,0 +1,99 @@
+.TH EZBIND 1 "2026-09-21" "ezbind 0.1.0-dev" "User Commands"
+.SH NAME
+ezbind \- prepare an ebook PDF for folded-folio home bookbinding
+.SH SYNOPSIS
+.B ezbind
+.RB [ OPTIONS ]
+.I INPUT.pdf
+.B --output
+.I OUTPUT.pdf
+.SH DESCRIPTION
+.B ezbind
+arranges an ebook PDF for duplex printing as folded single-sheet folios. The
+sheets are folded with the fold toward the spine, stacked, and glued into a
+text block. Physical cover cards, adhesive, and fabric are supplied and placed
+by the user.
+.PP
+The canonical usage statement is:
+.PP
+.nf
+Usage: ezbind [OPTIONS] INPUT.pdf --output OUTPUT.pdf
+.fi
+.SH OPTIONS
+.TP
+.BR --help , \-h
+Print the usage statement, option summary, and exit-status summary. This
+operation does not require an input PDF and returns status 0.
+.TP
+.BR --output \ OUTPUT.pdf
+Write the imposed PDF to the specified path.
+.TP
+.B --force
+Replace an existing output file. Without this option, an existing output is
+not replaced.
+.TP
+.B --sheet letter
+Use US Letter sheet dimensions.
+.TP
+.B --sheet a4
+Use ISO A4 sheet dimensions.
+.TP
+.B --grid margin
+Draw the default light-gray graph-paper-like vector grid in permitted margin
+regions. The default spacing is 5 mm.
+.TP
+.B --covers blank
+Add blank front and back cover-card pages. Cover pages are excluded by default.
+.TP
+.B --spine-guide line
+Add an optional printed guide for the physical fabric/spine reserve.
+.SH UNITS
+Physical dimensions accept millimetres (mm), inches (in), and PDF points (pt).
+Margins are measured from finished-page edges. The default margins are 12 mm
+top and bottom, 15 mm at the fore-edge, and 20 mm at the spine.
+.SH OUTPUT AND PHYSICAL WORKFLOW
+The output contains two logical page positions on each side of each folded
+sheet. The nominal four-page assignment is front-left 4, front-right 1,
+back-left 2, and back-right 3. Pages are padded with blanks to a multiple of
+four. Print duplex, fold each sheet once with the fold toward the spine, and
+stack sheets in output order before gluing.
+.PP
+Printer duplex flip settings vary. Verify the page sequence and fold direction
+with a small asymmetric test document before binding a valuable book.
+.SH EXIT STATUS
+.TP
+.B 0
+Success.
+.TP
+.B 2
+Command-line usage error.
+.TP
+.B 3
+Input PDF error.
+.TP
+.B 4
+Impossible layout.
+.TP
+.B 5
+Output or filesystem error.
+.TP
+.B 6
+Missing or unusable runtime dependency.
+.TP
+.B 10
+Unexpected internal error.
+.SH DIAGNOSTICS
+Usage errors are written to standard error and include the diagnostic followed
+by the canonical usage line. Ordinary diagnostics do not include extracted
+source text, passwords, or complete PDF content.
+.SH PDF LIMITATIONS
+Visible page content and selectable text are preserved through the qpdf backend
+where supported. Annotations, interactive forms, bookmarks, tagged structure,
+signatures, and other document-level features may be reported as degraded or
+unsupported. Input PDFs that are malformed, empty, or unsupported are rejected.
+.SH EXAMPLE
+.nf
+ezbind --sheet letter --grid margin book.pdf --output book-bound.pdf
+.fi
+.SH SEE ALSO
+.BR qpdf (1)

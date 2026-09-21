@@ -3,7 +3,7 @@
 **Project:** ezbind
 **Document:** Software Design Description (SDD)
 **Identifier:** EZBIND-SDD-001
-**Status:** Draft for client design review
+**Status:** Client-acknowledged baseline
 **Date:** 2026-09-21
 **Revision:** 1.0
 
@@ -138,7 +138,7 @@ The canonical first line for help and usage errors is exactly:
 Usage: ezbind [OPTIONS] INPUT.pdf --output OUTPUT.pdf
 ```
 
-`--help` and `-h` print the usage line, concise option summary, and exit-status summary to standard output and return 0. Invalid flags and malformed invocations print a diagnostic followed by the same usage line to standard error and return 2. The command manual source is `doc/ezbind.1`; its generated/installable form is `ezbind(1)`.
+`--help` and `-h` print the usage line, concise option summary, and exit-status summary to standard output and return 0. Invalid flags and malformed invocations print a diagnostic followed by the same usage line to standard error and return 2. The command manual source is `doc/ezbind.1`; the Alire crate owns the generated GPR/configuration files; the generated/installable form is `ezbind(1)`.
 
 ### 3.10 Reproducibility and capability reporting
 
@@ -150,15 +150,15 @@ The application reports selected non-default layout options in a concise summary
 
 | ID | Unit | Language/type | Purpose |
 |---|---|---|---|
-| UNIT-CLI | `Ezbind.CLI` | Ada package | Parse arguments, implement help/usage, map errors to exit statuses. |
-| UNIT-APP | `Ezbind.Application` | Ada package | Orchestrate validation, layout, backend lifecycle, diagnostics, and atomic output. |
-| UNIT-PHY | `Ezbind.Physical` | Ada package | Parse and convert physical dimensions and units. |
-| UNIT-GEO | `Ezbind.Geometry` | Ada package | Compute sheet, finished-page, margin, reserve, and grid rectangles. |
-| UNIT-IMP | `Ezbind.Imposition` | Ada package | Produce padded logical pages, sides, positions, rotations, and placement records. |
-| UNIT-GRD | `Ezbind.Guides` | Ada package | Generate vector grid, spine guide, fold/crop/registration marks, and cover placeholders. |
-| UNIT-PDF | `Ezbind.PDF_Backend` | Ada package | Backend-neutral PDF lifecycle and placement interface. |
+| UNIT-CLI | `Ezbind_CLI` | Ada package | Parse arguments, implement help/usage, map errors to exit statuses. |
+| UNIT-APP | `Ezbind_Application` | Ada package | Orchestrate validation, layout, backend lifecycle, diagnostics, and atomic output. |
+| UNIT-PHY | `Ezbind_Physical` | Ada package | Parse and convert physical dimensions and units. |
+| UNIT-GEO | `Ezbind_Geometry` | Ada package | Compute sheet, finished-page, margin, reserve, and grid rectangles. |
+| UNIT-IMP | `Ezbind_Imposition` | Ada package | Produce padded logical pages, sides, positions, rotations, and placement records. |
+| UNIT-GRD | `Ezbind_Guides` | Ada package | Generate vector grid, spine guide, fold/crop/registration marks, and cover placeholders. |
+| UNIT-PDF | `Ezbind_PDF_Backend` | Ada package | Backend-neutral PDF lifecycle and placement interface. |
 | UNIT-QPDF | `ez_qpdf_bridge` | C++ with C ABI | Open/read/write PDFs, create/import Form XObjects, place pages, append content. |
-| UNIT-CONT | `Ezbind.Capabilities` | Ada package | Track preserved, degraded, and unsupported source features. |
+| UNIT-CONT | `Ezbind_Capabilities` | Ada package | Track preserved, degraded, and unsupported source features. |
 | UNIT-DOC | `doc/ezbind.1` | roff man page | User-facing command reference synchronized with CLI behavior. |
 | UNIT-TEST | `tests/` | Ada and shell support | Unit/integration/acceptance fixtures and independent PDF checks. |
 
@@ -252,7 +252,7 @@ No database is required. No persistent user data is stored. No input PDF content
 
 ## 5. Detailed design
 
-### 5.1 `Ezbind.Physical` / UNIT-PHY
+### 5.1 `Ezbind_Physical` / UNIT-PHY
 
 Purpose: parse physical values and provide exact named conversions.
 
@@ -270,7 +270,7 @@ Logic:
 - use named constants for conversion factors;
 - preserve precision through geometry calculations.
 
-### 5.2 `Ezbind.Geometry` / UNIT-GEO
+### 5.2 `Ezbind_Geometry` / UNIT-GEO
 
 Purpose: validate layout fit and calculate rectangles.
 
@@ -300,7 +300,7 @@ Rules:
 - use bottom-left coordinates for backend calls;
 - ensure numerical error remains within the SRS tolerance.
 
-### 5.3 `Ezbind.Imposition` / UNIT-IMP
+### 5.3 `Ezbind_Imposition` / UNIT-IMP
 
 Purpose: transform a source page count into a placement list.
 
@@ -320,7 +320,7 @@ Outputs:
 
 For each four-page group with logical pages `a`, `b`, `c`, `d`, use the assignment front-left `d`, front-right `a`, back-left `b`, back-right `c`. The unit does not open PDFs or draw content.
 
-### 5.4 `Ezbind.Guides` / UNIT-GRD
+### 5.4 `Ezbind_Guides` / UNIT-GRD
 
 Purpose: produce vector guides independent of source page content.
 
@@ -342,7 +342,7 @@ Rules:
 - default line width is 0.25 pt and default color is light gray;
 - disabled guide options produce no corresponding commands.
 
-### 5.5 `Ezbind.PDF_Backend` / UNIT-PDF
+### 5.5 `Ezbind_PDF_Backend` / UNIT-PDF
 
 Purpose: hide native PDF operations from application code.
 
@@ -370,7 +370,7 @@ Responsibilities:
 
 The bridge shall be tested independently with POC-001 before Ada orchestration depends on it.
 
-### 5.7 `Ezbind.CLI` / UNIT-CLI
+### 5.7 `Ezbind_CLI` / UNIT-CLI
 
 Purpose: define stable command behavior.
 
@@ -459,8 +459,12 @@ The qpdf development headers and C++ toolchain must be available to build the br
 - **Feasibility:** The design uses a narrow bridge to isolate the principal native dependency and defines a proof-of-concept gate.
 - **Independence limitation:** This design is self-evaluated by the implementing developer; user design review is required before baseline.
 
-Result: **acceptable draft for client design review; not client-controlled until acknowledged.**
+Result: **accepted as the client-controlled design baseline after user acknowledgement on 2026-09-21.**
 
 ## 9. Current gate
 
-The requirements baseline is accepted. Detailed implementation, dependency pinning, and source creation remain blocked until the user acknowledges this Design Description and the qpdf proof-of-concept plan.
+The requirements and design baselines are accepted. B1 implementation and dependency pinning are authorized. The qpdf proof-of-concept remains an implementation exit criterion before the B1 baseline.
+
+## 10. Design baseline acknowledgement
+
+The user reviewed and accepted this Design Description on 2026-09-21, including the qpdf native backend recommendation, C-compatible C++ bridge, Ada architecture, and proof-of-concept exit criteria. This document is now client-controlled Revision 1.0. Changes require a Problem/Change Log entry and user agreement before modification.

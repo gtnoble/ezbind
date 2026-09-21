@@ -40,7 +40,7 @@ The user brief in the initiating conversation is the source of the initial proje
 
 - User initiating brief, 2026-09-21.
 - `requirements/requirements-spec.md` — client-controlled EZBIND-SRS-001, Revision 1.1, accepted 2026-09-21.
-- `design/design-description.md` — draft EZBIND-SDD-001, Revision 1.0, created for design review.
+- `design/design-description.md` — client-controlled EZBIND-SDD-001, Revision 1.0, accepted 2026-09-21.
 - `tests/test-plan.md` — draft EZBIND-STP-001, Revision 1.1, aligned with the updated requirements review.
 - `sdfs/project-development-log.md` — project development log.
 - `plan/problem-change-log.md` — corrective-action and change record.
@@ -260,7 +260,7 @@ Result: **accepted as the client-controlled baseline after user acknowledgement 
 
 ## 16. Current gate
 
-The B0 plan/open-decisions gate is closed by user acknowledgement on 2026-09-21. The requirements review gate was closed by user acknowledgement on 2026-09-21. The project is now at the design review gate. Implementation remains blocked until the Design Description is reviewed and acknowledged.
+The B0 plan/open-decisions gate is closed by user acknowledgement on 2026-09-21. The requirements review gate was closed by user acknowledgement on 2026-09-21. The design review gate was closed by user acknowledgement on 2026-09-21. B1 implementation is authorized; the qpdf proof-of-concept and implementation tests are the active build objectives.
 
 ## 17. Notes
 
@@ -268,4 +268,4 @@ The plan is tailored for a greenfield, software-only, single-developer project. 
 
 ## 18. Baseline acknowledgement
 
-The user acknowledged the Project Plan and accepted the proposed resolutions for all Section 13 decision items on 2026-09-21. The user subsequently requested the `ezbind(1)` man page and canonical CLI usage behavior on 2026-09-21; this authorized Revision 1.1. The user accepted the requirements baseline on 2026-09-21; design review is now the active gate. The plan remains client-controlled. Any further change to the accepted baseline requires a Problem/Change Log entry and user agreement.
+The user acknowledged the Project Plan and accepted the proposed resolutions for all Section 13 decision items on 2026-09-21. The user subsequently requested the `ezbind(1)` man page and canonical CLI usage behavior on 2026-09-21; this authorized Revision 1.1. The user accepted the requirements baseline and Design Description on 2026-09-21; B1 implementation is now active. The plan remains client-controlled. Any further change to the accepted baseline requires a Problem/Change Log entry and user agreement.

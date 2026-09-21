@@ -1,0 +1,19 @@
+name = "ezbind"
+description = "Ada CLI for folded-folio PDF bookbinding layouts"
+version = "0.1.0-dev"
+
+authors = ["Garret Noble"]
+maintainers = ["Garret Noble <garretnoble@gmail.com>"]
+maintainers-logins = ["gtnoble"]
+licenses = "MIT OR Apache-2.0 WITH LLVM-exception"
+website = ""
+tags = ["pdf", "bookbinding", "cli"]
+
+executables = ["ezbind"]
+
+[build-switches]
+development.compile_checks = "Warnings"
+development.debug_info = "Yes"
+development.optimization = "Debug"
+development.runtime_checks = "Everything"
+"*".style_checks = ["-gnaty3", "-gnatyc", "-gnatyf", "-gnatyk", "-gnatW8"]

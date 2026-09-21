@@ -1,0 +1,11 @@
+name = "ezbind_tests"
+description = "B1 geometry, imposition, and CLI tests for ezbind"
+version = "0.1.0-dev"
+
+executables = ["ezbind_tests"]
+
+[[depends-on]]
+ezbind = "*"
+
+[[pins]]
+ezbind = { path = ".." }

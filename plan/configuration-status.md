@@ -11,9 +11,9 @@
 | Configuration Status | EZBIND-CS-001 | Initial | Project | Active |
 | Project Development Log | EZBIND-SDF-001 | Initial | Project | Active |
 | Requirements Specification | EZBIND-SRS-001 | Rev 1.1 baseline | Client | User accepted 2026-09-21 |
-| Design Description | EZBIND-SDD-001 | Rev 1.0 draft | Author | Design review gate; qpdf backend proposed |
-| Source code | EZBIND-CLI | Not started | Not applicable | Blocked by design gate |
-| Test products | EZBIND-TEST | Rev 1.1 draft | Author | Requirements-linked CLI and documentation tests |
+| Design Description | EZBIND-SDD-001 | Rev 1.0 baseline | Client | User accepted 2026-09-21 |
+| Source code | EZBIND-CLI | B1 implementation | Project | Core and qpdf POC implemented; CLI orchestration incomplete |
+| Test products | EZBIND-TEST | B1 TD Rev 1.1 | Project | B1 execution results recorded; acceptance tests pending |
 
 ## Control rules
 
