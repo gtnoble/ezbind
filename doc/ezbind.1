@@ -45,17 +45,20 @@ spacing is 5 mm. Grid lines are not added unless this option is selected.
 Set the grid spacing. Values require a positive \fBmm\fR, \fBin\fR, or \fBpt\fR value; the default is 5 mm.
 .TP
 .BR --margin-top\~VALUE | --margin-bottom\~VALUE
-Set the top or bottom finished-page margin. Values require a non-negative \fBmm\fR, \fBin\fR, or \fBpt\fR suffix. The defaults are 36 pt.
+Set the minimum top or bottom clearance around the uniformly fitted source page. Values require a non-negative \fBmm\fR, \fBin\fR, or \fBpt\fR suffix. The defaults are 36 pt. The source is not cropped or distorted.
 .TP
 .BR --margin-fore-edge\~VALUE | --margin-spine\~VALUE
-Set the fore-edge or spine finished-page margin. Values require a non-negative \fBmm\fR, \fBin\fR, or \fBpt\fR suffix. The defaults are 36 pt and 48 pt.
+Set the minimum fore-edge or spine clearance around the uniformly fitted source page. The spine is the fold-facing inner edge; the fore-edge is outer. Values require a non-negative \fBmm\fR, \fBin\fR, or \fBpt\fR suffix. The defaults are 36 pt and 48 pt.
 .TP
 .B --force
 Replace an existing output PDF after successful generation.
 .SH DEFAULT LAYOUT
-The default margins are 36 points at the top, bottom, and fore-edge, and 48
-points at the spine. The source page is placed in its finished-page rectangle
-without rasterization by the qpdf backend. A one-page source produces two
+The default minimum clearances are 36 points at the top, bottom, and
+fore-edge, and 48 points at the spine. The source page is fitted uniformly
+inside the resulting content rectangle without cropping or distortion. If the
+source and content rectangles have different aspect ratios, additional
+letterboxing remains on one pair of edges. The optional grid occupies the
+reserved strips and does not cross the source content. A one-page source produces two
 physical output sides; source counts are padded to multiples of four.
 .SH OUTPUT AND PHYSICAL WORKFLOW
 Print the output duplex using the printer setting appropriate for the selected

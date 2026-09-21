@@ -66,7 +66,7 @@ package body Ezbind_Imposition is
                Sheet_Number => Sheet_Number,
                Side => Front,
                Position => Left,
-               Region => Layout.Left_Page);
+               Region => Layout.Left_Content);
             Set_Placement
               (Slot => First_Page + 1,
                Logical_Page => Front_Right,
@@ -74,7 +74,7 @@ package body Ezbind_Imposition is
                Sheet_Number => Sheet_Number,
                Side => Front,
                Position => Right,
-               Region => Layout.Right_Page);
+               Region => Layout.Right_Content);
             Set_Placement
               (Slot => First_Page + 2,
                Logical_Page => Back_Left,
@@ -82,7 +82,7 @@ package body Ezbind_Imposition is
                Sheet_Number => Sheet_Number,
                Side => Back,
                Position => Left,
-               Region => Layout.Left_Page);
+               Region => Layout.Left_Content);
             Set_Placement
               (Slot => First_Page + 3,
                Logical_Page => Back_Right,
@@ -90,7 +90,7 @@ package body Ezbind_Imposition is
                Sheet_Number => Sheet_Number,
                Side => Back,
                Position => Right,
-               Region => Layout.Right_Page);
+               Region => Layout.Right_Content);
          end;
       end loop;
       return Result;

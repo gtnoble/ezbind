@@ -94,7 +94,7 @@ The exact back-side transformation is represented in the placement model and ver
 
 ### 3.5 Source-page placement policy
 
-Use the effective source visible box, preferring CropBox and falling back to MediaBox. Respect source page rotation and UserUnit through qpdf’s transformation-aware page import. Preserve the complete visible source page by scaling it to fit the content rectangle without cropping. Do not stretch or enlarge unless a later explicitly selected policy requires it.
+Use the effective source page box, preferring CropBox and falling back to MediaBox. Respect source page rotation and UserUnit through qpdf’s transformation-aware page import. Fit the complete source page uniformly inside the margin-bounded content rectangle without cropping or distortion. The configured top, bottom, fore-edge, and spine margins are minimum clearances; aspect-ratio differences may add letterboxing to one pair of edges. Existing whitespace inside the input page is preserved. Do not enlarge unless a later explicitly selected policy requires it.
 
 Mixed source-page dimensions are accepted only when each page independently fits the configured finished-page rectangle. An impossible placement causes validation failure before output creation.
 
@@ -109,7 +109,7 @@ The geometry model separates:
 - source-content rectangle;
 - grid clipping regions.
 
-The grid is generated as vector line content in the set difference between the finished-page area and excluded source-content/spine/safe-area regions. It is appended after imported page content only in permitted margin areas. Default grid spacing is 5 mm, line width 0.25 pt, and light gray.
+The grid is generated as vector line content in the four reserved strips outside the margin-bounded source-content rectangles. It is appended after imported page content only in permitted margin areas and never crosses a source-content rectangle. The spine margin is on each fold-facing inner edge and the fore-edge margin is outer. Default grid spacing is 5 mm, line width 0.25 pt, and light gray.
 
 ### 3.7 Cover and physical-material policy
 

@@ -57,9 +57,9 @@ package body Ezbind_Geometry is
         (Left => Page_Width, Bottom => 0.0,
          Right => Coordinate (2.0) * Page_Width, Top => Page_Height);
       Left_Content : constant Rectangle :=
-        (Left => Page_Margins.Spine,
+        (Left => Page_Margins.Fore_Edge,
          Bottom => Page_Margins.Bottom,
-         Right => Page_Width - Page_Margins.Fore_Edge,
+         Right => Page_Width - Page_Margins.Spine,
          Top => Page_Height - Page_Margins.Top);
       Right_Content : constant Rectangle :=
         (Left => Page_Width + Page_Margins.Spine,

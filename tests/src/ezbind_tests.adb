@@ -29,8 +29,6 @@ procedure Ezbind_Tests is
         Page_Margins =>
           (Top => 36.0, Bottom => 36.0,
            Fore_Edge => 36.0, Spine => 48.0));
-   Placements : constant Ezbind_Imposition.Placement_Array :=
-     Ezbind_Imposition.Create_Placements (4, Layout);
    Custom_Layout : constant Ezbind_Geometry.Sheet_Layout :=
      Ezbind_Geometry.Create_Layout
        (Sheet_Width => 792.0,
@@ -40,6 +38,8 @@ procedure Ezbind_Tests is
         Page_Margins =>
           (Top => 18.0, Bottom => 20.0,
            Fore_Edge => 24.0, Spine => 60.0));
+   Placements : constant Ezbind_Imposition.Placement_Array :=
+     Ezbind_Imposition.Create_Placements (4, Custom_Layout);
    use type Ezbind_Imposition.Position_Kind;
    use type Ezbind_Imposition.Side_Kind;
 begin
@@ -67,8 +67,14 @@ begin
 
    if not Ezbind_Geometry.Is_Valid (Layout)
      or else not Ezbind_Geometry.Is_Valid (Custom_Layout)
-     or else Custom_Layout.Left_Content.Left /= 60.0
-     or else Custom_Layout.Left_Content.Right /= 372.0
+     or else Custom_Layout.Left_Content.Left /= 24.0
+     or else Custom_Layout.Left_Content.Right /= 336.0
+     or else Custom_Layout.Right_Content.Left /= 456.0
+     or else Custom_Layout.Right_Content.Right /= 768.0
+     or else Placements (1).Region.Left /= Custom_Layout.Left_Content.Left
+     or else Placements (1).Region.Right /= Custom_Layout.Left_Content.Right
+     or else Placements (2).Region.Left /= Custom_Layout.Right_Content.Left
+     or else Placements (2).Region.Right /= Custom_Layout.Right_Content.Right
      or else Placements (1).Source_Page /= 4
      or else Placements (2).Source_Page /= 1
      or else Placements (3).Source_Page /= 2

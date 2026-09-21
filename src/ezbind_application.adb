@@ -227,16 +227,18 @@ package body Ezbind_Application is
    end Commit_Output;
 
    function Draw_Grid
-     (Output : in Ezbind_QPDF_Bridge.Output_Handle;
-      Page   : in Ezbind_Geometry.Rectangle;
+     (Output  : in Ezbind_QPDF_Bridge.Output_Handle;
+      Page    : in Ezbind_Geometry.Rectangle;
       Content : in Ezbind_Geometry.Rectangle;
       Spacing : in Long_Float) return Boolean is
-      X : Long_Float := Long_Float (Page.Left) + Spacing;
-      Y : Long_Float := Long_Float (Page.Bottom) + Spacing;
+      X    : Long_Float := Long_Float (Page.Left) + Spacing;
+      Y    : Long_Float := Long_Float (Page.Bottom) + Spacing;
       Good : Boolean := True;
    begin
       while X < Long_Float (Page.Right) loop
-         if X > Long_Float (Content.Right) then
+         if X < Long_Float (Content.Left)
+           or else X > Long_Float (Content.Right)
+         then
             Good := Good and then Ezbind_QPDF_Bridge.Append_Line
               (Output, X, Long_Float (Page.Bottom), X,
                Long_Float (Page.Top));
@@ -248,8 +250,8 @@ package body Ezbind_Application is
            or else Y > Long_Float (Content.Top)
          then
             Good := Good and then Ezbind_QPDF_Bridge.Append_Line
-              (Output, Long_Float (Content.Left), Y,
-               Long_Float (Content.Right), Y);
+              (Output, Long_Float (Page.Left), Y,
+               Long_Float (Page.Right), Y);
          end if;
          Y := Y + Spacing;
       end loop;

@@ -29,13 +29,13 @@ Implemented options:
 
 - `--output PATH` — required output path.
 - `--sheet letter|a4` — select the physical output sheet; Letter is the default.
-- `--grid` — add light-gray vector lines in the configured margin areas.
+- `--grid` — add light-gray vector lines in all configured margin areas, without crossing source content.
 - `--grid-spacing VALUE` — set positive grid spacing using a physical value with `mm`, `in`, or `pt` suffix; the default is 5 mm.
 - `--margin-top VALUE`, `--margin-bottom VALUE`, `--margin-fore-edge VALUE`, `--margin-spine VALUE` — set independent margins using `mm`, `in`, or `pt`; defaults are 36, 36, 36, and 48 pt.
 - `--force` — replace an existing output; replacement is refused by default.
 - `--help` and `-h` — print help without requiring an input PDF.
 
-Normal output uses a landscape Letter or A4 sheet with two finished-page rectangles. The nominal folio assignment is front-left 4, front-right 1, back-left 2, and back-right 3. Page counts are padded to a multiple of four with blank logical pages. Default margins are 36 pt top/bottom/fore-edge and 48 pt spine. Physical option values require an explicit `mm`, `in`, or `pt` suffix.
+Normal output uses a landscape Letter or A4 sheet with two finished-page rectangles. The nominal folio assignment is front-left 4, front-right 1, back-left 2, and back-right 3. Page counts are padded to a multiple of four with blank logical pages. Default margins are 36 pt top/bottom/fore-edge and 48 pt spine. Margins are minimum clearance around the uniformly scaled source page; the source is not cropped or distorted. Physical option values require an explicit `mm`, `in`, or `pt` suffix.
 
 Help returns status `0`. Invalid flags, missing option values, missing paths, duplicate positional input paths, and oversized paths return status `2` and print a diagnostic followed by the canonical usage line to standard error. Input-PDF failures return `3`; impossible layouts return `4`; output/filesystem failures return `5`; unexpected processing failures return `10`.
 

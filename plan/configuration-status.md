@@ -12,7 +12,7 @@
 | Project Development Log | EZBIND-SDF-001 | Initial | Project | Active |
 | Requirements Specification | EZBIND-SRS-001 | Rev 1.1 baseline | Client | User accepted 2026-09-21 |
 | Design Description | EZBIND-SDD-001 | Rev 1.0 baseline | Client | User accepted 2026-09-21 |
-| Source code | EZBIND-CLI | B2 implementation slice | Project | Two-sided folio orchestration, Letter/A4, grid, configurable physical margins/spacing, overwrite, and qpdf page lifecycle implemented; broader options remain staged |
+| Source code | EZBIND-CLI | B2 margin-fit increment | Project | Two-sided folio orchestration, Letter/A4, uniform source-page fit within configurable clearance margins, complete reserved-strip grid, overwrite, and qpdf page lifecycle implemented; broader options remain staged |
 | Test products | EZBIND-TEST | B2 TD Rev 1.0 | Project | B1 and B2 implementation-slice results recorded; acceptance tests pending |
 
 ## Control rules

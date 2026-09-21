@@ -22,7 +22,7 @@ package body Ezbind_CLI is
       Ada.Text_IO.Put_Line
         ("  --margin-fore-edge V, --margin-spine V");
       Ada.Text_IO.Put_Line
-        ("                   Values use mm, in, or pt; defaults are 36/36/36/48 pt.");
+        ("                   Minimum clearance; uniform fit, no crop/distortion.");
       Ada.Text_IO.Put_Line
         ("  --force          Replace an existing output file.");
       Ada.Text_IO.Put_Line
