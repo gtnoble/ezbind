@@ -8,7 +8,11 @@ Every entry must include a category and one priority. Categories: Plans, Concept
 
 | ID | Date | Category | Priority | Description | Affected product/version | Corrective action | Actions to date | Status | Date resolved |
 |---|---|---|---|---|---|---|---|---|---|
-| — | — | — | — | No problems recorded at initialization. | — | — | Project initialized. | — | — |
+| CHG-001 | 2026-09-21 | Plans, Concept, Requirements | 3 — Moderate | User accepted the proposed resolutions for all B0 open-decision items and authorized advancement from planning to requirements analysis. | EZBIND-SDP-001 Rev 1.0; EZBIND-OCD-001 Rev 1.0; EZBIND-SRS-001 Rev 1.0 draft | Record acceptance, update baseline status, and create requirements products. | Acceptance recorded; controlled artifacts updated; requirements review package drafted. | resolved | 2026-09-21 |
+
+## CHG-001 rationale
+
+The priority is 3 because the change affects project scope and baseline status but has a known, controlled resolution and does not block the accepted capability.
 
 ## Trend notes
 

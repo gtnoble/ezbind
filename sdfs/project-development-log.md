@@ -15,10 +15,19 @@ Record development rationale, constraints, decisions, exploratory results, inter
 - **Activity:** Project startup and environment reconnaissance.
 - **Result:** Empty repository confirmed; Git initialized; disciplined directories established.
 - **Available environment:** Alire 2.1.0, system GNAT 13.3.0, Alire-configured GNAT/GPRbuild toolchain, Git, and local PDF inspection utilities.
-- **Constraints/open decisions:** PDF backend, exact folio/page ordering, margins, grid behavior, cover-card representation, input preservation, and acceptance fixtures remain unresolved.
-- **Decision:** Use an evolutionary multi-build plan and stop at the B0 plan gate until the user acknowledges the Project Plan.
+- **Constraints/open decisions:** The user accepted the proposed physical-layout and operational resolutions on 2026-09-21. PDF backend selection and detailed architecture remain open design decisions.
+- **Decision:** Use an evolutionary multi-build plan. The B0 plan/open-decisions gate is closed; proceed through requirements review before design or implementation.
 - **Verification:** Repository inspection and independent review completed; plan self-evaluation recorded in `plan/project-plan.md`.
+
+## Entry 002 — B0 gate closure and requirements start
+
+- **Date:** 2026-09-21
+- **Activity:** Client plan review and resolution acceptance.
+- **Result:** User accepted the Project Plan and all proposed resolutions for the open decision groups.
+- **Configuration effect:** Project Plan advanced to client-controlled Revision 1.0.
+- **Next activity:** Requirements analysis using the accepted operational baseline; no source implementation authorized yet.
+- **Verification:** Operational Concept, Requirements Specification, and requirements-linked Test Plan drafted and self-evaluated.
 
 ## Status
 
-No implementation or unit-test results exist. Requirements and design work are intentionally blocked pending the B0 gate.
+Requirements and operational-concept products are in draft review. No implementation or unit-test results exist. Detailed design and implementation remain gated on requirements acknowledgement.

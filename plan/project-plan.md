@@ -3,9 +3,9 @@
 **Project:** ezbind — home bookbinding PDF preparation CLI  
 **Document:** Software Development Plan (SDP)  
 **Identifier:** EZBIND-SDP-001  
-**Status:** Draft — awaiting client acknowledgement  
+**Status:** Client-acknowledged baseline  
 **Date:** 2026-09-21  
-**Revision:** 0.1
+**Revision:** 1.0
 
 ## 1. Overview
 
@@ -34,14 +34,14 @@ Software-only system. No hardware-software integration activity is planned. The 
 
 ### 1.4 Governing user brief
 
-The user brief in the initiating conversation is the source of the initial project objectives. Detailed requirements have not yet been baselined; requirements analysis is gated on acknowledgement of this plan and resolution of the open decisions in Section 13.
+The user brief in the initiating conversation is the source of the initial project objectives. The user acknowledged this plan and accepted the proposed resolutions to the Section 13 decision items on 2026-09-21. Requirements analysis is authorized; requirements and design remain subject to their own review gates.
 
 ## 2. Referenced documents
 
 - User initiating brief, 2026-09-21.
-- `requirements/requirements-spec.md` — to be created after this plan is acknowledged.
+- `requirements/requirements-spec.md` — draft EZBIND-SRS-001, Revision 1.0, created for requirements review.
 - `design/design-description.md` — to be created after requirements review and acknowledgement.
-- `tests/test-plan.md` — initial test-planning placeholder; to be baselined with the requirements.
+- `tests/test-plan.md` — draft EZBIND-STP-001, Revision 1.0, aligned with the requirements review.
 - `sdfs/project-development-log.md` — project development log.
 - `plan/problem-change-log.md` — corrective-action and change record.
 - `plan/configuration-status.md` — configuration status accounting.
@@ -197,13 +197,13 @@ At each management review report: requirements volatility; component progress; o
 
 ## 11. Resources and user participation
 
-Developer resources currently available are the local Linux development environment, Ada toolchain, Git, PDF command-line inspection/rendering tools, and the project workspace. The user is expected to provide decisions on the open questions in Section 13, representative PDFs or permission to use synthetic fixtures, and review/acknowledgement at the defined gates.
+Developer resources currently available are the local Linux development environment, Ada toolchain, Git, PDF command-line inspection/rendering tools, and the project workspace. The user is expected to review the draft requirements package, provide representative PDFs or permission to use synthetic fixtures, and acknowledge requirements and design at the defined gates.
 
 No developer-site installation, formal user training, or separate maintenance-team handover is currently planned. These remain open until confirmed.
 
 ## 12. Initial schedule
 
-Dates below are sequence targets, not commitments, until the B0 review is acknowledged.
+Dates below are sequence targets, not commitments, until requirements and design reviews are acknowledged.
 
 | Milestone | Target sequence | Dependency |
 |---|---|---|
@@ -217,21 +217,19 @@ Dates below are sequence targets, not commitments, until the B0 review is acknow
 | B2 usable CLI | After B1 review | Validated geometry and PDF strategy |
 | B3 release hardening | After B2 acceptance | User feedback and open-problem closure |
 
-## 13. Open decisions requiring user input
+## 13. Accepted B0 decisions
 
-These are intentionally unresolved and block requirements baselining:
+The user accepted the proposed resolutions for all B0 open-decision items on 2026-09-21. They now form the B1 requirements baseline; implementation details remain subject to design review.
 
-1. **Physical sheet and page model:** What paper sizes and source page sizes must be supported? Is one source page printed on each side of a sheet, or can a side contain multiple source pages? Are folios always one sheet folded once?
-2. **Folio/signature structure:** What exact page ordering is desired for a folded folio stack? Should the output add blank padding pages to complete a folio/signature, and how is the folio size specified?
-3. **Cover cards:** Should the generated PDF include cover-card pages, blank placeholders, registration marks, or only the text-block pages? If included, where and how many?
-4. **Fabric strip:** Should the PDF reserve/mark a fabric overlap area, add a spine guide, or merely leave the specified margin? The physical fabric itself cannot be printed by the application.
-5. **Margins:** Which margins are independently configurable (top, bottom, fore-edge, spine/gutter), what units should the CLI accept, and are margins measured from the trimmed page or sheet edge?
-6. **Grid:** Grid spacing, line weight/color, whether the grid appears only in margins or across the page, and whether the grid must avoid the gutter/fabric area.
-7. **Binding geometry:** Is creep compensation required? Are crop marks, fold marks, registration marks, bleed, or printer-safe-area constraints required?
-8. **Input PDF assumptions:** Must the tool preserve selectable text, links, annotations, bookmarks, metadata, forms, and embedded fonts? How should encrypted or malformed PDFs be handled?
-9. **Output and operation:** Target OSes, expected maximum PDF size/page count, overwrite policy, stdout/stderr conventions, exit codes, configuration files, and batch operation requirements.
-10. **Acceptance:** Will the user witness acceptance testing? Will representative source PDFs and physical print/fold observations be supplied? Is an independent reviewer available?
-11. **Project constraints:** Any memory, storage, performance, privacy, licensing, installation, maintenance, or formal configuration-audit requirements beyond the current brief?
+- Letter, A4, and custom sheet dimensions are supported; the source page is the finished-page target size.
+- Each sheet is folded once and carries four logical pages using standard booklet ordering.
+- Blank padding completes a multiple of four.
+- Cover cards are excluded by default, with optional blank front/back card pages.
+- Fabric remains physical; an optional spine/fabric guide may be printed.
+- Top, bottom, fore-edge, and spine margins are independently configurable from finished-page edges.
+- Margins are blank by default; optional 5 mm light-gray vector grid lines are confined to margin areas.
+- Creep, crop/fold/registration marks, and safe-area reserves are optional and disabled by default.
+- Input handling, preservation, local-only processing, Linux targeting, CLI semantics, and acceptance approach follow the accepted resolutions recorded in the requirements documents.
 
 ## 14. Risk register
 
@@ -257,12 +255,16 @@ Applied the plan criteria from the process reference:
 - **Supportability:** Requires controlled source, build-toolchain selection, design records, and release descriptions.
 - **Independence limitation:** Explicitly recorded for self-evaluation, QA, and acceptance testing.
 
-Result: **acceptable as a draft for client review; not client-controlled until acknowledged.**
+Result: **accepted as the client-controlled baseline after user acknowledgement on 2026-09-21.**
 
 ## 16. Current gate
 
-The project must remain at the B0 plan/open-decisions gate until the user acknowledges this Project Plan and provides answers or explicit deferrals for the Section 13 decisions. Requirements analysis, requirements baselining, and implementation are not authorized by this draft alone.
+The B0 plan/open-decisions gate is closed by user acknowledgement on 2026-09-21. The project is now at the requirements review gate. Requirements implementation and detailed design remain blocked until the draft Requirements Specification is reviewed and acknowledged.
 
 ## 17. Notes
 
 The plan is tailored for a greenfield, software-only, single-developer project. Any requirement designated critical by the user, any user-site installation, any separate maintenance handover, any witnessed acceptance session, or any development-process security/privacy constraint will require a corresponding plan update before the affected activity begins.
+
+## 18. Baseline acknowledgement
+
+The user acknowledged the Project Plan and accepted the proposed resolutions for all Section 13 decision items on 2026-09-21. This advances the plan from author control to client control. Any change to the accepted baseline requires a Problem/Change Log entry and user agreement.
