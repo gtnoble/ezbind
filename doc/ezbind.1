@@ -1,4 +1,4 @@
-.TH EZBIND 1 "2026-09-21" "ezbind 0.1.0-dev B1" "User Commands"
+.TH EZBIND 1 "2026-09-21" "ezbind 0.1.0-dev B2" "User Commands"
 .SH NAME
 ezbind \- prepare an ebook PDF for folded-folio home bookbinding
 .SH SYNOPSIS
@@ -9,10 +9,14 @@ ezbind \- prepare an ebook PDF for folded-folio home bookbinding
 .I OUTPUT.pdf
 .SH DESCRIPTION
 .B ezbind
-The B1 development snapshot establishes the command-line contract and qpdf
-PDF composition proof of concept. Full ebook imposition is planned for B2; this
-snapshot does not yet produce a complete bookbinding layout. Physical cover
-cards, adhesive, and fabric are supplied and placed by the user.
+reads one local input PDF and writes a duplex folded-folio arrangement. Each
+output sheet has two finished-page positions on each side. The nominal folio
+assignment is front-left 4, front-right 1, back-left 2, and back-right 3.
+Incomplete final folios are padded with blank logical pages.
+.PP
+The current B2 implementation slice supports Letter and A4 sheets, an optional
+margin grid, and explicit overwrite control. Physical cover cards, adhesive,
+and fabric remain user-supplied.
 .PP
 The canonical usage statement is:
 .PP
@@ -22,22 +26,36 @@ Usage: ezbind [OPTIONS] INPUT.pdf --output OUTPUT.pdf
 .SH OPTIONS
 .TP
 .BR --help , \-h
-Print the usage statement, option summary, and exit-status summary. This
-operation does not require an input PDF and returns status 0.
-.PP
-The B1 snapshot does not yet implement PDF transformation options. The
-following planned options must not be treated as available in this version:
-.PP
-.nf
---output  --force  --sheet  --grid  --covers  --spine-guide
-.fi
-.SH UNITS
-Physical dimension parsing is part of the B1 core, but dimension options are
-not yet exposed by the executable. The planned interface accepts millimetres
-(mm), inches (in), and PDF points (pt).
+Print the usage statement and concise option summary. This operation does not
+require an input PDF and returns status 0.
+.TP
+.B --output \fIPATH\fR
+Required output PDF path. The program refuses to replace an existing file
+unless \fB--force\fR is specified.
+.TP
+.BR --sheet\~letter | \-\-sheet\~a4
+Select the physical output sheet. Letter is the default. Output is landscape:
+792 x 612 points for Letter and approximately 841.89 x 595.28 points for A4.
+.TP
+.B --grid
+Add light-gray vector grid lines in the margin areas. The current default
+spacing is 5 mm. Grid lines are not added unless this option is selected.
+.TP
+.B --force
+Replace an existing output PDF after successful generation.
+.SH DEFAULT LAYOUT
+The default margins are 36 points at the top, bottom, and fore-edge, and 48
+points at the spine. The source page is placed in its finished-page rectangle
+without rasterization by the qpdf backend. A one-page source produces two
+physical output sides; source counts are padded to multiples of four.
 .SH OUTPUT AND PHYSICAL WORKFLOW
-The complete folded-folio output workflow is planned for B2. Do not use the B1
-snapshot to produce physical binding output.
+Print the output duplex using the printer setting appropriate for the selected
+paper. Fold each sheet once with the fold toward the spine, keep the generated
+folio order, and stack before gluing the spine side. Confirm duplex orientation
+with a small asymmetric fixture before committing a valuable book.
+.PP
+Output is first written to a sibling temporary file and committed after
+successful generation. A handled failure does not leave the temporary output.
 .SH EXIT STATUS
 .TP
 .B 0
@@ -47,7 +65,7 @@ Success.
 Command-line usage error.
 .TP
 .B 3
-Input PDF error.
+Input PDF error, including unreadable, malformed, or empty input.
 .TP
 .B 4
 Impossible layout.
@@ -59,19 +77,21 @@ Output or filesystem error.
 Missing or unusable runtime dependency.
 .TP
 .B 10
-Unexpected internal error.
+Unexpected internal processing error.
 .SH DIAGNOSTICS
 Usage errors are written to standard error and include the diagnostic followed
 by the canonical usage line. Ordinary diagnostics do not include extracted
 source text, passwords, or complete PDF content.
 .SH PDF LIMITATIONS
-Visible page content and selectable text are preserved through the qpdf backend
-where supported. Annotations, interactive forms, bookmarks, tagged structure,
-signatures, and other document-level features may be reported as degraded or
-unsupported. Input PDFs that are malformed, empty, or unsupported are rejected.
+The qpdf backend preserves visible page content and selectable text for the
+implemented placement path. Custom margins and physical units, cover-card
+pages, spine/fabric guides, crop/fold/registration marks, creep, printer
+safe-area configuration, and broad document-feature capability reporting are
+not yet exposed by this B2 slice. Unsupported or degraded backend behavior
+must be evaluated against representative input before production use.
 .SH EXAMPLE
 .nf
-ezbind --help
+ezbind book.pdf --output book-bound.pdf --sheet a4 --grid
 .fi
 .SH SEE ALSO
 .BR qpdf (1)

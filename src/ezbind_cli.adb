@@ -1,6 +1,6 @@
---  ----------------------------------------------------------------------
+------------------------------------------------------------------------
 --  EZBIND_CLI
---  ----------------------------------------------------------------------
+------------------------------------------------------------------------
 with Ada.Text_IO;
 
 package body Ezbind_CLI is
@@ -11,6 +11,10 @@ package body Ezbind_CLI is
         ("  --help, -h       Show this help text.");
       Ada.Text_IO.Put_Line
         ("  --output PATH    Write the imposed PDF to PATH.");
+      Ada.Text_IO.Put_Line
+        ("  --sheet letter|a4  Select the physical output sheet.");
+      Ada.Text_IO.Put_Line
+        ("  --grid           Draw a 5 mm margin grid.");
       Ada.Text_IO.Put_Line
         ("  --force          Replace an existing output file.");
       Ada.Text_IO.Put_Line

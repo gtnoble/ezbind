@@ -1,5 +1,5 @@
 name = "ezbind_tests"
-description = "B1 geometry, imposition, and CLI tests for ezbind"
+description = "B1/B2 geometry, imposition, bridge, and CLI tests for ezbind"
 version = "0.1.0-dev"
 
 executables = ["ezbind_tests"]

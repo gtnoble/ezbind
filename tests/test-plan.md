@@ -3,13 +3,13 @@
 **Project:** EZBIND
 **Document:** Software Test Plan (STP)
 **Identifier:** EZBIND-STP-001
-**Status:** B1 execution plan and results reference
+**Status:** B2 implementation-slice test plan and B1/B2 results reference
 **Date:** 2026-09-21
 **Revision:** 1.1
 
 ## 1. Scope
 
-This plan covers unit, integration, component acceptance, and conditional system acceptance testing for `EZBIND-CLI` and its generated PDF output. It is aligned with client-controlled `requirements/requirements-spec.md` Revision 1.1. B1 execution results are recorded in `tests/b1-test-description.md`; complete CLI acceptance remains planned for B2.
+This plan covers unit, integration, component acceptance, and conditional system acceptance testing for `EZBIND-CLI` and its generated PDF output. It is aligned with client-controlled `requirements/requirements-spec.md` Revision 1.1. B1 results are recorded in `tests/b1-test-description.md`; B2 implementation-slice results are recorded in `tests/b2-test-description.md`; complete acceptance remains planned after the slice review.
 
 ## 2. Referenced documents
 
@@ -55,8 +55,8 @@ Unit testing may proceed when a unit has a reviewed detailed design. Integration
 
 ## 7. Test schedule and products
 
-- B1: geometry and imposition unit/integration tests plus initial output-PDF proof.
-- B2: complete CLI, documentation, PDF, security, and physical acceptance test descriptions and execution.
+- B1: geometry, imposition, and initial qpdf proof of concept — completed for the recorded slice.
+- B2: implementation-slice CLI/PDF/integration tests and documentation synchronization — executed; broader option coverage and test-readiness remain active.
 - B3: regression, portability, packaging, and release-hardening tests.
 
 The Test Description will specify exact cases and procedures. The Test Report will record actual results, deviations, and problem/change IDs.
@@ -71,4 +71,4 @@ The requirement-to-test-group matrix is maintained in `requirements/requirements
 
 ## 10. Notes
 
-This document is the active test-plan baseline for B1 planning. B1 execution results are recorded in the B1 Test Description; a separate acceptance Test Report remains planned for B2.
+This document is the active test-plan baseline for B2 implementation-slice planning. B1 and B2 implementation-slice results are recorded in their respective Test Descriptions; a separate acceptance Test Report remains planned after test readiness.

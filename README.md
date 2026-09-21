@@ -1,14 +1,14 @@
 # ezbind
 
-`ezbind` is an Ada command-line application for preparing ebook PDFs for a modified DFA home-bookbinding process. It is intended to arrange single-sheet folios for duplex printing, folding toward the spine, stacking, and gluing into a text block.
+`ezbind` is an Ada command-line application for preparing ebook PDFs for a modified DFA home-bookbinding process. It arranges single-sheet folios for duplex printing, folding toward the spine, stacking, and gluing into a text block.
 
 ## Project status
 
-The project is in **Build B1 implementation**. The accepted requirements and design are in place. The current executable provides the canonical help and invalid-command-line behavior and includes the physical-unit, geometry, imposition, and qpdf bridge proof-of-concept components. Full PDF layout orchestration and the complete option set remain planned B2 work.
+The project is in **Build B2 implementation**. The current usable slice validates one input PDF, imposes four logical pages per folded sheet, pads incomplete folios with blanks, supports Letter/A4 output selection, optionally draws a vector margin grid, and uses an explicit overwrite option. The broader option set in the requirements remains staged work.
 
 ## Build with Alire
 
-The project uses the canonical Alire executable-crate workflow. The selected development toolchain is recorded by Alire; the native PDF bridge requires qpdf development headers/library and a C++17 compiler.
+The project uses the canonical Alire executable-crate workflow. The native PDF bridge requires qpdf development headers/library and a C++17 compiler.
 
 ```text
 alr build --development
@@ -21,45 +21,46 @@ The tested native environment is Linux with qpdf 11.9.0, Alire 2.1.0, and Alire-
 
 ## Current command behavior
 
-The current B1 executable supports help and usage-error behavior:
-
-```text
-./bin/ezbind --help
-./bin/ezbind --bad-option
-```
-
-The canonical usage line is:
-
 ```text
 Usage: ezbind [OPTIONS] INPUT.pdf --output OUTPUT.pdf
 ```
 
-`--help` and `-h` return status `0`. Invalid flags and incomplete command lines return status `2`, print a diagnostic followed by the usage line to standard error, and do not create output.
+Implemented options:
 
-PDF transformation options shown in the planned `ezbind(1)` interface are not all implemented in this B1 snapshot. Do not use this snapshot for physical binding output yet.
+- `--output PATH` — required output path.
+- `--sheet letter|a4` — select the physical output sheet; Letter is the default.
+- `--grid` — add light-gray vector lines in the configured margin areas.
+- `--force` — replace an existing output; replacement is refused by default.
+- `--help` and `-h` — print help without requiring an input PDF.
 
-## B1 tests and qpdf proof of concept
+Normal output uses a landscape Letter or A4 sheet with two finished-page rectangles. The nominal folio assignment is front-left 4, front-right 1, back-left 2, and back-right 3. Page counts are padded to a multiple of four with blank logical pages. Default margins are 36 pt top/bottom/fore-edge and 48 pt spine.
 
-The nested test executable runs the Ada core checks and, when given a source PDF and output path, exercises the qpdf bridge:
+Help returns status `0`. Invalid flags, missing option values, missing paths, duplicate positional input paths, and oversized paths return status `2` and print a diagnostic followed by the canonical usage line to standard error. Input-PDF failures return `3`; impossible layouts return `4`; output/filesystem failures return `5`; unexpected processing failures return `10`.
+
+Output is written to a sibling temporary file and committed only after successful PDF generation. Ordinary diagnostics do not print extracted document text or complete PDF content.
+
+The current slice does not yet expose custom margins/units, cover-card pages, spine/fabric guides, crop/fold/registration marks, creep compensation, safe-area configuration, capability reporting, or full feature-preservation controls. Validate representative output before physical binding.
+
+## B2 verification
+
+The nested test executable runs the Ada core checks and qpdf bridge smoke test:
 
 ```text
+(cd tests && alr build --development)
 ./tests/bin/ezbind_tests source.pdf /tmp/ezbind-b1-output.pdf
 qpdf --check /tmp/ezbind-b1-output.pdf
-pdfinfo /tmp/ezbind-b1-output.pdf
-pdftotext /tmp/ezbind-b1-output.pdf -
 ```
 
-The B1 proof of concept has verified valid Letter output, vector content insertion, and selectable text preservation for a text-bearing fixture. See [`tests/b1-test-description.md`](tests/b1-test-description.md) for the recorded procedure and results.
+The B2 execution record is [`tests/b2-test-description.md`](tests/b2-test-description.md). It records help/usage behavior, malformed-input handling, overwrite policy, one-page output, five-page padding, A4/grid output, and sequential root/test builds.
 
 ## Controlled project structure
 
 - `plan/` — project plan, configuration status, and corrective-action records
 - `requirements/` — operational concept and accepted requirements
 - `design/` — accepted architecture and backend rationale
-- `src/` — Ada and C++ deliverable source
+- `src/` — Ada and native bridge source
 - `doc/` — command documentation, including `ezbind(1)`
 - `tests/` — Alire test crate, test plans, procedures, and results
 - `sdfs/` — project and component development logs
-- `releases/` — release and version descriptions
 
 The project process, gates, risks, and traceability are documented in [`plan/project-plan.md`](plan/project-plan.md).

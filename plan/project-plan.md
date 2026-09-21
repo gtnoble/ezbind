@@ -66,7 +66,7 @@ One operational Ada CLI application, built as a canonical Alire executable crate
 
 ### 3.3 Project components
 
-For the first build, the deliverable is treated as one software component, `EZBIND-CLI`, with logical units for command-line parsing, PDF inspection, binding geometry, imposition, margin-grid rendering, PDF emission, and diagnostics. The accepted B1 implementation maps these responsibilities to the Ada and native bridge units recorded in the Design Description.
+For the first build, the deliverable is treated as one software component, `EZBIND-CLI`, with logical units for command-line parsing, PDF inspection, binding geometry, imposition, margin-grid rendering, PDF emission, and diagnostics. The accepted architecture maps these responsibilities to the Ada and native bridge units recorded in the Design Description. The B2 implementation slice adds the application orchestration and explicit qpdf destination-page lifecycle.
 
 ## 4. Development process and build strategy
 
@@ -80,7 +80,7 @@ Use an evolutionary, multi-build lifecycle. Requirements will be baselined for t
 |---|---|---|
 | B0 — project initialization | Establish process, workspace, toolchain policy, initial brief, and open-decision register. | Acknowledged Project Plan and initialized project library. |
 | B1 — geometry and PDF proof of concept | Validate page geometry, folio ordering/orientation, margin modes, and a minimal output PDF on representative fixtures. | Alire builds; Ada core tests; qpdf bridge proof; independent PDF checks. **Completed for the implemented slice.** |
-| B2 — usable CLI | Implement validated input handling, complete CLI options, canonical usage output, man-page documentation, diagnostics, grid rendering, and deterministic PDF generation. | Component acceptance test cycle, documentation review, and user review. **Next build.** |
+| B2 — usable CLI | Implement the validated CLI and the first usable PDF-imposition slice, then expand the remaining option set through controlled increments. | B2 implementation-slice tests, documentation review, test-readiness review, and user review. **Active; slice implemented.** |
 | B3 — release hardening | Improve portability, documentation, regression fixtures, packaging, and known-error handling based on B2 results. | Release evaluation, Version Description, and user acceptance decision. |
 
 Build boundaries are provisional and may be revised only through the change-control process after plan acknowledgement.
@@ -104,9 +104,9 @@ Build boundaries are provisional and may be revised only through the change-cont
 | System design (§5.4) | Complete for current scope | Single software system; accepted architecture is recorded in the SDD. |
 | Software requirements analysis (§5.5) | Complete for current scope | Client-controlled SRS and requirement-to-test traceability are recorded. |
 | Software design (§5.6) | Complete for current scope | Client-controlled SDD records the accepted architecture and B1 design basis. |
-| Implementation/unit test (§5.7) | Active in B1 | Ada implementation and native bridge with results recorded in the B1 Test Description and SDF. |
-| Unit integration/test (§5.8) | Active in B1 | Progressive integration of Ada core and qpdf bridge; sequential Alire root/test builds. |
-| Acceptance testing (§5.9) | Planned for B2 | User-facing CLI and output-PDF qualification; developer independence limitation applies. |
+| Implementation/unit test (§5.7) | Active in B2 | Ada application orchestration, native bridge, and core units are implemented and tested; results are recorded in the B1/B2 Test Descriptions and SDF. |
+| Unit integration/test (§5.8) | Active in B2 | Two-sided PDF generation, padding, Letter/A4 selection, grid emission, overwrite handling, and sequential Alire root/test builds are integrated and tested. |
+| Acceptance testing (§5.9) | Planned after B2 slice | User-facing CLI and output-PDF qualification remain separate from the developer-run B2 implementation-slice tests; independence limitation applies. |
 | HW/SW integration (§5.10) | Not applicable | Software-only project. |
 | System acceptance (§5.11) | Conditional | May be combined with component acceptance because the system is software-only; confirm at requirements review. |
 | Prepare for use (§5.12) | Planned for B2/B3 | Local installation, user documentation, and release packaging. |
@@ -115,7 +115,7 @@ Build boundaries are provisional and may be revised only through the change-cont
 | Product evaluation (§5.15) | Active | Self-evaluate each artifact before presenting it; independence limitation recorded. |
 | Quality assurance (§5.16) | Active, inline | Process/product checks by the developer; independence limitation recorded. |
 | Corrective action (§5.17) | Active | Problem/change log with category and priority for every entry. |
-| Joint reviews (§5.18) | Active | Plan, requirements, and design reviews are complete; B1 results/B2 planning review is next. |
+| Joint reviews (§5.18) | Active | Plan, requirements, and design reviews are complete; B2 implementation-slice results and test-readiness review are next. |
 | Risk management (§5.19.1) | Active | Risk register in this plan; update at every review. |
 | Management indicators (§5.19.2) | Active | Report requirements volatility, component progress, open problems, milestone status, scope changes, and test trend. |
 | Security/privacy (§5.19.3) | Conditional | Local PDFs may contain sensitive content; confirm process and product expectations below. No network processing is planned. |
@@ -135,7 +135,7 @@ Build boundaries are provisional and may be revised only through the change-cont
 
 ### 6.2 PDF implementation strategy
 
-The B1 design selected qpdf native APIs behind a project-owned C-compatible C++ bridge. The bridge proof of concept passed for page import, placement, vector content insertion, valid Letter output, and selectable text preservation. qpdf remains the native PDF dependency for the B1/B2 implementation path.
+The design selects qpdf native APIs behind a project-owned C-compatible C++ bridge. The B1 proof of concept passed for page import, placement, vector content insertion, valid Letter output, and selectable text preservation. The B2 slice extends that bridge with explicit destination-page creation for two-sided folio output. qpdf remains the native PDF dependency for the B2 implementation path.
 
 ### 6.3 Project library
 
@@ -190,7 +190,7 @@ No formal client configuration audit has been requested. The project will suppor
 
 - **B0 plan review:** this plan and open decisions; current gate.
 - **Requirements review:** Operational Concept/Requirements Specification and traceability; no implementation beyond exploratory tooling before acknowledgement.
-- **Design review:** Design Description, PDF strategy, geometry model, and test architecture; complete. B1 results/B2 planning review is next.
+- **Design review:** Design Description, PDF strategy, geometry model, and test architecture; complete. B2 implementation-slice results and test-readiness review are next.
 - **Test-readiness review:** test environment, fixtures, Test Description, and tool verification.
 - **Build/release review:** results, open problems, Version Description, and process retrospective.
 
@@ -198,13 +198,13 @@ At each management review report: requirements volatility; component progress; o
 
 ## 11. Resources and user participation
 
-Developer resources currently available are the local Linux development environment, Ada toolchain, Git, PDF command-line inspection/rendering tools, and the project workspace. The user is expected to review B1 results, provide representative PDFs or permission to use synthetic fixtures, and review the B2 readiness package at the next gate.
+Developer resources currently available are the local Linux development environment, Ada toolchain, Git, PDF command-line inspection/rendering tools, and the project workspace. The user is expected to review B1/B2 results, provide representative PDFs or permission to use synthetic fixtures, and review the B2 test-readiness and physical-output package.
 
 No developer-site installation, formal user training, or separate maintenance-team handover is currently planned. These remain open until confirmed.
 
 ## 12. Initial schedule
 
-Dates below are sequence targets, not commitments, until B1 review and B2 planning are complete.
+Dates below are sequence targets, not commitments, until the B2 implementation-slice review and test-readiness review are complete.
 
 | Milestone | Target sequence | Dependency |
 |---|---|---|
@@ -215,7 +215,7 @@ Dates below are sequence targets, not commitments, until B1 review and B2 planni
 | Architecture/design draft | After requirements baseline | Requirements review |
 | Design review/baseline | Before B1 implementation | User review |
 | B1 proof of concept | Completed 2026-09-21 | Design baseline; native dependency verification |
-| B2 usable CLI | Next build | B1 review and scope confirmation |
+| B2 usable CLI | Active implementation slice | B1 results review and controlled B2 scope |
 | B3 release hardening | After B2 acceptance | User feedback and open-problem closure |
 
 ## 13. Accepted B0 decisions
@@ -260,7 +260,7 @@ Result: **accepted as the client-controlled baseline after user acknowledgement 
 
 ## 16. Current gate
 
-The B0 plan/open-decisions, requirements, and design gates were closed by user acknowledgement on 2026-09-21. B1 implementation and its proof-of-concept are complete for the implemented slice. The project is at the B1 results/B2 planning gate; full CLI orchestration remains unauthorized as a completed capability until implemented and tested.
+The B0 plan/open-decisions, requirements, and design gates were closed by user acknowledgement on 2026-09-21. The B1 proof-of-concept and the first B2 implementation slice are complete. The project is at the B2 implementation-slice/test-readiness gate; broader CLI options, acceptance testing, and physical qualification remain incomplete.
 
 ## 17. Notes
 
@@ -268,4 +268,4 @@ The plan is tailored for a greenfield, software-only, single-developer project. 
 
 ## 18. Baseline acknowledgement
 
-The user acknowledged the Project Plan and accepted the proposed resolutions for all Section 13 decision items on 2026-09-21. The user subsequently requested the `ezbind(1)` man page and canonical CLI usage behavior on 2026-09-21; this authorized Revision 1.1. The user accepted the requirements baseline and Design Description on 2026-09-21. B1 implementation and documentation are now recorded; B2 is the next planned build. The plan remains client-controlled. Any further change to the accepted baseline requires a Problem/Change Log entry and user agreement.
+The user acknowledged the Project Plan and accepted the proposed resolutions for all Section 13 decision items on 2026-09-21. The user subsequently requested the `ezbind(1)` man page and canonical CLI usage behavior on 2026-09-21; this authorized Revision 1.1. The user accepted the requirements baseline and Design Description on 2026-09-21. B1 implementation, the B2 implementation slice, and their documentation are recorded; B2 expansion and acceptance testing remain active. The plan remains client-controlled. Any further change to the accepted baseline requires a Problem/Change Log entry and user agreement.

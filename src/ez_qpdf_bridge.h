@@ -22,6 +22,10 @@ int ez_qpdf_create_output (double width,
                            char *error_text,
                            size_t error_size);
 
+int ez_qpdf_begin_page (ez_qpdf_output *output,
+                        char *error_text,
+                        size_t error_size);
+
 int ez_qpdf_place_page (ez_qpdf_input *input,
                         size_t source_index,
                         ez_qpdf_output *output,

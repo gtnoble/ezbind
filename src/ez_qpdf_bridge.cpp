@@ -96,6 +96,28 @@ extern "C" int ez_qpdf_create_output(double width,
     });
 }
 
+extern "C" int ez_qpdf_begin_page(ez_qpdf_output* output,
+                                   char* error_text,
+                                   size_t error_size)
+{
+    if (output == nullptr)
+    {
+        set_error(error_text, error_size, "invalid qpdf page target");
+        return 1;
+    }
+    return guarded(error_text, error_size, [&]() {
+        QPDFObjectHandle page = QPDFObjectHandle::newDictionary();
+        page.replaceKey("/Type", QPDFObjectHandle::newName("/Page"));
+        page.replaceKey(
+            "/MediaBox",
+            QPDFObjectHandle::newArray(
+                QPDFObjectHandle::Rectangle(
+                    0.0, 0.0, output->width, output->height)));
+        page.replaceKey("/Resources", QPDFObjectHandle::newDictionary());
+        output->document.addPage(output->document.makeIndirectObject(page), false);
+    });
+}
+
 extern "C" int ez_qpdf_place_page(ez_qpdf_input* input,
                                     size_t source_index,
                                     ez_qpdf_output* output,
@@ -113,16 +135,6 @@ extern "C" int ez_qpdf_place_page(ez_qpdf_input* input,
         return 1;
     }
     return guarded(error_text, error_size, [&]() {
-        QPDFObjectHandle page = QPDFObjectHandle::newDictionary();
-        page.replaceKey("/Type", QPDFObjectHandle::newName("/Page"));
-        page.replaceKey(
-            "/MediaBox",
-            QPDFObjectHandle::newArray(
-                QPDFObjectHandle::Rectangle(0.0, 0.0, output->width, output->height)));
-        page.replaceKey("/Resources", QPDFObjectHandle::newDictionary());
-        page = output->document.makeIndirectObject(page);
-        output->document.addPage(page, false);
-
         std::vector<QPDFPageObjectHelper> pages =
             QPDFPageDocumentHelper(output->document).getAllPages();
         QPDFPageObjectHelper destination = pages.back();

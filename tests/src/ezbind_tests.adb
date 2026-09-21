@@ -30,6 +30,8 @@ procedure Ezbind_Tests is
            Fore_Edge => 36.0, Spine => 48.0));
    Placements : constant Ezbind_Imposition.Placement_Array :=
      Ezbind_Imposition.Create_Placements (4, Layout);
+   use type Ezbind_Imposition.Position_Kind;
+   use type Ezbind_Imposition.Side_Kind;
 begin
    if Ezbind_Physical.To_Points
         ((Value => 25.4, Unit => Ezbind_Physical.Millimetre)) /= 72.0
@@ -42,8 +44,14 @@ begin
    end if;
 
    if not Ezbind_Geometry.Is_Valid (Layout)
-     or else Placements (1).Source_Page /= 1
-     or else Placements (4).Source_Page /= 4
+     or else Placements (1).Source_Page /= 4
+     or else Placements (2).Source_Page /= 1
+     or else Placements (3).Source_Page /= 2
+     or else Placements (4).Source_Page /= 3
+     or else Placements (1).Side /= Ezbind_Imposition.Front
+     or else Placements (2).Position /= Ezbind_Imposition.Right
+     or else Placements (3).Side /= Ezbind_Imposition.Back
+     or else Placements (4).Position /= Ezbind_Imposition.Right
    then
       raise Program_Error with "layout or placement failed";
    end if;
@@ -57,6 +65,7 @@ begin
       end if;
 
       if not Ezbind_QPDF_Bridge.Create_Output (612.0, 792.0, Output)
+        or else not Ezbind_QPDF_Bridge.Begin_Page (Output)
         or else not Ezbind_QPDF_Bridge.Place_Page
           (Input, 0, Output, 0.0, 0.0, 612.0, 792.0)
         or else not Ezbind_QPDF_Bridge.Append_Line

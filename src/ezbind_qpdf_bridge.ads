@@ -4,15 +4,11 @@
 --  Purpose:
 --    Provide a safe Ada interface to the project-owned qpdf C bridge.
 ------------------------------------------------------------------------
-with Interfaces.C;
-with Interfaces.C.Strings;
 with System;
 
 package Ezbind_QPDF_Bridge is
    type Input_Handle is private;
    type Output_Handle is private;
-
-   type Error_Text is array (Positive range 1 .. 512) of Interfaces.C.char;
 
    function Open_Input
      (Path       : in String;
@@ -23,6 +19,8 @@ package Ezbind_QPDF_Bridge is
      (Width  : in Long_Float;
       Height : in Long_Float;
       Output : out Output_Handle) return Boolean;
+
+   function Begin_Page (Output : in Output_Handle) return Boolean;
 
    function Place_Page
      (Input        : in Input_Handle;

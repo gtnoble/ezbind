@@ -20,7 +20,7 @@
 
 ## 1. Scope
 
-This document defines the proposed design of `EZBIND-CLI`, the Ada command-line application that transforms one input PDF into a folded-folio bookbinding layout. It covers the logical architecture, interfaces, geometry model, PDF backend boundary, diagnostics, error handling, and implementation units needed for Build B1/B2.
+This document defines the proposed design of `EZBIND-CLI`, the Ada command-line application that transforms one input PDF into a folded-folio bookbinding layout. It covers the logical architecture, interfaces, geometry model, PDF backend boundary, diagnostics, error handling, and implementation units used by the B1 proof of concept and B2 implementation slice.
 
 The design satisfies the client-controlled requirements in `requirements/requirements-spec.md`, EZBIND-SRS-001 Revision 1.1. It does not change those requirements.
 
@@ -57,7 +57,7 @@ Ada remains the authoritative implementation language for application behavior. 
 
 ### 3.2 Selected PDF backend
 
-Select qpdf native APIs behind a project-owned C-compatible bridge for the baseline design. POC-001 passed for the implemented B1 slice; POC-002 through POC-013 remain planned expansion tests for B2 and release hardening.
+Select qpdf native APIs behind a project-owned C-compatible bridge for the baseline design. POC-001 passed in B1; the B2 implementation slice now covers two-sided destination-page creation, folio padding, Letter/A4 output, vector grid emission, malformed-input handling, and temporary-output commit. Remaining POC cases are planned for B2 expansion and release hardening.
 
 Rationale:
 
@@ -368,7 +368,7 @@ Responsibilities:
 - append vector content streams;
 - write output and expose errors through the C ABI.
 
-The bridge was tested independently with POC-001 before further Ada orchestration is added.
+The bridge was tested independently with POC-001 and is now integrated with the Ada application orchestration for the B2 implementation slice.
 
 ### 5.7 `Ezbind_CLI` / UNIT-CLI
 
@@ -408,7 +408,7 @@ The man page is generated/maintained from the same option inventory and canonica
 
 | Candidate | Decision | Rationale |
 |---|---|---|
-| qpdf native API via C++ bridge | Selected for B1 proof of concept | Direct Form-XObject import and arbitrary placement; permissive license; preserves visible content/text. |
+| qpdf native API via C++ bridge | Selected and implemented for B1/B2 | Direct Form-XObject import, explicit destination-page creation, and arbitrary placement; permissive license; preserves visible content/text. |
 | qpdf CLI | Validation support only | Does not expose required arbitrary page placement. |
 | apdf | Rejected as primary backend | Generates PDFs but does not import arbitrary source pages. |
 | MuPDF | Rejected for baseline | Native API viable, but installed package is AGPL/commercial-license-sensitive. |
@@ -417,7 +417,7 @@ The man page is generated/maintained from the same option inventory and canonica
 
 ### 7.2 Proof-of-concept exit criteria
 
-For B1/B2 expansion, execute and record the remaining POC tests covering:
+For B2 expansion and release hardening, execute and record the remaining POC tests covering:
 
 - native qpdf page import and two-up placement;
 - four-page order and orientation;
@@ -463,7 +463,7 @@ Result: **accepted as the client-controlled design baseline after user acknowled
 
 ## 9. Current gate
 
-The requirements and design baselines are accepted. B1 implementation and dependency pinning are complete for the current slice. The project is at the B1 results/B2 planning gate; full CLI orchestration remains future work.
+The requirements and design baselines are accepted. B1 implementation and dependency pinning are complete, and the first B2 application-orchestration slice is implemented and tested. The project is at the B2 implementation-slice/test-readiness gate; broader option coverage and acceptance qualification remain future work.
 
 ## 10. Design baseline acknowledgement
 

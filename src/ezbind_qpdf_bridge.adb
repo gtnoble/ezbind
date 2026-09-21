@@ -3,7 +3,6 @@
 ------------------------------------------------------------------------
 with Interfaces.C;
 with Interfaces.C.Strings;
-with System;
 
 package body Ezbind_QPDF_Bridge is
    use type Interfaces.C.int;
@@ -23,6 +22,12 @@ package body Ezbind_QPDF_Bridge is
       Error_Text : System.Address;
       Error_Size : Interfaces.C.size_t) return Interfaces.C.int
      with Import, Convention => C, External_Name => "ez_qpdf_create_output";
+
+   function C_Begin_Page
+     (Output     : Output_Handle;
+      Error_Text : System.Address;
+      Error_Size : Interfaces.C.size_t) return Interfaces.C.int
+     with Import, Convention => C, External_Name => "ez_qpdf_begin_page";
 
    function C_Place_Page
      (Input        : Input_Handle;
@@ -63,12 +68,12 @@ package body Ezbind_QPDF_Bridge is
      (Path       : in String;
       Input      : out Input_Handle;
       Page_Count : out Natural) return Boolean is
-      C_Path : Interfaces.C.Strings.chars_ptr :=
+      C_Path       : Interfaces.C.Strings.chars_ptr :=
         Interfaces.C.Strings.New_String (Path);
-      Count : aliased Interfaces.C.size_t := 0;
+      Count        : aliased Interfaces.C.size_t := 0;
       Native_Input : aliased Input_Handle :=
         Input_Handle (System.Null_Address);
-      Status : Interfaces.C.int;
+      Status       : Interfaces.C.int;
    begin
       Status := C_Open_Input
         (C_Path, Native_Input'Access, Count'Access, System.Null_Address, 0);
@@ -82,22 +87,26 @@ package body Ezbind_QPDF_Bridge is
      (Width  : in Long_Float;
       Height : in Long_Float;
       Output : out Output_Handle) return Boolean is
+      Native_Output : aliased Output_Handle :=
+        Output_Handle (System.Null_Address);
    begin
-      declare
-         Native_Output : aliased Output_Handle :=
-           Output_Handle (System.Null_Address);
-      begin
-         if C_Create_Output
-           (Interfaces.C.double (Width), Interfaces.C.double (Height),
-            Native_Output'Access, System.Null_Address, 0) = 0
-         then
-            Output := Native_Output;
-            return True;
-         else
-            return False;
-         end if;
-      end;
+      if C_Create_Output
+        (Interfaces.C.double (Width), Interfaces.C.double (Height),
+         Native_Output'Access, System.Null_Address, 0) = 0
+      then
+         Output := Native_Output;
+         return True;
+      else
+         Output := Output_Handle (System.Null_Address);
+         return False;
+      end if;
    end Create_Output;
+
+   function Begin_Page (Output : in Output_Handle) return Boolean is
+   begin
+      return C_Begin_Page
+        (Output, System.Null_Address, 0) = 0;
+   end Begin_Page;
 
    function Place_Page
      (Input        : in Input_Handle;
@@ -143,13 +152,17 @@ package body Ezbind_QPDF_Bridge is
 
    procedure Close (Input : in out Input_Handle) is
    begin
-      C_Close_Input (Input);
-      Input := Input_Handle (System.Null_Address);
+      if Input /= Input_Handle (System.Null_Address) then
+         C_Close_Input (Input);
+         Input := Input_Handle (System.Null_Address);
+      end if;
    end Close;
 
    procedure Close (Output : in out Output_Handle) is
    begin
-      C_Close_Output (Output);
-      Output := Output_Handle (System.Null_Address);
+      if Output /= Output_Handle (System.Null_Address) then
+         C_Close_Output (Output);
+         Output := Output_Handle (System.Null_Address);
+      end if;
    end Close;
 end Ezbind_QPDF_Bridge;

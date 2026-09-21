@@ -82,3 +82,20 @@ Requirements and operational-concept products are in draft review. No implementa
 - **Result:** README, Project Plan, Design Description, Test Plan, B1 Test Description, and `ezbind(1)` now distinguish implemented B1 behavior from planned B2 capabilities.
 - **Documentation boundary:** The B1 executable supports help and usage errors; complete PDF transformation options remain planned and are explicitly marked unavailable.
 - **Verification:** Rendered man page reviewed; stale B0/requirements-phase claims removed; Alire build commands and native dependency versions documented.
+
+## Entry 009 — B2 implementation slice
+
+- **Date:** 2026-09-21
+- **Activity:** Implemented the first B2 orchestration slice and executed integration checks.
+- **Result:** The CLI now parses one input/output pair, Letter/A4 selection, optional grid, and explicit overwrite. The qpdf bridge now creates destination pages independently from placement, allowing two physical sides per folded sheet. Imposition emits front `[4, 1]` and back `[2, 3]`, with blank padding to a multiple of four.
+- **Output policy:** Generated PDFs use a sibling temporary path and commit only after successful generation; force replacement is explicit.
+- **Verification:** Help and usage-error paths pass; malformed input returns status 3 without output; one-page Letter output has two pages and passes `qpdf --check`; five-page A4/grid output has four pages and passes `qpdf --check`; forced replacement passes; sequential root/test builds and the bridge smoke test pass.
+- **Known limits:** Custom margins/units, covers, guides, marks, creep, safe-area controls, capability reporting, and broad PDF feature preservation remain staged.
+- **Process note:** B2 execution is self-evaluated by the developer; independent user review remains required before physical use.
+
+## Entry 010 — B2 documentation synchronization
+
+- **Date:** 2026-09-21
+- **Activity:** Audited project documentation against the implemented B2 slice.
+- **Result:** Updated Project Plan gates and activity status, Design Description implementation notes, Test Plan status/schedule, test-crate metadata, and controlled status/change records. Historical B1 execution records remain unchanged.
+- **Verification:** Documentation search found no remaining current-gate claims that full CLI orchestration is future work; README, `ezbind(1)`, B2 Test Description, and controlled project records now agree on the implemented slice and deferred scope.
