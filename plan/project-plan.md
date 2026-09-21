@@ -5,7 +5,7 @@
 **Identifier:** EZBIND-SDP-001  
 **Status:** Client-acknowledged baseline  
 **Date:** 2026-09-21  
-**Revision:** 1.0
+**Revision:** 1.1
 
 ## 1. Overview
 
@@ -39,9 +39,9 @@ The user brief in the initiating conversation is the source of the initial proje
 ## 2. Referenced documents
 
 - User initiating brief, 2026-09-21.
-- `requirements/requirements-spec.md` — draft EZBIND-SRS-001, Revision 1.0, created for requirements review.
+- `requirements/requirements-spec.md` — draft EZBIND-SRS-001, Revision 1.1, updated with documentation and usage requirements.
 - `design/design-description.md` — to be created after requirements review and acknowledgement.
-- `tests/test-plan.md` — draft EZBIND-STP-001, Revision 1.0, aligned with the requirements review.
+- `tests/test-plan.md` — draft EZBIND-STP-001, Revision 1.1, aligned with the updated requirements review.
 - `sdfs/project-development-log.md` — project development log.
 - `plan/problem-change-log.md` — corrective-action and change record.
 - `plan/configuration-status.md` — configuration status accounting.
@@ -59,6 +59,7 @@ One operational Ada CLI application, configuration-free by default, with documen
 - Software Design Description.
 - Test Plan, Test Description, and Test Report, consolidated where practical.
 - User Manual and Installation/Build instructions when deployment preparation begins.
+- Versioned command man-page documentation, initially `ezbind(1)`, including the canonical usage statement.
 - Version Description for each release.
 - Project and component development logs.
 - Problem/change log, configuration status records, review records, and self-evaluation records.
@@ -79,7 +80,7 @@ Use an evolutionary, multi-build lifecycle. Requirements will be baselined for t
 |---|---|---|
 | B0 — project initialization | Establish process, workspace, toolchain policy, initial brief, and open-decision register. | Acknowledged Project Plan and initialized project library. |
 | B1 — geometry and PDF proof of concept | Validate page geometry, folio ordering/orientation, margin modes, and a minimal output PDF on representative fixtures. | Requirements/design review; automated geometry tests; inspected sample output. |
-| B2 — usable CLI | Implement validated input handling, complete CLI options, diagnostics, grid rendering, and deterministic PDF generation. | Component acceptance test cycle and user review. |
+| B2 — usable CLI | Implement validated input handling, complete CLI options, canonical usage output, man-page documentation, diagnostics, grid rendering, and deterministic PDF generation. | Component acceptance test cycle, documentation review, and user review. |
 | B3 — release hardening | Improve portability, documentation, regression fixtures, packaging, and known-error handling based on B2 results. | Release evaluation, Version Description, and user acceptance decision. |
 
 Build boundaries are provisional and may be revised only through the change-control process after plan acknowledgement.
@@ -160,7 +161,7 @@ Testing will cover:
 - malformed, encrypted, unsupported, and empty PDFs;
 - output PDF structural validity and renderability;
 - deterministic output for deterministic inputs;
-- CLI help, diagnostics, exit statuses, and file handling;
+- CLI help, canonical usage output, invalid-flag diagnostics, exit statuses, file handling, and man-page consistency;
 - representative end-to-end print/fold fixtures reviewed visually.
 
 Acceptance tests will run on the target or an agreed equivalent environment. Because the developer is also implementing the product, acceptance, product evaluation, and QA independence limitations will be explicitly reported; the user will be invited to independently review output and results.
@@ -267,4 +268,4 @@ The plan is tailored for a greenfield, software-only, single-developer project. 
 
 ## 18. Baseline acknowledgement
 
-The user acknowledged the Project Plan and accepted the proposed resolutions for all Section 13 decision items on 2026-09-21. This advances the plan from author control to client control. Any change to the accepted baseline requires a Problem/Change Log entry and user agreement.
+The user acknowledged the Project Plan and accepted the proposed resolutions for all Section 13 decision items on 2026-09-21. The user subsequently requested the `ezbind(1)` man page and canonical CLI usage behavior on 2026-09-21; this authorized Revision 1.1. The plan remains client-controlled. Any further change to the accepted baseline requires a Problem/Change Log entry and user agreement.

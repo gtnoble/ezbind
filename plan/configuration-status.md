@@ -6,14 +6,14 @@
 
 | Configuration item | Identifier | Revision/status | Control level | Notes |
 |---|---|---|---|---|
-| Project Plan | EZBIND-SDP-001 | Rev 1.0 baseline | Client | User acknowledged 2026-09-21 |
+| Project Plan | EZBIND-SDP-001 | Rev 1.1 baseline | Client | User change request accepted 2026-09-21 |
 | Problem/Change Log | EZBIND-PCL-001 | Initial | Project | Active |
 | Configuration Status | EZBIND-CS-001 | Initial | Project | Active |
 | Project Development Log | EZBIND-SDF-001 | Initial | Project | Active |
-| Requirements Specification | EZBIND-SRS-001 | Rev 1.0 draft | Author | Requirements review gate |
+| Requirements Specification | EZBIND-SRS-001 | Rev 1.1 draft | Author | Requirements review gate; documentation and usage added |
 | Design Description | EZBIND-SDD-001 | Not started | Not applicable | Blocked by requirements gate |
 | Source code | EZBIND-CLI | Not started | Not applicable | Blocked by design gate |
-| Test products | EZBIND-TEST | Rev 1.0 draft | Author | Requirements-linked Test Plan |
+| Test products | EZBIND-TEST | Rev 1.1 draft | Author | Requirements-linked CLI and documentation tests |
 
 ## Control rules
 

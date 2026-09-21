@@ -28,7 +28,7 @@ This document defines the intended user workflow and physical assumptions. Detai
 ## 2. Referenced documents
 
 - `plan/project-plan.md`, EZBIND-SDP-001, Revision 1.0.
-- `requirements/requirements-spec.md`, EZBIND-SRS-001, Revision 1.0 draft.
+- `requirements/requirements-spec.md`, EZBIND-SRS-001, Revision 1.1 draft.
 - User-approved resolutions to the B0 open-decision register, 2026-09-21.
 
 ## 3. Current situation

@@ -31,3 +31,11 @@ Record development rationale, constraints, decisions, exploratory results, inter
 ## Status
 
 Requirements and operational-concept products are in draft review. No implementation or unit-test results exist. Detailed design and implementation remain gated on requirements acknowledgement.
+
+## Entry 003 — documentation and usage requirements
+
+- **Date:** 2026-09-21
+- **Activity:** Requirements change requested by the user.
+- **Result:** Added the initial `ezbind(1)` man-page requirement and explicit canonical usage behavior for `--help`, `-h`, and invalid flags.
+- **Decision:** Help writes the canonical usage statement and help text to standard output with exit status 0; command-line usage errors write a diagnostic and the same usage statement to standard error with exit status 2 and no output replacement.
+- **Verification planned:** `TEST-CLI` and `TEST-DOC` cover the behavior and documentation.

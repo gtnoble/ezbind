@@ -5,17 +5,17 @@
 **Identifier:** EZBIND-STP-001  
 **Status:** Draft for requirements review  
 **Date:** 2026-09-21  
-**Revision:** 1.0
+**Revision:** 1.1
 
 ## 1. Scope
 
-This plan covers unit, integration, component acceptance, and conditional system acceptance testing for `EZBIND-CLI` and its generated PDF output. It is aligned with `requirements/requirements-spec.md` Revision 1.0 draft. Detailed test descriptions and actual results will be produced after the requirements and design gates.
+This plan covers unit, integration, component acceptance, and conditional system acceptance testing for `EZBIND-CLI` and its generated PDF output. It is aligned with `requirements/requirements-spec.md` Revision 1.1 draft. Detailed test descriptions and actual results will be produced after the requirements and design gates.
 
 ## 2. Referenced documents
 
 - `plan/project-plan.md`, EZBIND-SDP-001, Revision 1.0.
 - `requirements/operational-concept.md`, EZBIND-OCD-001, Revision 1.0.
-- `requirements/requirements-spec.md`, EZBIND-SRS-001, Revision 1.0 draft.
+- `requirements/requirements-spec.md`, EZBIND-SRS-001, Revision 1.1 draft.
 
 ## 3. Test environment
 
@@ -30,7 +30,8 @@ The physical acceptance environment will include a duplex-capable printer, the s
 | TEST-GEO | Verify units, dimensions, margins, reserves, fit, and grid rectangles. | REQ-CAP-003..004, 013..019, 022; REQ-DATA-001; REQ-ENV-004 |
 | TEST-IMP | Verify page order, padding, side/position assignment, orientation, and fold sequence. | REQ-CAP-005..007; REQ-DATA-002; REQ-PHY-003 |
 | TEST-PDF | Verify input handling, output validity, visible preservation, metadata, and feature limitations. | REQ-CAP-002, 008..009; REQ-PDF-001..003; REQ-QUAL-003 |
-| TEST-CLI | Verify options, defaults, help, diagnostics, exit statuses, cover/guide/mark behavior, and overwrite policy. | REQ-CAP-010..012, 020..021, 023..024; REQ-CLI-001..005 |
+| TEST-CLI | Verify options, defaults, help, canonical usage, invalid flags, diagnostics, exit statuses, cover/guide/mark behavior, and overwrite policy. | REQ-CAP-010..012, 020..021, 023..024; REQ-CLI-001..009 |
+| TEST-DOC | Verify `ezbind(1)` presence, required content, installation metadata, and correspondence with the executable interface. | REQ-DOC-001..003 |
 | TEST-SEC | Verify local-only processing, temporary-file policy, and content-free ordinary diagnostics. | REQ-ENV-002..003; REQ-QUAL-004 |
 | TEST-PHY | Verify printed duplex orientation, sequence, fold direction, stack order, and physical guides. | REQ-CAP-006, 012, 017; REQ-PHY-001..003 |
 | TEST-BUILD | Verify Ada implementation, reproducible build instructions, and controlled artifacts. | REQ-QUAL-001..002, 005; REQ-ENV-001 |
@@ -44,6 +45,7 @@ The physical acceptance environment will include a duplex-capable printer, the s
 - visual/rendering regression tests;
 - deterministic-output tests;
 - filesystem and overwrite tests;
+- documentation and man-page consistency tests;
 - privacy and diagnostic inspection;
 - physical print/fold demonstration.
 
@@ -54,7 +56,7 @@ Unit testing may proceed when a unit has a reviewed detailed design. Integration
 ## 7. Test schedule and products
 
 - B1: geometry and imposition unit/integration tests plus initial output-PDF proof.
-- B2: complete CLI, PDF, security, and physical acceptance test descriptions and execution.
+- B2: complete CLI, documentation, PDF, security, and physical acceptance test descriptions and execution.
 - B3: regression, portability, packaging, and release-hardening tests.
 
 The Test Description will specify exact cases and procedures. The Test Report will record actual results, deviations, and problem/change IDs.
@@ -65,7 +67,7 @@ The developer is also implementing the product, so full test independence is una
 
 ## 9. Requirements traceability
 
-The requirement-to-test-group matrix is maintained in `requirements/requirements-spec.md`, Section 5.1. Detailed cases will use `TEST-*` identifiers and trace to individual `REQ-*` identifiers before the Test Readiness Review.
+The requirement-to-test-group matrix is maintained in `requirements/requirements-spec.md`, Section 5.1. `TEST-DOC` covers the man-page and usage-documentation requirements. Detailed cases will use `TEST-*` identifiers and trace to individual `REQ-*` identifiers before the Test Readiness Review.
 
 ## 10. Notes
 

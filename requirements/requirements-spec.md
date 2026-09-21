@@ -5,7 +5,7 @@
 **Identifier:** EZBIND-SRS-001  
 **Status:** Draft for client requirements review  
 **Date:** 2026-09-21  
-**Revision:** 1.0
+**Revision:** 1.1
 
 ## Contents
 
@@ -39,7 +39,7 @@ Each requirement states one primary verification method:
 
 - `plan/project-plan.md`, EZBIND-SDP-001, Revision 1.0.
 - `requirements/operational-concept.md`, EZBIND-OCD-001, Revision 1.0.
-- `tests/test-plan.md`, EZBIND-STP-001, Revision 1.0 draft.
+- `tests/test-plan.md`, EZBIND-STP-001, Revision 1.1 draft.
 - User-approved B0 resolutions, 2026-09-21.
 
 ## 3. Definitions and conventions
@@ -98,6 +98,10 @@ All physical dimensions shall be represented internally with sufficient precisio
 | REQ-CLI-003 | Normal diagnostics shall be written to standard error and shall not include extracted document text, passwords, or complete PDF content. | Inspection/Test | B2 |
 | REQ-CLI-004 | The program shall return exit status 0 on success, 2 for command-line usage errors, 3 for input-PDF errors, 4 for impossible layouts, 5 for output/filesystem errors, 6 for missing/unusable runtime dependencies, and 10 for unexpected internal errors. | Test | B2 |
 | REQ-CLI-005 | The program shall operate on one input PDF per invocation; batch processing is not required for this baseline. | Inspection/Test | B2 |
+| REQ-CLI-006 | The program shall recognize `--help` and `-h` without requiring an input PDF, print the canonical usage statement and help text to standard output, and return exit status 0. | Test | B2 |
+| REQ-CLI-007 | When the invocation contains an unknown flag, malformed option, missing option value, or other command-line usage error, the program shall print a diagnostic followed by the canonical usage statement to standard error, shall not create or replace an output PDF, and shall return exit status 2. | Test | B2 |
+| REQ-CLI-008 | The canonical usage statement shall be identical in the help and invalid-invocation paths and shall be exactly `Usage: ezbind [OPTIONS] INPUT.pdf --output OUTPUT.pdf` as its first line. | Test/Inspection | B2 |
+| REQ-CLI-009 | Help output shall print the canonical usage line followed by a concise option summary and exit-status summary; invalid-invocation output shall print the command-line diagnostic followed by the same canonical usage line and shall not be required to print the full option summary. | Test | B2 |
 
 ### 4.3 Internal data requirements
 
@@ -134,7 +138,15 @@ All physical dimensions shall be represented internally with sufficient precisio
 | REQ-PDF-002 | The program shall reject encrypted input unless an explicitly supported authentication mechanism is supplied. | Test | B2 |
 | REQ-PDF-003 | The program shall preserve basic input metadata where supported and shall identify ezbind processing in output metadata. | Test/Inspection | B2 |
 
-### 4.7 Safety and physical-use constraints
+### 4.7 Documentation requirements
+
+| ID | Requirement | Verification | Planned build |
+|---|---|---|---|
+| REQ-DOC-001 | The deliverable documentation shall include a versioned command manual page named `ezbind(1)` in a standard man-page source format, and the release package shall identify its installation location. | Inspection | B2 |
+| REQ-DOC-002 | `ezbind(1)` shall document the canonical synopsis, all supported options, defaults, physical units, output and overwrite behavior, exit statuses, diagnostics, PDF limitations, the duplex/fold workflow, and at least one complete invocation example. | Inspection | B2 |
+| REQ-DOC-003 | The released `ezbind(1)` page shall correspond to the executable version and shall be updated whenever the command-line interface, defaults, exit statuses, or physical workflow changes. | Inspection/Test | B2/B3 |
+
+### 4.8 Safety and physical-use constraints
 
 | ID | Requirement | Verification | Planned build |
 |---|---|---|---|
@@ -153,7 +165,8 @@ The following test groups are reserved in the Test Plan and will be expanded int
 | TEST-GEO | Unit conversion, dimensions, margins, safe-area fit, grid rectangles. |
 | TEST-IMP | Page ordering, padding, sides, positions, rotations, and fold sequence. |
 | TEST-PDF | Input validation, output validity, visual preservation, metadata, unsupported features. |
-| TEST-CLI | Options, defaults, help, diagnostics, exit statuses, overwrite policy. |
+| TEST-CLI | Options, defaults, help, canonical usage, invalid flags, diagnostics, exit statuses, overwrite policy. |
+| TEST-DOC | Man-page presence, content, version correspondence, and installation metadata. |
 | TEST-PHY | Printed duplex/fold/stack fixture and optional physical guides. |
 | TEST-SEC | Local-only behavior, temporary files, and content-free diagnostics. |
 
@@ -165,14 +178,15 @@ The following test groups are reserved in the Test Plan and will be expanded int
 | REQ-CAP-010..012 | TEST-CLI, TEST-PHY |
 | REQ-CAP-013..022 | TEST-GEO, TEST-CLI, TEST-PHY |
 | REQ-CAP-023..024 | TEST-CLI, TEST-PDF |
-| REQ-CLI-001..005 | TEST-CLI, TEST-SEC |
+| REQ-CLI-001..009 | TEST-CLI, TEST-SEC |
 | REQ-DATA-001..003 | TEST-GEO, unit inspection |
 | REQ-ENV-001..004 | TEST-SEC, TEST-PDF |
 | REQ-QUAL-001..005 | Inspection, all test groups |
 | REQ-PDF-001..003 | TEST-PDF |
 | REQ-PHY-001..003 | TEST-PHY, inspection |
+| REQ-DOC-001..003 | TEST-DOC, inspection |
 
-The detailed Test Description will identify exact input data, steps, expected results, and pass/fail criteria before acceptance testing.
+The detailed Test Description will identify exact input data, steps, expected results, and pass/fail criteria before acceptance testing. It will compare help and invalid-invocation output against the canonical usage line byte-for-byte, excluding platform line-ending normalization.
 
 ### 5.3 Requirements-to-source traceability
 
@@ -181,6 +195,7 @@ All requirements in this draft trace to the user initiating brief and the user-a
 ## 6. Notes
 
 - This specification is a draft for the requirements review gate. It is not yet client-controlled.
+- The initial man-page scope is `ezbind(1)`; additional man pages are not required until another user-facing command or file format is introduced.
 - The PDF backend is intentionally not selected by this document; backend selection is a design activity constrained by these requirements.
 - The physical duplex flip direction must be confirmed with a printed fixture because printer driver settings vary.
 - Requirements may be changed only through the project change-control process after baseline acknowledgement.
@@ -189,6 +204,7 @@ All requirements in this draft trace to the user initiating brief and the user-a
 
 - Applicable SRS checklist sections are present: scope, references, requirements by category, verification methods, qualification provisions, traceability, and notes.
 - Every listed requirement has a verification method and planned build.
+- CLI usage behavior and the `ezbind(1)` deliverable are explicitly specified and traceable to tests.
 - The scope and accepted physical baseline are represented.
 - Remaining implementation choices are identified as design decisions.
 - Result: **acceptable draft for client requirements review; not client-controlled until acknowledged.**
