@@ -14,7 +14,7 @@ Record development rationale, constraints, decisions, exploratory results, inter
 - **Date:** 2026-09-21
 - **Activity:** Project startup and environment reconnaissance.
 - **Result:** Empty repository confirmed; Git initialized; disciplined directories established.
-- **Available environment:** Alire 2.1.0, system GNAT 13.3.0, Alire-configured GNAT/GPRbuild toolchain, Git, and local PDF inspection utilities.
+- **Available environment:** Alire 2.1.0, host GCC/G++ 13.3.0, Alire-selected GNAT native 15.2.1/GPRbuild 25.0.1, Git, and local PDF inspection/rendering utilities.
 - **Constraints/open decisions:** The user accepted the proposed physical-layout and operational resolutions on 2026-09-21. PDF backend selection and detailed architecture remain open design decisions.
 - **Decision:** Use an evolutionary multi-build plan. The B0 plan/open-decisions gate is closed; proceed through requirements review before design or implementation.
 - **Verification:** Repository inspection and independent review completed; plan self-evaluation recorded in `plan/project-plan.md`.
@@ -74,3 +74,11 @@ Requirements and operational-concept products are in draft review. No implementa
 - **Result:** Replaced provisional build metadata with canonical Alire executable-crate structure, generated configuration files, and `[build-switches]` metadata. The root and nested test crates build with `alr build --development`.
 - **Implementation mapping:** The executable main remains `procedure Ezbind`; Ada implementation packages use flattened `Ezbind_*` names to avoid a parent-package collision.
 - **Verification:** Clean sequential root/test builds pass; generated artifacts remain ignored and are not committed.
+
+## Entry 008 — B1 documentation update
+
+- **Date:** 2026-09-21
+- **Activity:** Documentation synchronization after B1 implementation.
+- **Result:** README, Project Plan, Design Description, Test Plan, B1 Test Description, and `ezbind(1)` now distinguish implemented B1 behavior from planned B2 capabilities.
+- **Documentation boundary:** The B1 executable supports help and usage errors; complete PDF transformation options remain planned and are explicitly marked unavailable.
+- **Verification:** Rendered man page reviewed; stale B0/requirements-phase claims removed; Alire build commands and native dependency versions documented.

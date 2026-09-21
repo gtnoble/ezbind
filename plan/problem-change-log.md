@@ -12,6 +12,7 @@ Every entry must include a category and one priority. Categories: Plans, Concept
 | CHG-002 | 2026-09-21 | Requirements, Manuals, Test | 3 — Moderate | User requested man-page documentation and a canonical usage statement for help and invalid-flag invocations. | EZBIND-SRS-001 Rev 1.1 draft; EZBIND-STP-001 Rev 1.1 draft; EZBIND-SDP-001 Rev 1.1 | Add `ezbind(1)`, define help/invalid-flag behavior, update traceability and deliverable records. | Requirements and test-plan drafts updated; plan deliverable list and canonical usage contract updated. | resolved | 2026-09-21 |
 | CHG-003 | 2026-09-21 | Requirements, Design | 3 — Moderate | User accepted the complete requirements baseline and authorized transition to design. | EZBIND-SRS-001 Rev 1.1; EZBIND-SDP-001 Rev 1.1 | Record requirements acceptance, advance configuration control, and produce the Design Description. | SRS marked client-controlled; Design Description accepted and source work authorized. | resolved | 2026-09-21 |
 | CHG-004 | 2026-09-21 | Design, Code, Other | 4 — Minor | B1 implementation adopts canonical Alire executable naming (`Ezbind`) and flattened Ada package names (`Ezbind_*`) because Ada executable and parent-package units cannot share the same root unit. Generated Alire configuration is restored to Alire ownership. | EZBIND-SDD-001 Rev 1.0; `alire.toml`; `ezbind.gpr`; `config/` | Record the implementation mapping and use the canonical Alire-generated project structure. | Design unit references synchronized; Alire metadata/build-switches added; generated config restored; root and test builds pass. | resolved | 2026-09-21 |
+| CHG-005 | 2026-09-21 | Plans, Design, Test, Manuals | 4 — Minor | Documentation no longer matched the B1 implementation status, canonical Alire workflow, or actual CLI capability boundary. | README.md; EZBIND-SDP-001 Rev 1.1; EZBIND-SDD-001 Rev 1.0; EZBIND-STP-001 Rev 1.1; EZBIND-B1-TD-001 Rev 1.1; doc/ezbind.1 | Synchronize status, commands, toolchain, POC results, and implemented-versus-planned CLI behavior. | Documentation updated and rendered man page reviewed. | resolved | 2026-09-21 |
 | BUG-001 | 2026-09-21 | Code, Test | 2 — Serious | B1 qpdf smoke test aborted because Ada represented 64-bit native bridge pointers as 32-bit C integers. | `src/ezbind_qpdf_bridge.ads`; POC-001 | Use address-sized opaque handles, make destination pages indirect, rebuild and rerun qpdf validation. | Handle representation corrected; clean sequential builds and text-bearing smoke test pass. | resolved | 2026-09-21 |
 
 ## CHG-001 rationale
@@ -37,6 +38,10 @@ The initial POC failure could prevent the essential PDF capability, so it was Pr
 ## CHG-004 rationale
 
 This is a minor implementation/documentation clarification with no user-visible requirement change. It preserves the accepted architecture while following the canonical Alire executable layout.
+
+## CHG-005 rationale
+
+This is a minor documentation synchronization change. It corrects user-facing status and capability claims without changing software requirements or implementation behavior.
 
 ## Trend notes
 

@@ -17,7 +17,7 @@ This description covers the B1 physical-unit, geometry, imposition, guide-genera
 - Alire-selected GNAT native 15.2.1 and GCC/G++ 13.3.0-compatible native bridge.
 - qpdf 11.9.0 and `libqpdf-dev`.
 - `qpdf --check`, `pdfinfo`, `pdftotext`, and `pdftoppm` for independent checks.
-- Project build through `gprbuild` selected by Alire when available, or the documented fallback build command.
+- Project build through the canonical Alire commands `alr build --development` and sequential nested-test `alr build --development`.
 
 ## TEST-GEO
 
@@ -94,4 +94,4 @@ The first native smoke execution aborted because the Ada opaque handle type was 
 
 ## Exit criteria
 
-B1 passes when unit tests for physical values, geometry, imposition, and guides pass; POC-001 produces a valid output; qpdf errors are mapped to controlled statuses; and the results are recorded in the project development log.
+The implemented B1 slice passes when physical values, geometry, imposition, and qpdf bridge checks pass; POC-001 produces valid output; and results are recorded in the project development log. Full CLI option handling, multi-page imposition, guide rendering, and acceptance tests remain B2 work.

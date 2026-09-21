@@ -3,13 +3,13 @@
 **Project:** EZBIND
 **Document:** Software Test Plan (STP)
 **Identifier:** EZBIND-STP-001
-**Status:** Draft for requirements review
+**Status:** B1 execution plan and results reference
 **Date:** 2026-09-21
 **Revision:** 1.1
 
 ## 1. Scope
 
-This plan covers unit, integration, component acceptance, and conditional system acceptance testing for `EZBIND-CLI` and its generated PDF output. It is aligned with `requirements/requirements-spec.md` Revision 1.1 draft. Detailed test descriptions and actual results will be produced after the requirements and design gates.
+This plan covers unit, integration, component acceptance, and conditional system acceptance testing for `EZBIND-CLI` and its generated PDF output. It is aligned with client-controlled `requirements/requirements-spec.md` Revision 1.1. B1 execution results are recorded in `tests/b1-test-description.md`; complete CLI acceptance remains planned for B2.
 
 ## 2. Referenced documents
 
@@ -71,4 +71,4 @@ The requirement-to-test-group matrix is maintained in `requirements/requirements
 
 ## 10. Notes
 
-This is a requirements-phase draft. The Test Description and Test Report are not yet baselined and contain no execution results.
+This document is the active test-plan baseline for B1 planning. B1 execution results are recorded in the B1 Test Description; a separate acceptance Test Report remains planned for B2.

@@ -50,7 +50,7 @@ The user brief in the initiating conversation is the source of the initial proje
 
 ### 3.1 Deliverable software
 
-One operational Ada CLI application, configuration-free by default, with documented command syntax and deterministic PDF output for a given input and parameter set.
+One operational Ada CLI application, built as a canonical Alire executable crate, with documented command syntax and deterministic PDF output for a given input and parameter set.
 
 ### 3.2 Supporting products
 
@@ -66,7 +66,7 @@ One operational Ada CLI application, configuration-free by default, with documen
 
 ### 3.3 Project components
 
-For the first build, the deliverable is treated as one software component, `EZBIND-CLI`, with logical units for command-line parsing, PDF inspection, binding geometry, imposition, margin-grid rendering, PDF emission, and diagnostics. The final decomposition remains a design decision subject to requirements analysis.
+For the first build, the deliverable is treated as one software component, `EZBIND-CLI`, with logical units for command-line parsing, PDF inspection, binding geometry, imposition, margin-grid rendering, PDF emission, and diagnostics. The accepted B1 implementation maps these responsibilities to the Ada and native bridge units recorded in the Design Description.
 
 ## 4. Development process and build strategy
 
@@ -79,8 +79,8 @@ Use an evolutionary, multi-build lifecycle. Requirements will be baselined for t
 | Build | Objective | Exit evidence |
 |---|---|---|
 | B0 — project initialization | Establish process, workspace, toolchain policy, initial brief, and open-decision register. | Acknowledged Project Plan and initialized project library. |
-| B1 — geometry and PDF proof of concept | Validate page geometry, folio ordering/orientation, margin modes, and a minimal output PDF on representative fixtures. | Requirements/design review; automated geometry tests; inspected sample output. |
-| B2 — usable CLI | Implement validated input handling, complete CLI options, canonical usage output, man-page documentation, diagnostics, grid rendering, and deterministic PDF generation. | Component acceptance test cycle, documentation review, and user review. |
+| B1 — geometry and PDF proof of concept | Validate page geometry, folio ordering/orientation, margin modes, and a minimal output PDF on representative fixtures. | Alire builds; Ada core tests; qpdf bridge proof; independent PDF checks. **Completed for the implemented slice.** |
+| B2 — usable CLI | Implement validated input handling, complete CLI options, canonical usage output, man-page documentation, diagnostics, grid rendering, and deterministic PDF generation. | Component acceptance test cycle, documentation review, and user review. **Next build.** |
 | B3 — release hardening | Improve portability, documentation, regression fixtures, packaging, and known-error handling based on B2 results. | Release evaluation, Version Description, and user acceptance decision. |
 
 Build boundaries are provisional and may be revised only through the change-control process after plan acknowledgement.
@@ -99,13 +99,13 @@ Build boundaries are provisional and may be revised only through the change-cont
 | Activity | Status | Tailoring for this project |
 |---|---|---|
 | Planning and oversight (§5.1) | Active | This plan, reviews, indicators, and change control. |
-| Development environment (§5.2) | Active | Git project library; Alire/GNAT/GPRbuild; controlled fixtures and tools. |
+| Development environment (§5.2) | Active | Git project library; canonical Alire crate; Alire-selected GNAT/GPRbuild; qpdf 11.9.0 development package; controlled fixtures and tools. |
 | System requirements analysis (§5.3) | Active, deferred past plan gate | Software-only system; operational concept and system-level needs will be captured after acknowledgement. |
-| System design (§5.4) | Active, deferred past requirements gate | Single software system; architecture will be documented after requirements review. |
-| Software requirements analysis (§5.5) | Active, deferred past plan gate | Requirements and verification matrix will be baselined before implementation. |
-| Software design (§5.6) | Active, deferred past requirements gate | Design description will follow requirements review and will require user acknowledgement before implementation. |
-| Implementation/unit test (§5.7) | Planned for B1 onward | Ada implementation with unit tests recorded in SDFs. |
-| Unit integration/test (§5.8) | Planned for B1 onward | Progressive integration with PDF fixture validation. |
+| System design (§5.4) | Complete for current scope | Single software system; accepted architecture is recorded in the SDD. |
+| Software requirements analysis (§5.5) | Complete for current scope | Client-controlled SRS and requirement-to-test traceability are recorded. |
+| Software design (§5.6) | Complete for current scope | Client-controlled SDD records the accepted architecture and B1 design basis. |
+| Implementation/unit test (§5.7) | Active in B1 | Ada implementation and native bridge with results recorded in the B1 Test Description and SDF. |
+| Unit integration/test (§5.8) | Active in B1 | Progressive integration of Ada core and qpdf bridge; sequential Alire root/test builds. |
 | Acceptance testing (§5.9) | Planned for B2 | User-facing CLI and output-PDF qualification; developer independence limitation applies. |
 | HW/SW integration (§5.10) | Not applicable | Software-only project. |
 | System acceptance (§5.11) | Conditional | May be combined with component acceptance because the system is software-only; confirm at requirements review. |
@@ -115,7 +115,7 @@ Build boundaries are provisional and may be revised only through the change-cont
 | Product evaluation (§5.15) | Active | Self-evaluate each artifact before presenting it; independence limitation recorded. |
 | Quality assurance (§5.16) | Active, inline | Process/product checks by the developer; independence limitation recorded. |
 | Corrective action (§5.17) | Active | Problem/change log with category and priority for every entry. |
-| Joint reviews (§5.18) | Active | Plan review now; requirements, design, test-readiness, and release reviews later. |
+| Joint reviews (§5.18) | Active | Plan, requirements, and design reviews are complete; B1 results/B2 planning review is next. |
 | Risk management (§5.19.1) | Active | Risk register in this plan; update at every review. |
 | Management indicators (§5.19.2) | Active | Report requirements volatility, component progress, open problems, milestone status, scope changes, and test trend. |
 | Security/privacy (§5.19.3) | Conditional | Local PDFs may contain sensitive content; confirm process and product expectations below. No network processing is planned. |
@@ -128,14 +128,14 @@ Build boundaries are provisional and may be revised only through the change-cont
 
 - Ada is the required deliverable language, as specified by the user.
 - Alire is the package/build environment.
-- GNAT and GPRbuild are the compiler/build tools; the exact selected toolchain must be recorded and made reproducible before B1 implementation.
+- Alire selects and records the GNAT native 15.2.1 and GPRbuild 25.0.1 toolchain for the tested build path; qpdf 11.9.0 is a documented Linux native dependency.
 - Git is the project library and configuration-management tool.
 - AUnit or an equivalent Ada test framework may be evaluated for unit tests.
 - PDF inspection/rendering utilities may be used as test support tools, but they must not become an undocumented runtime dependency.
 
 ### 6.2 PDF implementation strategy
 
-No PDF library is selected at B0. B1 will evaluate an Ada PDF-generation library, native-library bindings, and controlled external-tool orchestration against these criteria: ability to preserve/import source pages, precise placement and rotation, vector grid rendering, output portability, dependency availability, licensing, error reporting, and deterministic testing. The selected strategy will be recorded in the Design Description before it becomes a project constraint.
+The B1 design selected qpdf native APIs behind a project-owned C-compatible C++ bridge. The bridge proof of concept passed for page import, placement, vector content insertion, valid Letter output, and selectable text preservation. qpdf remains the native PDF dependency for the B1/B2 implementation path.
 
 ### 6.3 Project library
 
@@ -190,7 +190,7 @@ No formal client configuration audit has been requested. The project will suppor
 
 - **B0 plan review:** this plan and open decisions; current gate.
 - **Requirements review:** Operational Concept/Requirements Specification and traceability; no implementation beyond exploratory tooling before acknowledgement.
-- **Design review:** Design Description, PDF strategy, geometry model, and test architecture; no B1 implementation baseline before acknowledgement.
+- **Design review:** Design Description, PDF strategy, geometry model, and test architecture; complete. B1 results/B2 planning review is next.
 - **Test-readiness review:** test environment, fixtures, Test Description, and tool verification.
 - **Build/release review:** results, open problems, Version Description, and process retrospective.
 
@@ -198,13 +198,13 @@ At each management review report: requirements volatility; component progress; o
 
 ## 11. Resources and user participation
 
-Developer resources currently available are the local Linux development environment, Ada toolchain, Git, PDF command-line inspection/rendering tools, and the project workspace. The user is expected to review the draft Design Description, provide representative PDFs or permission to use synthetic fixtures, and acknowledge design at the active gate.
+Developer resources currently available are the local Linux development environment, Ada toolchain, Git, PDF command-line inspection/rendering tools, and the project workspace. The user is expected to review B1 results, provide representative PDFs or permission to use synthetic fixtures, and review the B2 readiness package at the next gate.
 
 No developer-site installation, formal user training, or separate maintenance-team handover is currently planned. These remain open until confirmed.
 
 ## 12. Initial schedule
 
-Dates below are sequence targets, not commitments, until requirements and design reviews are acknowledged.
+Dates below are sequence targets, not commitments, until B1 review and B2 planning are complete.
 
 | Milestone | Target sequence | Dependency |
 |---|---|---|
@@ -214,13 +214,13 @@ Dates below are sequence targets, not commitments, until requirements and design
 | Requirements review/baseline | Following requirements draft | User review |
 | Architecture/design draft | After requirements baseline | Requirements review |
 | Design review/baseline | Before B1 implementation | User review |
-| B1 proof of concept | After design baseline | Toolchain/backend selection |
-| B2 usable CLI | After B1 review | Validated geometry and PDF strategy |
+| B1 proof of concept | Completed 2026-09-21 | Design baseline; native dependency verification |
+| B2 usable CLI | Next build | B1 review and scope confirmation |
 | B3 release hardening | After B2 acceptance | User feedback and open-problem closure |
 
 ## 13. Accepted B0 decisions
 
-The user accepted the proposed resolutions for all B0 open-decision items on 2026-09-21. They now form the B1 requirements baseline; implementation details remain subject to design review.
+The user accepted the proposed resolutions for all B0 open-decision items on 2026-09-21. They form the B1 requirements baseline; the accepted Design Description defines the implementation basis.
 
 - Letter, A4, and custom sheet dimensions are supported; the source page is the finished-page target size.
 - Each sheet is folded once and carries four logical pages using standard booklet ordering.
@@ -237,10 +237,10 @@ The user accepted the proposed resolutions for all B0 open-decision items on 202
 | ID | Risk | Likelihood/impact | Mitigation | Owner/status |
 |---|---|---|---|---|
 | R-001 | The physical meaning of “modified DFA” is underspecified, producing a visually plausible but physically incorrect page order. | High/High | Resolve Section 13 questions; create fold/order diagrams and synthetic fixtures; require physical review of representative output. | Developer / Open |
-| R-002 | The selected Ada/PDF approach cannot import and reposition existing PDF page content with sufficient fidelity. | Medium/High | Evaluate candidate libraries/tools in B1 before architecture baseline; retain backend abstraction. | Developer / Open |
+| R-002 | The selected Ada/PDF approach cannot import and reposition existing PDF page content with sufficient fidelity. | Medium/High | qpdf bridge proof passed for the B1 slice; retain backend abstraction and expand mixed-page/feature tests in B2. | Developer / Mitigated |
 | R-003 | Printer non-printable areas or unrequested creep cause clipped or misregistered output. | Medium/High | Make sheet/margin/printer assumptions explicit; validate dimensions and render output; support marks only if required. | Developer / Open |
 | R-004 | Source PDFs contain features the chosen backend cannot preserve. | Medium/High | Define preservation requirements; inspect representative PDFs; report unsupported features rather than silently dropping them. | Developer / Open |
-| R-005 | Toolchain differences between system GNAT and Alire-selected GNAT make builds irreproducible. | Medium/Medium | Select and record one build path; verify clean build in the project library; document versions. | Developer / Open |
+| R-005 | Toolchain differences between host GNAT and the Alire-selected GNAT make builds irreproducible. | Medium/Medium | Canonical Alire build path selected and verified with sequential root/test development builds. | Developer / Mitigated |
 | R-006 | User-provided PDFs may contain private content and could be exposed by temporary files or diagnostics. | Medium/High | Default to local processing; avoid content logging; define temporary-file cleanup and privacy expectations before implementation. | Developer / Open |
 | R-007 | Scope expands into a general print-imposition engine before the binding workflow is validated. | Medium/Medium | Use evolutionary builds and change control; keep B1 focused on one validated physical workflow. | Developer / Open |
 
@@ -260,7 +260,7 @@ Result: **accepted as the client-controlled baseline after user acknowledgement 
 
 ## 16. Current gate
 
-The B0 plan/open-decisions gate is closed by user acknowledgement on 2026-09-21. The requirements review gate was closed by user acknowledgement on 2026-09-21. The design review gate was closed by user acknowledgement on 2026-09-21. B1 implementation is authorized; the qpdf proof-of-concept and implementation tests are the active build objectives.
+The B0 plan/open-decisions, requirements, and design gates were closed by user acknowledgement on 2026-09-21. B1 implementation and its proof-of-concept are complete for the implemented slice. The project is at the B1 results/B2 planning gate; full CLI orchestration remains unauthorized as a completed capability until implemented and tested.
 
 ## 17. Notes
 
@@ -268,4 +268,4 @@ The plan is tailored for a greenfield, software-only, single-developer project. 
 
 ## 18. Baseline acknowledgement
 
-The user acknowledged the Project Plan and accepted the proposed resolutions for all Section 13 decision items on 2026-09-21. The user subsequently requested the `ezbind(1)` man page and canonical CLI usage behavior on 2026-09-21; this authorized Revision 1.1. The user accepted the requirements baseline and Design Description on 2026-09-21; B1 implementation is now active. The plan remains client-controlled. Any further change to the accepted baseline requires a Problem/Change Log entry and user agreement.
+The user acknowledged the Project Plan and accepted the proposed resolutions for all Section 13 decision items on 2026-09-21. The user subsequently requested the `ezbind(1)` man page and canonical CLI usage behavior on 2026-09-21; this authorized Revision 1.1. The user accepted the requirements baseline and Design Description on 2026-09-21. B1 implementation and documentation are now recorded; B2 is the next planned build. The plan remains client-controlled. Any further change to the accepted baseline requires a Problem/Change Log entry and user agreement.

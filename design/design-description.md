@@ -57,7 +57,7 @@ Ada remains the authoritative implementation language for application behavior. 
 
 ### 3.2 Selected PDF backend
 
-Select qpdf native APIs behind a project-owned C-compatible bridge for the baseline design, subject to POC-001 through POC-013 passing before the B1 implementation baseline.
+Select qpdf native APIs behind a project-owned C-compatible bridge for the baseline design. POC-001 passed for the implemented B1 slice; POC-002 through POC-013 remain planned expansion tests for B2 and release hardening.
 
 Rationale:
 
@@ -220,7 +220,7 @@ ez_qpdf_close
 ez_qpdf_last_error
 ```
 
-The actual bridge ABI must be finalized during POC implementation. Ownership rules must be explicit: the bridge owns native allocations; Ada receives copied scalar data and invokes the close operation exactly once.
+The implemented bridge ABI is defined by `src/ez_qpdf_bridge.h` and the Ada binding `src/ezbind_qpdf_bridge.ads`; future extensions must preserve the opaque-handle boundary. Ownership rules must be explicit: the bridge owns native allocations; Ada receives copied scalar data and invokes the close operation exactly once.
 
 ### 4.5 External interfaces
 
@@ -368,7 +368,7 @@ Responsibilities:
 - append vector content streams;
 - write output and expose errors through the C ABI.
 
-The bridge shall be tested independently with POC-001 before Ada orchestration depends on it.
+The bridge was tested independently with POC-001 before further Ada orchestration is added.
 
 ### 5.7 `Ezbind_CLI` / UNIT-CLI
 
@@ -417,7 +417,7 @@ The man page is generated/maintained from the same option inventory and canonica
 
 ### 7.2 Proof-of-concept exit criteria
 
-Before the B1 implementation baseline, execute and record POC tests covering:
+For B1/B2 expansion, execute and record the remaining POC tests covering:
 
 - native qpdf page import and two-up placement;
 - four-page order and orientation;
@@ -433,11 +433,11 @@ Before the B1 implementation baseline, execute and record POC tests covering:
 - semantic determinism;
 - physical duplex fixture.
 
-POC passes require no rasterization, valid output, correct page dimensions, expected text extraction, correct guide clipping, and explicit failure/reporting for unsupported conditions.
+The completed POC-001 slice passed without rasterization, produced valid Letter output, preserved expected text extraction, and inserted vector content. Remaining POC cases must establish mixed-page geometry, guide clipping, and unsupported-feature reporting.
 
 ### 7.3 Dependency and licensing conditions
 
-The qpdf development headers and C++ toolchain must be available to build the bridge. The exact qpdf version, ABI, package/license notices, and runtime linking strategy must be recorded in the build and release documentation. If the environment cannot provide a supported qpdf development package, stop and raise a design problem before selecting an alternative.
+The qpdf development headers and C++ toolchain are available in the tested Linux environment. The B1 path uses qpdf 11.9.0, dynamic linking, GCC/G++ C++17 support, and Alire-selected GNAT native 15.2.1/GPRbuild 25.0.1. These versions and the Apache-2.0 qpdf dependency must be recorded in release documentation.
 
 ## 8. Notes and self-evaluation
 
@@ -463,7 +463,7 @@ Result: **accepted as the client-controlled design baseline after user acknowled
 
 ## 9. Current gate
 
-The requirements and design baselines are accepted. B1 implementation and dependency pinning are authorized. The qpdf proof-of-concept remains an implementation exit criterion before the B1 baseline.
+The requirements and design baselines are accepted. B1 implementation and dependency pinning are complete for the current slice. The project is at the B1 results/B2 planning gate; full CLI orchestration remains future work.
 
 ## 10. Design baseline acknowledgement
 
