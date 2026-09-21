@@ -14,7 +14,15 @@ package body Ezbind_CLI is
       Ada.Text_IO.Put_Line
         ("  --sheet letter|a4  Select the physical output sheet.");
       Ada.Text_IO.Put_Line
-        ("  --grid           Draw a 5 mm margin grid.");
+        ("  --grid           Draw a margin grid (default spacing 5 mm).");
+      Ada.Text_IO.Put_Line
+        ("  --grid-spacing V Set positive grid spacing in mm, in, or pt.");
+      Ada.Text_IO.Put_Line
+        ("  --margin-top V, --margin-bottom V,");
+      Ada.Text_IO.Put_Line
+        ("  --margin-fore-edge V, --margin-spine V");
+      Ada.Text_IO.Put_Line
+        ("                   Values use mm, in, or pt; defaults are 36/36/36/48 pt.");
       Ada.Text_IO.Put_Line
         ("  --force          Replace an existing output file.");
       Ada.Text_IO.Put_Line

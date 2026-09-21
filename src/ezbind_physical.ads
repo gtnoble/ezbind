@@ -17,6 +17,10 @@ package Ezbind_Physical is
       Unit  : Unit_Kind;
    end record;
 
+   function Parse
+     (Text   : in String;
+      Result : out Physical_Value) return Boolean;
+
    function To_Points (Value : in Physical_Value) return Point_Value;
 
    function Millimetres (Value : in Point_Value) return Point_Value;

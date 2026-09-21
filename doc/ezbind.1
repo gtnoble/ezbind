@@ -41,6 +41,15 @@ Select the physical output sheet. Letter is the default. Output is landscape:
 Add light-gray vector grid lines in the margin areas. The current default
 spacing is 5 mm. Grid lines are not added unless this option is selected.
 .TP
+.B --grid-spacing \fIVALUE\fR
+Set the grid spacing. Values require a positive \fBmm\fR, \fBin\fR, or \fBpt\fR value; the default is 5 mm.
+.TP
+.BR --margin-top\~VALUE | --margin-bottom\~VALUE
+Set the top or bottom finished-page margin. Values require a non-negative \fBmm\fR, \fBin\fR, or \fBpt\fR suffix. The defaults are 36 pt.
+.TP
+.BR --margin-fore-edge\~VALUE | --margin-spine\~VALUE
+Set the fore-edge or spine finished-page margin. Values require a non-negative \fBmm\fR, \fBin\fR, or \fBpt\fR suffix. The defaults are 36 pt and 48 pt.
+.TP
 .B --force
 Replace an existing output PDF after successful generation.
 .SH DEFAULT LAYOUT
@@ -84,10 +93,10 @@ by the canonical usage line. Ordinary diagnostics do not include extracted
 source text, passwords, or complete PDF content.
 .SH PDF LIMITATIONS
 The qpdf backend preserves visible page content and selectable text for the
-implemented placement path. Custom margins and physical units, cover-card
-pages, spine/fabric guides, crop/fold/registration marks, creep, printer
-safe-area configuration, and broad document-feature capability reporting are
-not yet exposed by this B2 slice. Unsupported or degraded backend behavior
+implemented placement path. Cover-card pages, spine/fabric guides,
+crop/fold/registration marks, creep, printer safe-area configuration, and
+broad document-feature capability reporting are not yet exposed by this B2
+slice. Unsupported or degraded backend behavior
 must be evaluated against representative input before production use.
 .SH EXAMPLE
 .nf

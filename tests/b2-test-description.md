@@ -30,12 +30,13 @@ This record covers the implemented B2 slice: CLI parsing, qpdf input validation,
 | TEST-PDF-002 | Run malformed input. | Status 3; no output and no sibling temporary file. **Pass.** |
 | TEST-IMP-001 | Run a five-page synthetic PDF. | Four output sides after padding to eight logical positions. **Pass.** |
 | TEST-GEO-001 | Run five-page input with `--sheet a4 --grid`. | Four A4 output sides; `qpdf --check` passes; vector grid path is emitted. **Pass.** |
+| TEST-GEO-002 | Run with independent margin options using `mm`, `in`, and `pt` values and a custom grid spacing. | Status 0; output remains valid and the selected values affect the layout. Invalid, negative, zero-spacing, or unitless values return status 2 without output. **Pass.** |
 | TEST-CLI-004 | Run with an existing output, then with `--force`. | Without force status 5 and target unchanged; with force status 0 and replacement passes `qpdf --check`. **Pass.** |
 | TEST-BUILD-001 | Build root and nested test crates sequentially; run Ada/qpdf smoke tests. | Both builds pass; core and bridge tests pass; output passes `qpdf --check`. **Pass.** |
 
 ## Deferred cases
 
-Custom margins and units, cover-card pages, spine/fabric guides, crop/fold/registration marks, creep, safe-area configuration, broad PDF feature preservation, encrypted-input policy, capability reporting, deterministic metadata, and physical duplex acceptance remain deferred or incomplete in this implementation slice.
+Cover-card pages, spine/fabric guides, crop/fold/registration marks, creep, safe-area configuration, broad PDF feature preservation, encrypted-input policy, capability reporting, deterministic metadata, and physical duplex acceptance remain deferred or incomplete in this implementation slice.
 
 ## Independence limitation
 

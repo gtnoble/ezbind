@@ -99,3 +99,13 @@ Requirements and operational-concept products are in draft review. No implementa
 - **Activity:** Audited project documentation against the implemented B2 slice.
 - **Result:** Updated Project Plan gates and activity status, Design Description implementation notes, Test Plan status/schedule, test-crate metadata, and controlled status/change records. Historical B1 execution records remain unchanged.
 - **Verification:** Documentation search found no remaining current-gate claims that full CLI orchestration is future work; README, `ezbind(1)`, B2 Test Description, and controlled project records now agree on the implemented slice and deferred scope.
+
+
+## Entry 011 — B2 physical margin increment
+
+- **Date:** 2026-09-21
+- **Activity:** Added independent CLI margins and configurable grid spacing with explicit physical-unit parsing.
+- **Result:** `--margin-top`, `--margin-bottom`, `--margin-fore-edge`, and `--margin-spine` accept non-negative `mm`, `in`, or `pt` values; `--grid-spacing` accepts positive values in the same units. Defaults remain 36/36/36/48 pt and 5 mm.
+- **Validation:** Invalid, negative, unitless, and zero-spacing values return status 2 before output creation. Root and nested Alire builds, expanded Ada core tests, custom-margin/grid output, `qpdf --check`, selectable-text preservation, temporary-file cleanup, and rendered man-page checks pass.
+- **Known limits:** Cover pages, guides, marks, creep, safe-area configuration, capability reporting, and broader PDF-feature preservation remain staged.
+- **Process note:** This increment is self-evaluated by the developer; independent user review remains required before physical use.

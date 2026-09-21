@@ -18,6 +18,7 @@ procedure Ezbind_Tests is
       then Ada.Command_Line.Argument (2)
       else "/tmp/ezbind-b1-output.pdf");
    use type Ezbind_Physical.Point_Value;
+   Parsed : Ezbind_Physical.Physical_Value;
 
    Layout : constant Ezbind_Geometry.Sheet_Layout :=
      Ezbind_Geometry.Create_Layout
@@ -30,6 +31,15 @@ procedure Ezbind_Tests is
            Fore_Edge => 36.0, Spine => 48.0));
    Placements : constant Ezbind_Imposition.Placement_Array :=
      Ezbind_Imposition.Create_Placements (4, Layout);
+   Custom_Layout : constant Ezbind_Geometry.Sheet_Layout :=
+     Ezbind_Geometry.Create_Layout
+       (Sheet_Width => 792.0,
+        Sheet_Height => 612.0,
+        Page_Width => 396.0,
+        Page_Height => 612.0,
+        Page_Margins =>
+          (Top => 18.0, Bottom => 20.0,
+           Fore_Edge => 24.0, Spine => 60.0));
    use type Ezbind_Imposition.Position_Kind;
    use type Ezbind_Imposition.Side_Kind;
 begin
@@ -39,11 +49,26 @@ begin
       raise Program_Error with "millimetre conversion failed";
    end if;
 
+   if not Ezbind_Physical.Parse ("25.4mm", Parsed)
+     or else Ezbind_Physical.To_Points (Parsed) /= 72.0
+     or else not Ezbind_Physical.Parse ("1in", Parsed)
+     or else Ezbind_Physical.To_Points (Parsed) /= 72.0
+     or else not Ezbind_Physical.Parse ("72pt", Parsed)
+     or else Ezbind_Physical.To_Points (Parsed) /= 72.0
+     or else Ezbind_Physical.Parse ("-1mm", Parsed)
+     or else Ezbind_Physical.Parse ("72", Parsed)
+   then
+      raise Program_Error with "physical parser failed";
+   end if;
+
    if Ezbind_Imposition.Required_Page_Count (5) /= 8 then
       raise Program_Error with "padding failed";
    end if;
 
    if not Ezbind_Geometry.Is_Valid (Layout)
+     or else not Ezbind_Geometry.Is_Valid (Custom_Layout)
+     or else Custom_Layout.Left_Content.Left /= 60.0
+     or else Custom_Layout.Left_Content.Right /= 372.0
      or else Placements (1).Source_Page /= 4
      or else Placements (2).Source_Page /= 1
      or else Placements (3).Source_Page /= 2
@@ -79,8 +104,8 @@ begin
 
       Ezbind_QPDF_Bridge.Close (Input);
       Ezbind_QPDF_Bridge.Close (Output);
-      Ada.Text_IO.Put_Line ("B1 qpdf bridge test passed.");
+      Ada.Text_IO.Put_Line ("B2 qpdf bridge test passed.");
    end if;
 
-   Ada.Text_IO.Put_Line ("B1 Ada core tests passed.");
+   Ada.Text_IO.Put_Line ("B2 Ada core tests passed.");
 end Ezbind_Tests;

@@ -12,6 +12,7 @@ with Ezbind_QPDF_Bridge;
 
 package body Ezbind_Application is
    use type Ezbind_Imposition.Side_Kind;
+   use type Ezbind_Physical.Point_Value;
    type Sheet_Kind is (Letter, A4);
 
    type Options is record
@@ -19,9 +20,14 @@ package body Ezbind_Application is
       Input_Last  : Natural := 0;
       Output_Path : String (1 .. 1024) := (others => ' ');
       Output_Last : Natural := 0;
-      Sheet       : Sheet_Kind := Letter;
-      Force       : Boolean := False;
-      Grid        : Boolean := False;
+      Sheet        : Sheet_Kind := Letter;
+      Force        : Boolean := False;
+      Grid         : Boolean := False;
+      Top_Margin   : Ezbind_Physical.Point_Value := 36.0;
+      Bottom_Margin : Ezbind_Physical.Point_Value := 36.0;
+      Fore_Margin  : Ezbind_Physical.Point_Value := 36.0;
+      Spine_Margin : Ezbind_Physical.Point_Value := 48.0;
+      Grid_Spacing : Ezbind_Physical.Point_Value := 14.1732283464567;
    end record;
 
    function Value
@@ -43,6 +49,37 @@ package body Ezbind_Application is
       Last := Value'Length;
       return True;
    end Set_Path;
+
+   function Read_Physical
+     (Option_Name : in String;
+      Index       : in out Positive;
+      Count       : in Natural;
+      Result      : out Ezbind_Physical.Point_Value) return Boolean is
+   begin
+      if Index = Count then
+         Ezbind_CLI.Print_Usage_Error (Option_Name & " requires a value in mm, in, or pt");
+         return False;
+      end if;
+      Index := Index + 1;
+      declare
+         Parsed : Ezbind_Physical.Physical_Value;
+      begin
+         if not Ezbind_Physical.Parse
+           (Ada.Command_Line.Argument (Index), Parsed)
+         then
+            Ezbind_CLI.Print_Usage_Error
+              (Option_Name & " requires a non-negative value in mm, in, or pt");
+            return False;
+         end if;
+         Result := Ezbind_Physical.To_Points (Parsed);
+         return True;
+      exception
+         when others =>
+            Ezbind_CLI.Print_Usage_Error
+              (Option_Name & " requires a non-negative value in mm, in, or pt");
+            return False;
+      end;
+   end Read_Physical;
 
    function Parse_Options
      (Result : out Options) return Boolean is
@@ -76,6 +113,39 @@ package body Ezbind_Application is
                Result.Force := True;
             elsif Argument = "--grid" then
                Result.Grid := True;
+            elsif Argument = "--grid-spacing" then
+               if not Read_Physical
+                 ("--grid-spacing", Index, Count, Result.Grid_Spacing)
+                 or else Result.Grid_Spacing <= 0.0
+               then
+                  Ezbind_CLI.Print_Usage_Error
+                    ("--grid-spacing requires a positive value in mm, in, or pt");
+                  return False;
+               end if;
+            elsif Argument = "--margin-top" then
+               if not Read_Physical
+                 ("--margin-top", Index, Count, Result.Top_Margin)
+               then
+                  return False;
+               end if;
+            elsif Argument = "--margin-bottom" then
+               if not Read_Physical
+                 ("--margin-bottom", Index, Count, Result.Bottom_Margin)
+               then
+                  return False;
+               end if;
+            elsif Argument = "--margin-fore-edge" then
+               if not Read_Physical
+                 ("--margin-fore-edge", Index, Count, Result.Fore_Margin)
+               then
+                  return False;
+               end if;
+            elsif Argument = "--margin-spine" then
+               if not Read_Physical
+                 ("--margin-spine", Index, Count, Result.Spine_Margin)
+               then
+                  return False;
+               end if;
             elsif Argument = "--sheet" then
                if Index = Count then
                   Ezbind_CLI.Print_Usage_Error ("--sheet requires letter or a4");
@@ -196,7 +266,10 @@ package body Ezbind_Application is
       Page_Width  : Long_Float;
       Page_Height : Long_Float;
       Margins     : constant Ezbind_Geometry.Margins :=
-        (Top => 36.0, Bottom => 36.0, Fore_Edge => 36.0, Spine => 48.0);
+        (Top => Settings.Top_Margin,
+         Bottom => Settings.Bottom_Margin,
+         Fore_Edge => Settings.Fore_Margin,
+         Spine => Settings.Spine_Margin);
       Temporary_Path : constant String :=
         Value (Settings.Output_Path, Settings.Output_Last) & ".ezbind.tmp";
       Input_Open  : Boolean := False;
@@ -274,10 +347,10 @@ package body Ezbind_Application is
                if Settings.Grid then
                   Good := Good and then Draw_Grid
                     (Output, Layout.Left_Page, Layout.Left_Content,
-                     14.1732283);
+                     Long_Float (Settings.Grid_Spacing));
                   Good := Good and then Draw_Grid
                     (Output, Layout.Right_Page, Layout.Right_Content,
-                     14.1732283);
+                     Long_Float (Settings.Grid_Spacing));
                end if;
             end loop;
          end loop;
