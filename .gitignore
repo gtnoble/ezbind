@@ -1,0 +1,20 @@
+# Ada/Alire build products
+alire/
+bin/
+obj/
+*.o
+*.ali
+*.a
+*.exe
+
+# Temporary and generated PDF/test artifacts
+*.tmp
+*.log
+*.aux
+*.synctex.gz
+/test-output/
+
+# Editor and OS files
+*~
+.#*
+.DS_Store
