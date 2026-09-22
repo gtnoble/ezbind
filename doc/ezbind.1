@@ -9,10 +9,12 @@ ezbind \- prepare an ebook PDF for folded-folio home bookbinding
 .I OUTPUT.pdf
 .SH DESCRIPTION
 .B ezbind
-reads one local input PDF and writes a duplex folded-folio arrangement. Each
-output sheet has two finished-page positions on each side. The nominal folio
-assignment is front-left 4, front-right 1, back-left 2, and back-right 3.
-Incomplete final folios are padded with blank logical pages.
+reads one local input PDF and writes a duplex folded-folio arrangement when
+folio mode is selected. Each output sheet has two finished-page positions on
+each side. The nominal folio assignment is front-left 4, front-right 1,
+back-left 2, and back-right 3. Incomplete final folios are padded with blank
+logical pages. Cover-only mode instead reads only the supplied front and back
+SVG files and writes the separate cover PDF without opening a text-block PDF.
 .PP
 The current B2 implementation slice supports Letter and A4 sheets, an optional
 margin grid, and explicit overwrite control. Physical cover cards, adhesive,
@@ -65,7 +67,9 @@ landscape cardstock sheet.
 .B --cover-output \fIPATH\fR
 Write a separate one-page cover PDF. The front artwork is rendered on the right
 half and the back artwork on the left half, placing both center-cut edges toward
-the spine. Artwork is fitted proportionally to each half-sheet viewport.
+the spine. Artwork is fitted proportionally to each half-sheet viewport. When
+cover-only mode is used, no input PDF or folio --output is required; the three
+cover options are sufficient and only --cover-output is written.
 .SH DEFAULT LAYOUT
 The default minimum clearances are 36 points at the top, bottom, and
 fore-edge, and 48 points at the spine. The source page is fitted uniformly
@@ -137,6 +141,13 @@ A separate cardstock cover sheet can be generated with:
 ezbind book.pdf -o book-bound.pdf --sheet letter \\
   --cover-back back.svg --cover-front front.svg \\
   --cover-output covers.pdf
+.fi
+.PP
+Cover-only generation does not require the text-block PDF:
+.PP
+.nf
+ezbind --sheet letter --cover-back back.svg \\
+  --cover-front front.svg --cover-output covers.pdf
 .fi
 .SH SEE ALSO
 .BR qpdf (1)

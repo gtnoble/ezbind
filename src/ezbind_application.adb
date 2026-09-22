@@ -223,32 +223,46 @@ package body Ezbind_Application is
          Index := Index + 1;
       end loop;
 
-      if Result.Input_Last = 0 or else Result.Output_Last = 0 then
-         Ezbind_CLI.Print_Usage_Error ("an input PDF and --output are required");
-         return False;
-      end if;
+      declare
+         Cover_Options : constant Boolean :=
+           Result.Cover_Front_Last /= 0
+           or else Result.Cover_Back_Last /= 0
+           or else Result.Cover_Output_Last /= 0;
+         Complete_Cover_Options : constant Boolean :=
+           Result.Cover_Front_Last /= 0
+           and then Result.Cover_Back_Last /= 0
+           and then Result.Cover_Output_Last /= 0;
+         Cover_Only : constant Boolean :=
+           Complete_Cover_Options
+           and then Result.Input_Last = 0
+           and then Result.Output_Last = 0;
+      begin
+         if Cover_Options and then not Complete_Cover_Options then
+            Ezbind_CLI.Print_Usage_Error
+              ("--cover-front, --cover-back, and --cover-output are required together");
+            return False;
+         end if;
 
-      if (Result.Cover_Front_Last /= 0
-          or else Result.Cover_Back_Last /= 0
-          or else Result.Cover_Output_Last /= 0)
-        and then (Result.Cover_Front_Last = 0
-                  or else Result.Cover_Back_Last = 0
-                  or else Result.Cover_Output_Last = 0)
-      then
-         Ezbind_CLI.Print_Usage_Error
-           ("--cover-front, --cover-back, and --cover-output are required together");
-         return False;
-      end if;
+         if Cover_Only then
+            return True;
+         end if;
 
-      if Result.Cover_Output_Last /= 0
-        and then Value (Result.Output_Path, Result.Output_Last) =
-          Value (Result.Cover_Output_Path, Result.Cover_Output_Last)
-      then
-         Ezbind_CLI.Print_Usage_Error
-           ("--output and --cover-output must name different files");
-         return False;
-      end if;
-      return True;
+         if Result.Input_Last = 0 or else Result.Output_Last = 0 then
+            Ezbind_CLI.Print_Usage_Error
+              ("an input PDF and --output are required unless cover-only mode is used");
+            return False;
+         end if;
+
+         if Result.Cover_Output_Last /= 0
+           and then Value (Result.Output_Path, Result.Output_Last) =
+             Value (Result.Cover_Output_Path, Result.Cover_Output_Last)
+         then
+            Ezbind_CLI.Print_Usage_Error
+              ("--output and --cover-output must name different files");
+            return False;
+         end if;
+         return True;
+      end;
    end Parse_Options;
 
    procedure Geometry
@@ -333,21 +347,29 @@ package body Ezbind_Application is
          Bottom => Settings.Bottom_Margin,
          Fore_Edge => Settings.Fore_Margin,
          Spine => Settings.Spine_Margin);
-      Output_Path : constant String :=
-        Value (Settings.Output_Path, Settings.Output_Last);
       Cover_Mode : constant Boolean := Settings.Cover_Front_Last /= 0;
+      Cover_Only : constant Boolean :=
+        Cover_Mode and then Settings.Input_Last = 0;
+      Output_Path : constant String :=
+        (if Settings.Output_Last /= 0
+         then Value (Settings.Output_Path, Settings.Output_Last)
+         else Value (Settings.Cover_Output_Path, Settings.Cover_Output_Last));
       Cover_Output_Path : constant String :=
         (if Cover_Mode
          then Value (Settings.Cover_Output_Path, Settings.Cover_Output_Last)
          else Output_Path & ".unused-cover.pdf");
-      Temporary_Path : constant String := Output_Path & ".ezbind.tmp";
+      Temporary_Path : constant String :=
+        (if Cover_Only
+         then Cover_Output_Path & ".unused-folio.pdf"
+         else Output_Path & ".ezbind.tmp");
       Cover_Temporary_Path : constant String := Cover_Output_Path & ".ezbind.tmp";
       Input_Open  : Boolean := False;
       Output_Open : Boolean := False;
       Layout      : Ezbind_Geometry.Sheet_Layout;
       Good        : Boolean := True;
    begin
-      if Ada.Directories.Exists (Output_Path)
+      if not Cover_Only
+        and then Ada.Directories.Exists (Output_Path)
         and then not Settings.Force
       then
          Ada.Text_IO.Put_Line
@@ -377,6 +399,25 @@ package body Ezbind_Application is
          Ada.Text_IO.Put_Line
            (Ada.Text_IO.Standard_Error, "ezbind: requested layout does not fit");
          return 4;
+      end if;
+
+      if Cover_Only then
+         if not Ezbind_SVG_Bridge.Render_Cover_Sheet
+           (Value (Settings.Cover_Back_Path, Settings.Cover_Back_Last),
+            Value (Settings.Cover_Front_Path, Settings.Cover_Front_Last),
+            Sheet_Width, Sheet_Height, Cover_Temporary_Path)
+           or else not Commit_Output
+             (Cover_Temporary_Path, Cover_Output_Path, Settings.Force)
+         then
+            if Ada.Directories.Exists (Cover_Temporary_Path) then
+               Ada.Directories.Delete_File (Cover_Temporary_Path);
+            end if;
+            Ada.Text_IO.Put_Line
+              (Ada.Text_IO.Standard_Error, "ezbind: cover SVG rendering failed");
+            return 5;
+         end if;
+         Ada.Text_IO.Put_Line ("ezbind: wrote " & Cover_Output_Path);
+         return 0;
       end if;
 
       if not Ezbind_QPDF_Bridge.Open_Input

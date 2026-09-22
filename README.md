@@ -38,7 +38,7 @@ Implemented options:
 - `--cover-output PATH` — separate one-page PDF output for the cardstock cover sheet.
 - `-h`, `--help` — print help without requiring an input PDF.
 
-When cover mode is selected, the cardstock output is one landscape Letter or A4 sheet. The back-cover SVG is rendered on the left half and the front-cover SVG on the right half, so the center cut puts both cut edges toward the spine. Artwork is rendered proportionally to fit its half-sheet viewport; matching the SVG aspect ratio to the selected card size is recommended. The folio output and cover output must be different paths.
+When cover mode is selected, the cardstock output is one landscape Letter or A4 sheet. The back-cover SVG is rendered on the left half and the front-cover SVG on the right half, so the center cut puts both cut edges toward the spine. Artwork is rendered proportionally to fit its half-sheet viewport; matching the SVG aspect ratio to the selected card size is recommended. The folio output and cover output must be different paths when both modes are combined. Cover-only mode omits the positional input PDF and `--output`; it requires the three cover options and writes only `--cover-output`.
 
 Normal output uses a landscape Letter or A4 sheet with two finished-page rectangles. The nominal folio assignment is front-left 4, front-right 1, back-left 2, and back-right 3. Page counts are padded to a multiple of four with blank logical pages. Default margins are 36 pt top/bottom/fore-edge and 48 pt spine. Margins are minimum clearance around the uniformly scaled source page; the source is not cropped or distorted. Physical option values require an explicit `mm`, `in`, or `pt` suffix.
 

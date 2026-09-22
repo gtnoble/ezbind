@@ -119,3 +119,12 @@ Requirements and operational-concept products are in draft review. No implementa
 - **Verification:** Root and nested development builds pass with warnings enabled; direct bridge smoke test passes; Letter and A4 cover PDFs have correct one-page dimensions and pass `qpdf --check`; `pdftotext` recovers `BACK` and `FRONT`; rendered fixture verifies asymmetric left/right placement; incomplete options/path collision return status 2; missing SVG returns status 5 without output.
 - **Known limits:** librsvg supports a static SVG subset; external resources and font availability can affect output. Scale-to-fit is proportional and does not implement deliberate bleed/cropping. Physical printer safe areas and acceptance printing remain user responsibilities.
 - **Process note:** This increment is self-evaluated by the developer; independent user review of representative artwork and physical center-cut orientation remains required.
+
+## Entry 013 — Cover-only generation
+
+- **Date:** 2026-09-22
+- **Activity:** Removed the requirement to process a text-block PDF when only a cover sheet is requested.
+- **Interface:** A cover-only invocation is `ezbind --sheet letter|a4 --cover-back back.svg --cover-front front.svg --cover-output covers.pdf`; positional input and folio `--output` are omitted. Complete cover options remain required, and combined folio-plus-cover mode remains supported.
+- **Implementation:** The application validates cover-only mode, checks the cover destination, renders directly through `Ezbind_SVG_Bridge`, commits the cover temporary output, and returns before `Ezbind_QPDF_Bridge.Open_Input`.
+- **Verification:** Cover-only Letter output passes `pdfinfo`, `qpdf --check`, and text extraction; invalid mixed/incomplete invocations return status 2 without output; combined mode still produces valid folio and cover PDFs; no cover temporary file remains after success.
+- **Process note:** This increment is self-evaluated by the developer; independent review of cover output remains required.

@@ -34,6 +34,8 @@ package body Ezbind_CLI is
       Ada.Text_IO.Put_Line
         ("                         Cover output is back-left/front-right.");
       Ada.Text_IO.Put_Line
+        ("                         Cover-only mode omits INPUT.pdf and --output.");
+      Ada.Text_IO.Put_Line
         ("Exit statuses: 0 success, 2 usage, 3 input, 4 layout,");
       Ada.Text_IO.Put_Line ("5 output, 6 dependency, 10 internal error.");
    end Print_Help;

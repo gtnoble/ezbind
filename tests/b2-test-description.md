@@ -38,6 +38,7 @@ This record covers the implemented B2 slice: CLI parsing, qpdf input validation,
 | TEST-COVER-002 | Generate A4 covers from the same fixtures. | Status 0; separate cover PDF has one 841.89 × 595.28 pt page; qpdf validation passes. **Pass.** |
 | TEST-COVER-003 | Run the nested test executable with SVG fixture paths. | Direct librsvg/Cairo bridge smoke test passes; qpdf smoke test and Ada core tests also pass. **Pass.** |
 | TEST-COVER-004 | Supply incomplete cover options, identical folio/cover output paths, and a missing SVG. | Incomplete options and path collision return status 2; missing SVG returns status 5; no misleading output remains. **Pass.** |
+| TEST-COVER-005 | Generate cover-only output with a nonexistent text-block PDF path omitted from the command. | Status 0; one-page cover PDF is written and validated without opening a text-block input. **Pass.** |
 | TEST-BUILD-001 | Build root and nested test crates sequentially; run Ada/qpdf/librsvg smoke tests. | Both builds pass; core, qpdf, and SVG bridge tests pass; outputs pass `qpdf --check`. **Pass.** |
 
 ## Deferred cases

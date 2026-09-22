@@ -50,3 +50,5 @@ This is a minor documentation synchronization change. It corrects user-facing st
 ## Trend notes
 
 No trend data is available at initialization. Review at each joint review.
+
+| CHG-010 | 2026-09-22 | Requirements, Code, Test, Manuals | 3 — Moderate | Cover-card generation incorrectly required processing a text-block PDF and a folio output path. | `REQ-CAP-026`; `src/ezbind_application.adb`; `src/ezbind_cli.adb`; README; `doc/ezbind.1`; B2 test records | Permit a complete cover-only invocation with front/back SVGs and `--cover-output`; bypass qpdf input processing; retain combined mode and reject incomplete/mixed argument sets. | Cover-only parser and direct render/commit branch implemented; Letter output, qpdf validation, text extraction, temporary-file cleanup, invalid invocations, and combined-mode regression checks pass. | resolved | 2026-09-22 |
