@@ -95,7 +95,7 @@ package body Ezbind_Application is
          declare
             Argument : constant String := Ada.Command_Line.Argument (Index);
          begin
-            if Argument = "--output" then
+            if Argument = "--output" or else Argument = "-o" then
                if Index = Count then
                   Ezbind_CLI.Print_Usage_Error
                     ("--output requires a path");
@@ -109,11 +109,11 @@ package body Ezbind_Application is
                   Ezbind_CLI.Print_Usage_Error ("output path is too long");
                   return False;
                end if;
-            elsif Argument = "--force" then
+            elsif Argument = "--force" or else Argument = "-f" then
                Result.Force := True;
-            elsif Argument = "--grid" then
+            elsif Argument = "--grid" or else Argument = "-g" then
                Result.Grid := True;
-            elsif Argument = "--grid-spacing" then
+            elsif Argument = "--grid-spacing" or else Argument = "-G" then
                if not Read_Physical
                  ("--grid-spacing", Index, Count, Result.Grid_Spacing)
                  or else Result.Grid_Spacing <= 0.0
@@ -122,31 +122,31 @@ package body Ezbind_Application is
                     ("--grid-spacing requires a positive value in mm, in, or pt");
                   return False;
                end if;
-            elsif Argument = "--margin-top" then
+            elsif Argument = "--margin-top" or else Argument = "-t" then
                if not Read_Physical
                  ("--margin-top", Index, Count, Result.Top_Margin)
                then
                   return False;
                end if;
-            elsif Argument = "--margin-bottom" then
+            elsif Argument = "--margin-bottom" or else Argument = "-b" then
                if not Read_Physical
                  ("--margin-bottom", Index, Count, Result.Bottom_Margin)
                then
                   return False;
                end if;
-            elsif Argument = "--margin-fore-edge" then
+            elsif Argument = "--margin-fore-edge" or else Argument = "-e" then
                if not Read_Physical
                  ("--margin-fore-edge", Index, Count, Result.Fore_Margin)
                then
                   return False;
                end if;
-            elsif Argument = "--margin-spine" then
+            elsif Argument = "--margin-spine" or else Argument = "-i" then
                if not Read_Physical
                  ("--margin-spine", Index, Count, Result.Spine_Margin)
                then
                   return False;
                end if;
-            elsif Argument = "--sheet" then
+            elsif Argument = "--sheet" or else Argument = "-s" then
                if Index = Count then
                   Ezbind_CLI.Print_Usage_Error ("--sheet requires letter or a4");
                   return False;

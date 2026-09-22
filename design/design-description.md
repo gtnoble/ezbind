@@ -138,7 +138,7 @@ The canonical first line for help and usage errors is exactly:
 Usage: ezbind [OPTIONS] INPUT.pdf --output OUTPUT.pdf
 ```
 
-`--help` and `-h` print the usage line, concise option summary, and exit-status summary to standard output and return 0. Invalid flags and malformed invocations print a diagnostic followed by the same usage line to standard error and return 2. The command manual source is `doc/ezbind.1`; the Alire crate owns the generated GPR/configuration files; the generated/installable form is `ezbind(1)`.
+`--help` and `-h` print the usage line, concise option summary, and exit-status summary to standard output and return 0. Each other long option has a corresponding short alias: `-o`, `-f`, `-g`, `-G`, `-t`, `-b`, `-e`, `-i`, and `-s`. Invalid flags and malformed invocations print a diagnostic followed by the same usage line to standard error and return 2. The command manual source is `doc/ezbind.1`; the Alire crate owns the generated GPR/configuration files; the generated/installable form is `ezbind(1)`.
 
 ### 3.10 Reproducibility and capability reporting
 
@@ -377,6 +377,7 @@ Purpose: define stable command behavior.
 Rules:
 
 - parse `--help` and `-h` before requiring positional input;
+- accept the documented short aliases for every existing long option;
 - emit the exact canonical usage first line;
 - reject unknown flags and missing values;
 - route diagnostics to standard error;

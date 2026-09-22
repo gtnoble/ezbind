@@ -10,21 +10,21 @@ package body Ezbind_CLI is
       Ada.Text_IO.Put_Line
         ("  --help, -h       Show this help text.");
       Ada.Text_IO.Put_Line
-        ("  --output PATH    Write the imposed PDF to PATH.");
+        ("  -o PATH, --output PATH  Write the imposed PDF to PATH.");
       Ada.Text_IO.Put_Line
-        ("  --sheet letter|a4  Select the physical output sheet.");
+        ("  -s letter|a4, --sheet letter|a4  Select the physical output sheet.");
       Ada.Text_IO.Put_Line
-        ("  --grid           Draw a margin grid (default spacing 5 mm).");
+        ("  -g, --grid             Draw a margin grid (default spacing 5 mm).");
       Ada.Text_IO.Put_Line
-        ("  --grid-spacing V Set positive grid spacing in mm, in, or pt.");
+        ("  -G V, --grid-spacing V  Set positive grid spacing in mm, in, or pt.");
       Ada.Text_IO.Put_Line
-        ("  --margin-top V, --margin-bottom V,");
+        ("  -t V, --margin-top V; -b V, --margin-bottom V,");
       Ada.Text_IO.Put_Line
-        ("  --margin-fore-edge V, --margin-spine V");
+        ("  -e V, --margin-fore-edge V; -i V, --margin-spine V");
       Ada.Text_IO.Put_Line
         ("                   Minimum clearance; uniform fit, no crop/distortion.");
       Ada.Text_IO.Put_Line
-        ("  --force          Replace an existing output file.");
+        ("  -f, --force            Replace an existing output file.");
       Ada.Text_IO.Put_Line
         ("Exit statuses: 0 success, 2 usage, 3 input, 4 layout,");
       Ada.Text_IO.Put_Line ("5 output, 6 dependency, 10 internal error.");

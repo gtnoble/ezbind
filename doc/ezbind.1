@@ -29,28 +29,28 @@ Usage: ezbind [OPTIONS] INPUT.pdf --output OUTPUT.pdf
 Print the usage statement and concise option summary. This operation does not
 require an input PDF and returns status 0.
 .TP
-.B --output \fIPATH\fR
+.B --output \fIPATH\fR, -o \fIPATH\fR
 Required output PDF path. The program refuses to replace an existing file
 unless \fB--force\fR is specified.
 .TP
-.BR --sheet\~letter | \-\-sheet\~a4
+.BR --sheet\~letter | \-s\~letter | \-\-sheet\~a4 | \-s\~a4
 Select the physical output sheet. Letter is the default. Output is landscape:
 792 x 612 points for Letter and approximately 841.89 x 595.28 points for A4.
 .TP
-.B --grid
+.BR --grid , \-g
 Add light-gray vector grid lines in the margin areas. The current default
 spacing is 5 mm. Grid lines are not added unless this option is selected.
 .TP
-.B --grid-spacing \fIVALUE\fR
+.B --grid-spacing \fIVALUE\fR, -G \fIVALUE\fR
 Set the grid spacing. Values require a positive \fBmm\fR, \fBin\fR, or \fBpt\fR value; the default is 5 mm.
 .TP
-.BR --margin-top\~VALUE | --margin-bottom\~VALUE
+.BR --margin-top\~VALUE | \-t\~VALUE | --margin-bottom\~VALUE | \-b\~VALUE
 Set the minimum top or bottom clearance around the uniformly fitted source page. Values require a non-negative \fBmm\fR, \fBin\fR, or \fBpt\fR suffix. The defaults are 36 pt. The source is not cropped or distorted.
 .TP
-.BR --margin-fore-edge\~VALUE | --margin-spine\~VALUE
+.BR --margin-fore-edge\~VALUE | \-e\~VALUE | --margin-spine\~VALUE | \-i\~VALUE
 Set the minimum fore-edge or spine clearance around the uniformly fitted source page. The spine is the fold-facing inner edge; the fore-edge is outer. Values require a non-negative \fBmm\fR, \fBin\fR, or \fBpt\fR suffix. The defaults are 36 pt and 48 pt.
 .TP
-.B --force
+.BR --force , \-f
 Replace an existing output PDF after successful generation.
 .SH DEFAULT LAYOUT
 The default minimum clearances are 36 points at the top, bottom, and
@@ -103,7 +103,7 @@ slice. Unsupported or degraded backend behavior
 must be evaluated against representative input before production use.
 .SH EXAMPLE
 .nf
-ezbind book.pdf --output book-bound.pdf --sheet a4 --grid
+ezbind book.pdf -o book-bound.pdf -s a4 -g
 .fi
 .SH SEE ALSO
 .BR qpdf (1)

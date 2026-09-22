@@ -102,6 +102,7 @@ All physical dimensions shall be represented internally with sufficient precisio
 | REQ-CLI-007 | When the invocation contains an unknown flag, malformed option, missing option value, or other command-line usage error, the program shall print a diagnostic followed by the canonical usage statement to standard error, shall not create or replace an output PDF, and shall return exit status 2. | Test | B2 |
 | REQ-CLI-008 | The canonical usage statement shall be identical in the help and invalid-invocation paths and shall be exactly `Usage: ezbind [OPTIONS] INPUT.pdf --output OUTPUT.pdf` as its first line. | Test/Inspection | B2 |
 | REQ-CLI-009 | Help output shall print the canonical usage line followed by a concise option summary and exit-status summary; invalid-invocation output shall print the command-line diagnostic followed by the same canonical usage line and shall not be required to print the full option summary. | Test | B2 |
+| REQ-CLI-010 | For every existing long CLI option, the program shall accept the documented corresponding short option alias with the same value and behavior. | Test | B2 |
 
 ### 4.3 Internal data requirements
 

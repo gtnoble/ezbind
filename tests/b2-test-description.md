@@ -33,6 +33,7 @@ This record covers the implemented B2 slice: CLI parsing, qpdf input validation,
 | TEST-GEO-002 | Run with independent margin options using `mm`, `in`, and `pt` values and a custom grid spacing. | Status 0; output remains valid and the selected values affect the layout. Invalid, negative, zero-spacing, or unitless values return status 2 without output. **Pass.** |
 | TEST-GEO-003 | Use asymmetric margins and inspect source placement/grid regions. | Spine clearance is on each fold-facing inner edge; fore-edge clearance is outer; source placement is uniformly fitted inside custom content rectangles and grid lines do not cross them. **Pass.** |
 | TEST-CLI-004 | Run with an existing output, then with `--force`. | Without force status 5 and target unchanged; with force status 0 and replacement passes `qpdf --check`. **Pass.** |
+| TEST-CLI-005 | Run the equivalent output, sheet, grid, grid-spacing, margin, and force invocations using `-o`, `-s`, `-g`, `-G`, `-t`, `-b`, `-e`, `-i`, and `-f`. | Each short alias has the same behavior and output validity as its long option. **Pass.** |
 | TEST-BUILD-001 | Build root and nested test crates sequentially; run Ada/qpdf smoke tests. | Both builds pass; core and bridge tests pass; output passes `qpdf --check`. **Pass.** |
 
 ## Deferred cases
