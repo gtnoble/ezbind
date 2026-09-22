@@ -4,6 +4,7 @@ with Ezbind_Geometry;
 with Ezbind_Imposition;
 with Ezbind_Physical;
 with Ezbind_QPDF_Bridge;
+with Ezbind_SVG_Bridge;
 
 procedure Ezbind_Tests is
    Input : Ezbind_QPDF_Bridge.Input_Handle;
@@ -17,6 +18,18 @@ procedure Ezbind_Tests is
      (if Ada.Command_Line.Argument_Count >= 2
       then Ada.Command_Line.Argument (2)
       else "/tmp/ezbind-b1-output.pdf");
+   Cover_Back_Path : constant String :=
+     (if Ada.Command_Line.Argument_Count >= 3
+      then Ada.Command_Line.Argument (3)
+      else "");
+   Cover_Front_Path : constant String :=
+     (if Ada.Command_Line.Argument_Count >= 4
+      then Ada.Command_Line.Argument (4)
+      else "");
+   Cover_Output_Path : constant String :=
+     (if Ada.Command_Line.Argument_Count >= 5
+      then Ada.Command_Line.Argument (5)
+      else "/tmp/ezbind-cover-test.pdf");
    use type Ezbind_Physical.Point_Value;
    Parsed : Ezbind_Physical.Physical_Value;
 
@@ -111,6 +124,17 @@ begin
       Ezbind_QPDF_Bridge.Close (Input);
       Ezbind_QPDF_Bridge.Close (Output);
       Ada.Text_IO.Put_Line ("B2 qpdf bridge test passed.");
+   end if;
+
+   if Cover_Back_Path /= "" or else Cover_Front_Path /= "" then
+      if Cover_Back_Path = "" or else Cover_Front_Path = ""
+        or else not Ezbind_SVG_Bridge.Render_Cover_Sheet
+          (Cover_Back_Path, Cover_Front_Path, 792.0, 612.0,
+           Cover_Output_Path)
+      then
+         raise Program_Error with "SVG bridge smoke test failed";
+      end if;
+      Ada.Text_IO.Put_Line ("librsvg/Cairo cover bridge test passed.");
    end if;
 
    Ada.Text_IO.Put_Line ("B2 Ada core tests passed.");

@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="4in" height="6in" viewBox="0 0 400 600">
+  <rect width="400" height="600" fill="#356dcc"/>
+  <circle cx="300" cy="500" r="64" fill="#f5d547"/>
+  <text x="32" y="84" font-family="sans-serif" font-size="42">FRONT</text>
+</svg>

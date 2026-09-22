@@ -26,6 +26,14 @@ package body Ezbind_CLI is
       Ada.Text_IO.Put_Line
         ("  -f, --force            Replace an existing output file.");
       Ada.Text_IO.Put_Line
+        ("  --cover-front PATH     SVG artwork for the front cover.");
+      Ada.Text_IO.Put_Line
+        ("  --cover-back PATH      SVG artwork for the back cover.");
+      Ada.Text_IO.Put_Line
+        ("  --cover-output PATH    Separate one-sheet cover PDF output.");
+      Ada.Text_IO.Put_Line
+        ("                         Cover output is back-left/front-right.");
+      Ada.Text_IO.Put_Line
         ("Exit statuses: 0 success, 2 usage, 3 input, 4 layout,");
       Ada.Text_IO.Put_Line ("5 output, 6 dependency, 10 internal error.");
    end Print_Help;

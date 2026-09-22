@@ -113,7 +113,9 @@ The grid is generated as vector line content in the four reserved strips outside
 
 ### 3.7 Cover and physical-material policy
 
-Cover cards and fabric are not imported or generated as physical materials. The default output excludes cover-card pages and fabric guides. Optional blank cover-card pages and an optional spine/fabric guide are represented as explicit layout options and handled by the orchestration and guide units.
+The default folio output excludes cover artwork. When all three cover options are supplied, the application emits a separate one-page landscape cardstock PDF. The back SVG is rendered on the left half and the front SVG on the right half, so a center cut places both cut edges toward the spine. Rendering uses the project-owned librsvg/Cairo bridge, with proportional fitting to each half-sheet viewport. The SVG bridge writes a temporary PDF and the application commits it only after successful rendering. Physical cover cards, adhesive, and fabric remain user-supplied.
+
+The SVG renderer is intentionally separate from the qpdf folio compositor. qpdf remains responsible for importing and imposing the input PDF; librsvg and Cairo render static SVG artwork directly to PDF. SVG feature support, external resources, and font availability are documented limitations.
 
 ### 3.8 Error and exception handling
 
@@ -158,6 +160,7 @@ The application reports selected non-default layout options in a concise summary
 | UNIT-GRD | `Ezbind_Guides` | Ada package | Generate vector grid, spine guide, fold/crop/registration marks, and cover placeholders. |
 | UNIT-PDF | `Ezbind_PDF_Backend` | Ada package | Backend-neutral PDF lifecycle and placement interface. |
 | UNIT-QPDF | `ez_qpdf_bridge` | C++ with C ABI | Open/read/write PDFs, create/import Form XObjects, place pages, append content. |
+| UNIT-SVG | `ez_svg_bridge` | C++ with C ABI | Load static SVG files through librsvg and render front/back cover art to a Cairo PDF surface. |
 | UNIT-CONT | `Ezbind_Capabilities` | Ada package | Track preserved, degraded, and unsupported source features. |
 | UNIT-DOC | `doc/ezbind.1` | roff man page | User-facing command reference synchronized with CLI behavior. |
 | UNIT-TEST | `tests/` | Ada and shell support | Unit/integration/acceptance fixtures and independent PDF checks. |
@@ -170,7 +173,7 @@ The application reports selected non-default layout options in a concise summary
 - `UNIT-IMP` depends on geometry placement types but not on qpdf.
 - `UNIT-GRD` produces backend-neutral vector guide commands or content streams.
 - `UNIT-PDF` defines the Ada-side abstract operations implemented by `UNIT-QPDF`.
-- `UNIT-QPDF` is the only unit that includes qpdf headers or uses C/C++ interop.
+- `UNIT-QPDF` and `UNIT-SVG` are the only units that include native PDF/rendering headers or use C/C++ interop. `UNIT-SVG` depends on librsvg 2.58, Cairo, GLib/GIO, GDK-Pixbuf, and Pango/Cairo as provided by the platform.
 - `UNIT-DOC` is maintained against the public option model and canonical usage constant.
 
 ### 4.3 Dynamic execution sequence
@@ -184,8 +187,9 @@ The application reports selected non-default layout options in a concise summary
 7. For each output sheet side, `UNIT-QPDF` creates a destination page and places the two source Form XObjects.
 8. `UNIT-GRD` emits enabled vector guides into permitted regions.
 9. `UNIT-QPDF` writes and closes the temporary output.
-10. `UNIT-APP` atomically renames the temporary output to the requested path.
-11. `UNIT-CLI` prints a concise success summary and returns 0.
+10. `UNIT-APP` atomically renames the temporary folio output to the requested path.
+11. If cover options are enabled, `UNIT-SVG` renders back-left/front-right artwork to a separate temporary cardstock PDF and `UNIT-APP` commits that output.
+12. `UNIT-CLI` prints a concise success summary and returns 0.
 
 Any expected failure closes backend handles, removes temporary output, prints a content-free diagnostic, and returns the mapped status.
 
@@ -414,7 +418,8 @@ The man page is generated/maintained from the same option inventory and canonica
 | apdf | Rejected as primary backend | Generates PDFs but does not import arbitrary source pages. |
 | MuPDF | Rejected for baseline | Native API viable, but installed package is AGPL/commercial-license-sensitive. |
 | Ghostscript | Rejected for baseline | Interpreter-oriented composition and AGPL/security/version risks. |
-| Poppler/Cairo/raster | Rejected for baseline | Visual fallback only; loses PDF semantics and selectable text. |
+| Poppler/raster | Rejected for folio placement | Visual fallback only; loses PDF semantics and selectable text. |
+| librsvg/Cairo | Selected for cover artwork | Direct static-SVG rendering to a PDF surface; avoids an external converter and preserves vector/text output where supported. |
 
 ### 7.2 Proof-of-concept exit criteria
 
@@ -438,7 +443,7 @@ The completed POC-001 slice passed without rasterization, produced valid Letter 
 
 ### 7.3 Dependency and licensing conditions
 
-The qpdf development headers and C++ toolchain are available in the tested Linux environment. The B1 path uses qpdf 11.9.0, dynamic linking, GCC/G++ C++17 support, and Alire-selected GNAT native 15.2.1/GPRbuild 25.0.1. These versions and the Apache-2.0 qpdf dependency must be recorded in release documentation.
+The qpdf and librsvg/Cairo development headers and C++ toolchain are available in the tested Linux environment. The implemented path uses qpdf 11.9.0, librsvg 2.58.0, Cairo 1.18.0, dynamic linking, GCC/G++ C++17 support, and Alire-selected GNAT native 15.2.1/GPRbuild 25.0.1. These versions, the Apache-2.0 qpdf dependency, and the LGPL librsvg/Cairo dependency must be recorded in release documentation.
 
 ## 8. Notes and self-evaluation
 

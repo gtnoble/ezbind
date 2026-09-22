@@ -9,6 +9,7 @@ with Ezbind_Geometry;
 with Ezbind_Imposition;
 with Ezbind_Physical;
 with Ezbind_QPDF_Bridge;
+with Ezbind_SVG_Bridge;
 
 package body Ezbind_Application is
    use type Ezbind_Imposition.Side_Kind;
@@ -16,18 +17,24 @@ package body Ezbind_Application is
    type Sheet_Kind is (Letter, A4);
 
    type Options is record
-      Input_Path  : String (1 .. 1024) := (others => ' ');
-      Input_Last  : Natural := 0;
-      Output_Path : String (1 .. 1024) := (others => ' ');
-      Output_Last : Natural := 0;
-      Sheet        : Sheet_Kind := Letter;
-      Force        : Boolean := False;
-      Grid         : Boolean := False;
-      Top_Margin   : Ezbind_Physical.Point_Value := 36.0;
-      Bottom_Margin : Ezbind_Physical.Point_Value := 36.0;
-      Fore_Margin  : Ezbind_Physical.Point_Value := 36.0;
-      Spine_Margin : Ezbind_Physical.Point_Value := 48.0;
-      Grid_Spacing : Ezbind_Physical.Point_Value := 14.1732283464567;
+      Input_Path        : String (1 .. 1024) := (others => ' ');
+      Input_Last        : Natural := 0;
+      Output_Path       : String (1 .. 1024) := (others => ' ');
+      Output_Last       : Natural := 0;
+      Cover_Front_Path  : String (1 .. 1024) := (others => ' ');
+      Cover_Front_Last  : Natural := 0;
+      Cover_Back_Path   : String (1 .. 1024) := (others => ' ');
+      Cover_Back_Last   : Natural := 0;
+      Cover_Output_Path : String (1 .. 1024) := (others => ' ');
+      Cover_Output_Last : Natural := 0;
+      Sheet             : Sheet_Kind := Letter;
+      Force             : Boolean := False;
+      Grid              : Boolean := False;
+      Top_Margin        : Ezbind_Physical.Point_Value := 36.0;
+      Bottom_Margin     : Ezbind_Physical.Point_Value := 36.0;
+      Fore_Margin       : Ezbind_Physical.Point_Value := 36.0;
+      Spine_Margin      : Ezbind_Physical.Point_Value := 48.0;
+      Grid_Spacing      : Ezbind_Physical.Point_Value := 14.1732283464567;
    end record;
 
    function Value
@@ -49,6 +56,25 @@ package body Ezbind_Application is
       Last := Value'Length;
       return True;
    end Set_Path;
+
+   function Read_Path
+     (Option_Name : in String;
+      Index       : in out Positive;
+      Count       : in Natural;
+      Target      : in out String;
+      Last        : in out Natural) return Boolean is
+   begin
+      if Index = Count then
+         Ezbind_CLI.Print_Usage_Error (Option_Name & " requires a path");
+         return False;
+      end if;
+      Index := Index + 1;
+      if not Set_Path (Target, Last, Ada.Command_Line.Argument (Index)) then
+         Ezbind_CLI.Print_Usage_Error (Option_Name & " path is too long or empty");
+         return False;
+      end if;
+      return True;
+   end Read_Path;
 
    function Read_Physical
      (Option_Name : in String;
@@ -96,17 +122,31 @@ package body Ezbind_Application is
             Argument : constant String := Ada.Command_Line.Argument (Index);
          begin
             if Argument = "--output" or else Argument = "-o" then
-               if Index = Count then
-                  Ezbind_CLI.Print_Usage_Error
-                    ("--output requires a path");
+               if not Read_Path
+                 ("--output", Index, Count,
+                  Result.Output_Path, Result.Output_Last)
+               then
                   return False;
                end if;
-               Index := Index + 1;
-               if not Set_Path
-                 (Result.Output_Path, Result.Output_Last,
-                  Ada.Command_Line.Argument (Index))
+            elsif Argument = "--cover-front" then
+               if not Read_Path
+                 ("--cover-front", Index, Count,
+                  Result.Cover_Front_Path, Result.Cover_Front_Last)
                then
-                  Ezbind_CLI.Print_Usage_Error ("output path is too long");
+                  return False;
+               end if;
+            elsif Argument = "--cover-back" then
+               if not Read_Path
+                 ("--cover-back", Index, Count,
+                  Result.Cover_Back_Path, Result.Cover_Back_Last)
+               then
+                  return False;
+               end if;
+            elsif Argument = "--cover-output" then
+               if not Read_Path
+                 ("--cover-output", Index, Count,
+                  Result.Cover_Output_Path, Result.Cover_Output_Last)
+               then
                   return False;
                end if;
             elsif Argument = "--force" or else Argument = "-f" then
@@ -185,6 +225,27 @@ package body Ezbind_Application is
 
       if Result.Input_Last = 0 or else Result.Output_Last = 0 then
          Ezbind_CLI.Print_Usage_Error ("an input PDF and --output are required");
+         return False;
+      end if;
+
+      if (Result.Cover_Front_Last /= 0
+          or else Result.Cover_Back_Last /= 0
+          or else Result.Cover_Output_Last /= 0)
+        and then (Result.Cover_Front_Last = 0
+                  or else Result.Cover_Back_Last = 0
+                  or else Result.Cover_Output_Last = 0)
+      then
+         Ezbind_CLI.Print_Usage_Error
+           ("--cover-front, --cover-back, and --cover-output are required together");
+         return False;
+      end if;
+
+      if Result.Cover_Output_Last /= 0
+        and then Value (Result.Output_Path, Result.Output_Last) =
+          Value (Result.Cover_Output_Path, Result.Cover_Output_Last)
+      then
+         Ezbind_CLI.Print_Usage_Error
+           ("--output and --cover-output must name different files");
          return False;
       end if;
       return True;
@@ -272,15 +333,21 @@ package body Ezbind_Application is
          Bottom => Settings.Bottom_Margin,
          Fore_Edge => Settings.Fore_Margin,
          Spine => Settings.Spine_Margin);
-      Temporary_Path : constant String :=
-        Value (Settings.Output_Path, Settings.Output_Last) & ".ezbind.tmp";
+      Output_Path : constant String :=
+        Value (Settings.Output_Path, Settings.Output_Last);
+      Cover_Mode : constant Boolean := Settings.Cover_Front_Last /= 0;
+      Cover_Output_Path : constant String :=
+        (if Cover_Mode
+         then Value (Settings.Cover_Output_Path, Settings.Cover_Output_Last)
+         else Output_Path & ".unused-cover.pdf");
+      Temporary_Path : constant String := Output_Path & ".ezbind.tmp";
+      Cover_Temporary_Path : constant String := Cover_Output_Path & ".ezbind.tmp";
       Input_Open  : Boolean := False;
       Output_Open : Boolean := False;
       Layout      : Ezbind_Geometry.Sheet_Layout;
       Good        : Boolean := True;
    begin
-      if Ada.Directories.Exists
-        (Value (Settings.Output_Path, Settings.Output_Last))
+      if Ada.Directories.Exists (Output_Path)
         and then not Settings.Force
       then
          Ada.Text_IO.Put_Line
@@ -288,16 +355,15 @@ package body Ezbind_Application is
             "ezbind: output exists; use --force to replace it");
          return 5;
       end if;
-
-      if not Ezbind_QPDF_Bridge.Open_Input
-        (Value (Settings.Input_Path, Settings.Input_Last), Input, Page_Count)
-        or else Page_Count = 0
+      if Cover_Mode
+        and then Ada.Directories.Exists (Cover_Output_Path)
+        and then not Settings.Force
       then
          Ada.Text_IO.Put_Line
-           (Ada.Text_IO.Standard_Error, "ezbind: cannot read input PDF");
-         return 3;
+           (Ada.Text_IO.Standard_Error,
+            "ezbind: cover output exists; use --force to replace it");
+         return 5;
       end if;
-      Input_Open := True;
 
       Geometry
         (Settings.Sheet, Sheet_Width, Sheet_Height, Page_Width, Page_Height);
@@ -310,9 +376,18 @@ package body Ezbind_Application is
       if not Ezbind_Geometry.Is_Valid (Layout) then
          Ada.Text_IO.Put_Line
            (Ada.Text_IO.Standard_Error, "ezbind: requested layout does not fit");
-         Ezbind_QPDF_Bridge.Close (Input);
          return 4;
       end if;
+
+      if not Ezbind_QPDF_Bridge.Open_Input
+        (Value (Settings.Input_Path, Settings.Input_Last), Input, Page_Count)
+        or else Page_Count = 0
+      then
+         Ada.Text_IO.Put_Line
+           (Ada.Text_IO.Standard_Error, "ezbind: cannot read input PDF");
+         return 3;
+      end if;
+      Input_Open := True;
 
       if not Ezbind_QPDF_Bridge.Create_Output
         (Sheet_Width, Sheet_Height, Output)
@@ -373,10 +448,42 @@ package body Ezbind_Application is
 
       Ezbind_QPDF_Bridge.Close (Input);
       Ezbind_QPDF_Bridge.Close (Output);
-      if not Commit_Output
-        (Temporary_Path, Value (Settings.Output_Path, Settings.Output_Last),
-         Settings.Force)
+      Input_Open := False;
+      Output_Open := False;
+
+      if Cover_Mode
+        and then not Ezbind_SVG_Bridge.Render_Cover_Sheet
+          (Value (Settings.Cover_Back_Path, Settings.Cover_Back_Last),
+           Value (Settings.Cover_Front_Path, Settings.Cover_Front_Last),
+           Sheet_Width, Sheet_Height, Cover_Temporary_Path)
       then
+         if Ada.Directories.Exists (Temporary_Path) then
+            Ada.Directories.Delete_File (Temporary_Path);
+         end if;
+         if Ada.Directories.Exists (Cover_Temporary_Path) then
+            Ada.Directories.Delete_File (Cover_Temporary_Path);
+         end if;
+         Ada.Text_IO.Put_Line
+           (Ada.Text_IO.Standard_Error, "ezbind: cover SVG rendering failed");
+         return 5;
+      end if;
+
+      if Cover_Mode
+        and then not Commit_Output
+          (Cover_Temporary_Path, Cover_Output_Path, Settings.Force)
+      then
+         if Ada.Directories.Exists (Temporary_Path) then
+            Ada.Directories.Delete_File (Temporary_Path);
+         end if;
+         if Ada.Directories.Exists (Cover_Temporary_Path) then
+            Ada.Directories.Delete_File (Cover_Temporary_Path);
+         end if;
+         Ada.Text_IO.Put_Line
+           (Ada.Text_IO.Standard_Error, "ezbind: cannot commit cover output PDF");
+         return 5;
+      end if;
+
+      if not Commit_Output (Temporary_Path, Output_Path, Settings.Force) then
          if Ada.Directories.Exists (Temporary_Path) then
             Ada.Directories.Delete_File (Temporary_Path);
          end if;
@@ -384,8 +491,10 @@ package body Ezbind_Application is
            (Ada.Text_IO.Standard_Error, "ezbind: cannot commit output PDF");
          return 5;
       end if;
-      Ada.Text_IO.Put_Line
-        ("ezbind: wrote " & Value (Settings.Output_Path, Settings.Output_Last));
+      Ada.Text_IO.Put_Line ("ezbind: wrote " & Output_Path);
+      if Cover_Mode then
+         Ada.Text_IO.Put_Line ("ezbind: wrote " & Cover_Output_Path);
+      end if;
       return 0;
    exception
       when others =>
@@ -397,6 +506,9 @@ package body Ezbind_Application is
          end if;
          if Ada.Directories.Exists (Temporary_Path) then
             Ada.Directories.Delete_File (Temporary_Path);
+         end if;
+         if Ada.Directories.Exists (Cover_Temporary_Path) then
+            Ada.Directories.Delete_File (Cover_Temporary_Path);
          end if;
          Ada.Text_IO.Put_Line
            (Ada.Text_IO.Standard_Error, "ezbind: internal processing error");

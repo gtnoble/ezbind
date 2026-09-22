@@ -4,11 +4,11 @@
 
 ## Project status
 
-The project is in **Build B2 implementation**. The current usable slice validates one input PDF, imposes four logical pages per folded sheet, pads incomplete folios with blanks, supports Letter/A4 output selection, optionally draws a vector margin grid, and uses an explicit overwrite option. The broader option set in the requirements remains staged work.
+The project is in **Build B2 implementation**. The current usable slice validates one input PDF, imposes four logical pages per folded sheet, pads incomplete folios with blanks, supports Letter/A4 output selection, optionally draws a vector margin grid, generates a separate one-sheet cover PDF from front/back SVG artwork, and uses an explicit overwrite option. The broader option set in the requirements remains staged work.
 
 ## Build with Alire
 
-The project uses the canonical Alire executable-crate workflow. The native PDF bridge requires qpdf development headers/library and a C++17 compiler.
+The project uses the canonical Alire executable-crate workflow. The native PDF bridges require qpdf and librsvg/Cairo development headers/libraries plus a C++17 compiler.
 
 ```text
 alr build --development
@@ -32,16 +32,21 @@ Implemented options:
 - `-g`, `--grid` — add light-gray vector lines in all configured margin areas, without crossing source content.
 - `-G VALUE`, `--grid-spacing VALUE` — set positive grid spacing using a physical value with `mm`, `in`, or `pt` suffix; the default is 5 mm.
 - `-t VALUE`, `--margin-top VALUE`; `-b VALUE`, `--margin-bottom VALUE`; `-e VALUE`, `--margin-fore-edge VALUE`; `-i VALUE`, `--margin-spine VALUE` — set independent margins using `mm`, `in`, or `pt`; defaults are 36, 36, 36, and 48 pt.
-- `-f`, `--force` — replace an existing output; replacement is refused by default.
+- `-f`, `--force` — replace existing folio and cover outputs; replacement is refused by default.
+- `--cover-front PATH` — SVG artwork for the front cover. This option must be paired with the other cover options.
+- `--cover-back PATH` — SVG artwork for the back cover. This option must be paired with the other cover options.
+- `--cover-output PATH` — separate one-page PDF output for the cardstock cover sheet.
 - `-h`, `--help` — print help without requiring an input PDF.
+
+When cover mode is selected, the cardstock output is one landscape Letter or A4 sheet. The back-cover SVG is rendered on the left half and the front-cover SVG on the right half, so the center cut puts both cut edges toward the spine. Artwork is rendered proportionally to fit its half-sheet viewport; matching the SVG aspect ratio to the selected card size is recommended. The folio output and cover output must be different paths.
 
 Normal output uses a landscape Letter or A4 sheet with two finished-page rectangles. The nominal folio assignment is front-left 4, front-right 1, back-left 2, and back-right 3. Page counts are padded to a multiple of four with blank logical pages. Default margins are 36 pt top/bottom/fore-edge and 48 pt spine. Margins are minimum clearance around the uniformly scaled source page; the source is not cropped or distorted. Physical option values require an explicit `mm`, `in`, or `pt` suffix.
 
-Help returns status `0`. Invalid flags, missing option values, missing paths, duplicate positional input paths, and oversized paths return status `2` and print a diagnostic followed by the canonical usage line to standard error. Input-PDF failures return `3`; impossible layouts return `4`; output/filesystem failures return `5`; unexpected processing failures return `10`.
+Help returns status `0`. Invalid flags, missing option values, missing paths, duplicate positional input paths, incomplete cover options, and oversized paths return status `2` and print a diagnostic followed by the canonical usage line to standard error. Input-PDF failures return `3`; impossible layouts return `4`; output/filesystem or SVG-rendering failures return `5`; unexpected processing failures return `10`.
 
-Output is written to a sibling temporary file and committed only after successful PDF generation. Ordinary diagnostics do not print extracted document text or complete PDF content.
+Folio and cover outputs are written to sibling temporary files and committed only after successful generation. Ordinary diagnostics do not print extracted document text or complete PDF content.
 
-The current slice does not yet expose cover-card pages, spine/fabric guides, crop/fold/registration marks, creep compensation, safe-area configuration, capability reporting, or full feature-preservation controls. Validate representative output before physical binding.
+The current slice does not yet expose spine/fabric guides, crop/fold/registration marks, creep compensation, safe-area configuration, capability reporting, or full feature-preservation controls. Validate representative output before physical binding.
 
 ## B2 verification
 

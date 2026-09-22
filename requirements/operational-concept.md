@@ -59,7 +59,7 @@ The user is an operator who supplies the input PDF, selects physical/layout opti
 
 ### 5.2 Normal operation
 
-The user invokes one command with one input path and one output path. Defaults produce Letter or A4 folded-folio output with blank margins, no creep, no printed marks, no cover-card pages, and no spine/fabric guide. The program validates the input and requested geometry before writing output.
+The user invokes one command with one input path and one folio output path. Defaults produce Letter or A4 folded-folio output with blank margins, no creep, no printed marks, no cover artwork, and no spine/fabric guide. Optional front/back SVG cover mode writes a separate cover output path. The program validates the input, requested geometry, and paired cover options before writing output.
 
 The source page is treated as the finished book-page size. A folded sheet contains two source-page positions on each side, for four logical pages per sheet. For a four-page unit, the nominal imposed positions are:
 
@@ -74,6 +74,7 @@ The exact duplex flip/orientation is a controlled implementation detail that mus
 
 The user may request:
 
+- separate front and back SVG cover artwork rendered to a cardstock cover-sheet PDF;
 - custom top, bottom, fore-edge, and spine margins;
 - millimetres, inches, or points for physical dimensions;
 - a 5 mm default graph-paper-like vector grid in margins;
@@ -92,7 +93,7 @@ Invalid PDF input, unsupported PDF conditions, impossible geometry, missing depe
 
 ### 5.5 Physical additions
 
-Cover cards and fabric are physical additions. The default output does not print cover cards or fabric. Optional blank cover-card pages and a spine/fabric guide are aids for layout and registration only; they do not represent the physical materials.
+Cover cards and fabric remain physical additions. The default folio output does not print cover artwork. When front/back SVG options are supplied, the program emits a separate cardstock cover-sheet PDF with back artwork left and front artwork right; the user prints it, cuts the center, and uses the two resulting cards. Optional blank cover-card pages and a spine/fabric guide remain aids for layout and registration only; they do not represent the physical materials.
 
 ## 6. Operational environment
 

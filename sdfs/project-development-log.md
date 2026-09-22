@@ -109,3 +109,13 @@ Requirements and operational-concept products are in draft review. No implementa
 - **Validation:** Invalid, negative, unitless, and zero-spacing values return status 2 before output creation. Root and nested Alire builds, expanded Ada core tests, custom-margin/grid output, `qpdf --check`, selectable-text preservation, temporary-file cleanup, and rendered man-page checks pass.
 - **Known limits:** Cover pages, guides, marks, creep, safe-area configuration, capability reporting, and broader PDF-feature preservation remain staged.
 - **Process note:** This increment is self-evaluated by the developer; independent user review remains required before physical use.
+
+## Entry 012 — librsvg/Cairo SVG cover-card increment
+
+- **Date:** 2026-09-22
+- **Activity:** Implemented separate cover-card PDF generation from front/back SVG artwork using a native librsvg/Cairo bridge.
+- **Implementation:** Added `Ezbind_SVG_Bridge` and `ez_svg_bridge`; added `--cover-front`, `--cover-back`, and `--cover-output`; rendered back-left/front-right onto one selected-size landscape sheet; preserved the existing qpdf folio path; added temporary-file cleanup and output-path collision validation.
+- **Dependencies:** Root and nested GPR files now link qpdf plus librsvg 2.58.0/Cairo 1.18.0 and their platform dependencies. Inkscape is not required.
+- **Verification:** Root and nested development builds pass with warnings enabled; direct bridge smoke test passes; Letter and A4 cover PDFs have correct one-page dimensions and pass `qpdf --check`; `pdftotext` recovers `BACK` and `FRONT`; rendered fixture verifies asymmetric left/right placement; incomplete options/path collision return status 2; missing SVG returns status 5 without output.
+- **Known limits:** librsvg supports a static SVG subset; external resources and font availability can affect output. Scale-to-fit is proportional and does not implement deliberate bleed/cropping. Physical printer safe areas and acceptance printing remain user responsibilities.
+- **Process note:** This increment is self-evaluated by the developer; independent user review of representative artwork and physical center-cut orientation remains required.

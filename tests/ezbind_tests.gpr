@@ -16,6 +16,9 @@ project Ezbind_Tests is
 
    package Linker is
       for Switches ("Ada") use
-        ("-L/usr/lib/x86_64-linux-gnu", "-lqpdf");
+        ("-L/usr/lib/x86_64-linux-gnu", "-lqpdf",
+         "-lrsvg-2", "-lgio-2.0", "-lgdk_pixbuf-2.0", "-lgobject-2.0",
+         "-lglib-2.0", "-lcairo", "-lpangocairo-1.0", "-lpango-1.0",
+         "-pthread");
    end Linker;
 end Ezbind_Tests;

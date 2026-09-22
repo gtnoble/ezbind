@@ -51,7 +51,21 @@ Set the minimum top or bottom clearance around the uniformly fitted source page.
 Set the minimum fore-edge or spine clearance around the uniformly fitted source page. The spine is the fold-facing inner edge; the fore-edge is outer. Values require a non-negative \fBmm\fR, \fBin\fR, or \fBpt\fR suffix. The defaults are 36 pt and 48 pt.
 .TP
 .BR --force , \-f
-Replace an existing output PDF after successful generation.
+Replace existing folio and cover output PDFs after successful generation. The
+program refuses replacement unless this option is specified.
+.TP
+.B --cover-front \fIPATH\fR
+SVG artwork for the front cover. It must be supplied together with the
+--cover-back and --cover-output options.
+.TP
+.B --cover-back \fIPATH\fR
+SVG artwork for the back cover. It is rendered on the left half of the
+landscape cardstock sheet.
+.TP
+.B --cover-output \fIPATH\fR
+Write a separate one-page cover PDF. The front artwork is rendered on the right
+half and the back artwork on the left half, placing both center-cut edges toward
+the spine. Artwork is fitted proportionally to each half-sheet viewport.
 .SH DEFAULT LAYOUT
 The default minimum clearances are 36 points at the top, bottom, and
 fore-edge, and 48 points at the spine. The source page is fitted uniformly
@@ -66,8 +80,15 @@ paper. Fold each sheet once with the fold toward the spine, keep the generated
 folio order, and stack before gluing the spine side. Confirm duplex orientation
 with a small asymmetric fixture before committing a valuable book.
 .PP
-Output is first written to a sibling temporary file and committed after
-successful generation. A handled failure does not leave the temporary output.
+When cover mode is selected, print the separate cover PDF on the selected
+cardstock size. The back artwork is on the left and the front artwork is on the
+right; cut vertically at the center so both cut edges face the spine. Cover
+artwork is rendered by librsvg onto a Cairo PDF surface and is fitted
+proportionally to each half-sheet viewport.
+.PP
+Folio and cover output are first written to sibling temporary files and
+committed after successful generation. A handled failure does not leave the
+temporary output.
 .SH EXIT STATUS
 .TP
 .B 0
@@ -96,14 +117,26 @@ by the canonical usage line. Ordinary diagnostics do not include extracted
 source text, passwords, or complete PDF content.
 .SH PDF LIMITATIONS
 The qpdf backend preserves visible page content and selectable text for the
-implemented placement path. Cover-card pages, spine/fabric guides,
-crop/fold/registration marks, creep, printer safe-area configuration, and
-broad document-feature capability reporting are not yet exposed by this B2
-slice. Unsupported or degraded backend behavior
-must be evaluated against representative input before production use.
+implemented folio placement path. Cover artwork is rendered through librsvg
+2.58 and Cairo; SVG features outside librsvg's supported static SVG subset,
+external resources, and font availability can affect output and must be
+validated against representative artwork. Spine/fabric guides,
+crop/fold/
+registration marks, creep, printer safe-area configuration, and broad
+document-feature capability reporting are not yet exposed by this B2 slice.
+Unsupported or degraded backend behavior must be evaluated before production
+use.
 .SH EXAMPLE
 .nf
 ezbind book.pdf -o book-bound.pdf -s a4 -g
+.fi
+.PP
+A separate cardstock cover sheet can be generated with:
+.PP
+.nf
+ezbind book.pdf -o book-bound.pdf --sheet letter \\
+  --cover-back back.svg --cover-front front.svg \\
+  --cover-output covers.pdf
 .fi
 .SH SEE ALSO
 .BR qpdf (1)

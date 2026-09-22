@@ -12,7 +12,14 @@ project Ezbind is
       for Default_Switches ("Ada") use Ezbind_Config.Ada_Compiler_Switches;
       for Switches ("C++") use
         ("-std=c++17", "-Wall", "-Wextra", "-Wpedantic",
-         "-DPOINTERHOLDER_TRANSITION=0", "-I/usr/include");
+         "-DPOINTERHOLDER_TRANSITION=0", "-I/usr/include",
+         "-I/usr/include/librsvg-2.0", "-I/usr/include/glib-2.0",
+         "-I/usr/lib/x86_64-linux-gnu/glib-2.0/include",
+         "-I/usr/include/libmount", "-I/usr/include/blkid",
+         "-I/usr/include/gdk-pixbuf-2.0", "-I/usr/include/libpng16",
+         "-I/usr/include/x86_64-linux-gnu", "-I/usr/include/webp",
+         "-pthread", "-I/usr/include/cairo", "-I/usr/include/freetype2",
+         "-I/usr/include/pixman-1");
    end Compiler;
 
    package Binder is
@@ -21,7 +28,10 @@ project Ezbind is
 
    package Linker is
       for Switches ("Ada") use
-        ("-L/usr/lib/x86_64-linux-gnu", "-lqpdf");
+        ("-L/usr/lib/x86_64-linux-gnu", "-lqpdf",
+         "-lrsvg-2", "-lgio-2.0", "-lgdk_pixbuf-2.0", "-lgobject-2.0",
+         "-lglib-2.0", "-lcairo", "-lpangocairo-1.0", "-lpango-1.0",
+         "-pthread");
    end Linker;
 
    package Install is

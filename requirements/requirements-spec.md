@@ -88,6 +88,7 @@ All physical dimensions shall be represented internally with sufficient precisio
 | REQ-CAP-022 | The program shall provide an optional printer safe-area reserve and shall reject a layout when the requested content, margins, and reserves do not fit. | Test | B2 |
 | REQ-CAP-023 | The program shall provide an explicit overwrite option and shall refuse to replace an existing output by default. | Test | B2 |
 | REQ-CAP-024 | The program shall report the selected non-default layout parameters sufficiently for a user to identify how the output was generated. | Test/Inspection | B2 |
+| REQ-CAP-025 | The program shall provide an optional SVG cover-card mode that accepts separate front and back SVG artwork and emits one landscape cardstock sheet with back artwork on the left half and front artwork on the right half, so the center cut edges face the spine. | Test/Demonstration | B2 |
 
 ### 4.2 External interface requirements
 
