@@ -40,14 +40,14 @@ static QPDFObjectHandle::Rectangle retained_source_box(QPDFPageObjectHelper& pag
     QPDFObjectHandle::Rectangle base = effective_crop_box(page); QPDFMatrix to_visual(page.getMatrixForTransformations(false)); QPDFObjectHandle::Rectangle visual = to_visual.transformRectangle(base);
     if (!valid_rectangle(visual)) throw std::runtime_error("source page has invalid transformed geometry");
     QPDFObjectHandle::Rectangle kept(visual.llx + left, visual.lly + bottom, visual.urx - right, visual.ury - top);
-    if (!valid_rectangle(kept)) throw std::runtime_error("source crop margins remove the entire page");
+    if (!valid_rectangle(kept)) throw std::runtime_error("source crop margins leave no page area");
     QPDFMatrix to_source = inverse_matrix(to_visual); QPDFObjectHandle::Rectangle result = to_source.transformRectangle(kept);
     if (!valid_rectangle(result)) throw std::runtime_error("source crop produced invalid page geometry");
     const double epsilon = 1.0e-7;
     if (result.llx < base.llx - epsilon || result.lly < base.lly - epsilon || result.urx > base.urx + epsilon || result.ury > base.ury + epsilon) throw std::runtime_error("source crop exceeds the effective CropBox");
     result.llx = std::max(base.llx, std::min(result.llx, base.urx)); result.lly = std::max(base.lly, std::min(result.lly, base.ury)); result.urx = std::max(base.llx, std::min(result.urx, base.urx)); result.ury = std::max(base.lly, std::min(result.ury, base.ury));
     if (!valid_rectangle(result))
-        throw std::runtime_error("source crop produced an empty page");
+        throw std::runtime_error("source crop produced no page area");
     return result;
 }
 extern "C" int ez_qpdf_open_input(char const* path, ez_qpdf_input** result, size_t* page_count, char* error_text, size_t error_size) {

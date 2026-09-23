@@ -473,7 +473,7 @@ package body Ezbind_Application is
                Input_Open := False;
                Ada.Text_IO.Put_Line
                  (Ada.Text_IO.Standard_Error,
-                  "ezbind: source crop margins remove page content");
+                  "ezbind: source crop margins leave no page area; reduce the crop values");
                return 4;
             end if;
          end loop;
