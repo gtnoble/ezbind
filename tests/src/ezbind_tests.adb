@@ -108,10 +108,23 @@ begin
          raise Program_Error with "qpdf input open failed";
       end if;
 
+      declare
+         Descriptor : Ezbind_QPDF_Bridge.Page_Descriptor;
+      begin
+         if not Ezbind_QPDF_Bridge.Get_Page_Descriptor
+           (Input, 0, Descriptor)
+           or else Descriptor.Visual_Width <= 0.0
+           or else Descriptor.Visual_Height <= 0.0
+         then
+            raise Program_Error with "qpdf page descriptor failed";
+         end if;
+      end;
+
       if not Ezbind_QPDF_Bridge.Create_Output (612.0, 792.0, Output)
         or else not Ezbind_QPDF_Bridge.Begin_Page (Output)
         or else not Ezbind_QPDF_Bridge.Place_Page
-          (Input, 0, Output, 0.0, 0.0, 612.0, 792.0)
+          (Input, 0, Output, 0.0, 0.0, 0.0, 0.0,
+           0.0, 0.0, 612.0, 792.0)
         or else not Ezbind_QPDF_Bridge.Append_Line
           (Output, 36.0, 36.0, 576.0, 36.0)
         or else not Ezbind_QPDF_Bridge.Write_Output (Output, Output_Path)

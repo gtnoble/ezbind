@@ -47,7 +47,10 @@ spacing is 5 mm. Grid lines are not added unless this option is selected.
 Set the grid spacing. Values require a positive \fBmm\fR, \fBin\fR, or \fBpt\fR value; the default is 5 mm.
 .TP
 .BR --margin-top\~VALUE | \-t\~VALUE | --margin-bottom\~VALUE | \-b\~VALUE
-Set the minimum top or bottom clearance around the uniformly fitted source page. Values require a non-negative \fBmm\fR, \fBin\fR, or \fBpt\fR suffix. The defaults are 36 pt. The source is not cropped or distorted.
+Set the minimum top or bottom clearance around the uniformly fitted source page. Values require a non-negative \fBmm\fR, \fBin\fR, or \fBpt\fR suffix. The defaults are 36 pt. These are output margins, not source crop values.
+.TP
+.BR --crop-top\~VALUE | --crop-bottom\~VALUE | --crop-left\~VALUE | --crop-right\~VALUE
+Remove the specified source-page edge distances before placement. Values require a non-negative \fBmm\fR, \fBin\fR, or \fBpt\fR suffix and default to zero. Distances are measured from the effective CropBox, falling back to MediaBox, and top/bottom/left/right refer to visual edges after page rotation. Auto-crop is not enabled.
 .TP
 .BR --margin-fore-edge\~VALUE | \-e\~VALUE | --margin-spine\~VALUE | \-i\~VALUE
 Set the minimum fore-edge or spine clearance around the uniformly fitted source page. The spine is the fold-facing inner edge; the fore-edge is outer. Values require a non-negative \fBmm\fR, \fBin\fR, or \fBpt\fR suffix. The defaults are 36 pt and 48 pt.
@@ -73,8 +76,8 @@ cover options are sufficient and only --cover-output is written.
 .SH DEFAULT LAYOUT
 The default minimum clearances are 36 points at the top, bottom, and
 fore-edge, and 48 points at the spine. The source page is fitted uniformly
-inside the resulting content rectangle without cropping or distortion. If the
-source and content rectangles have different aspect ratios, additional
+inside the resulting content rectangle without distortion. Source crop options
+are applied before this fit. If the source and content rectangles have different aspect ratios, additional
 letterboxing remains on one pair of edges. The optional grid occupies the
 reserved strips and does not cross the source content. A one-page source produces two
 physical output sides; source counts are padded to multiples of four.
@@ -125,9 +128,9 @@ implemented folio placement path. Cover artwork is rendered through librsvg
 2.58 and Cairo; SVG features outside librsvg's supported static SVG subset,
 external resources, and font availability can affect output and must be
 validated against representative artwork. Spine/fabric guides,
-crop/fold/
-registration marks, creep, printer safe-area configuration, and broad
-document-feature capability reporting are not yet exposed by this B2 slice.
+auto-crop, crop/fold/registration marks, creep, printer safe-area configuration,
+and broad document-feature capability reporting are not yet exposed by this B2
+slice. Source-page annotations and form fields may not follow clipped content.
 Unsupported or degraded backend behavior must be evaluated before production
 use.
 .SH EXAMPLE

@@ -30,6 +30,10 @@ package body Ezbind_Application is
       Sheet             : Sheet_Kind := Letter;
       Force             : Boolean := False;
       Grid              : Boolean := False;
+      Crop_Top          : Ezbind_Physical.Point_Value := 0.0;
+      Crop_Bottom       : Ezbind_Physical.Point_Value := 0.0;
+      Crop_Left         : Ezbind_Physical.Point_Value := 0.0;
+      Crop_Right        : Ezbind_Physical.Point_Value := 0.0;
       Top_Margin        : Ezbind_Physical.Point_Value := 36.0;
       Bottom_Margin     : Ezbind_Physical.Point_Value := 36.0;
       Fore_Margin       : Ezbind_Physical.Point_Value := 36.0;
@@ -160,6 +164,22 @@ package body Ezbind_Application is
                then
                   Ezbind_CLI.Print_Usage_Error
                     ("--grid-spacing requires a positive value in mm, in, or pt");
+                  return False;
+               end if;
+            elsif Argument = "--crop-top" then
+               if not Read_Physical ("--crop-top", Index, Count, Result.Crop_Top) then
+                  return False;
+               end if;
+            elsif Argument = "--crop-bottom" then
+               if not Read_Physical ("--crop-bottom", Index, Count, Result.Crop_Bottom) then
+                  return False;
+               end if;
+            elsif Argument = "--crop-left" then
+               if not Read_Physical ("--crop-left", Index, Count, Result.Crop_Left) then
+                  return False;
+               end if;
+            elsif Argument = "--crop-right" then
+               if not Read_Physical ("--crop-right", Index, Count, Result.Crop_Right) then
                   return False;
                end if;
             elsif Argument = "--margin-top" or else Argument = "-t" then
@@ -430,6 +450,35 @@ package body Ezbind_Application is
       end if;
       Input_Open := True;
 
+      declare
+         Descriptor : Ezbind_QPDF_Bridge.Page_Descriptor;
+      begin
+         for Source_Index in 0 .. Page_Count - 1 loop
+            if not Ezbind_QPDF_Bridge.Get_Page_Descriptor
+              (Input, Source_Index, Descriptor)
+            then
+               Ezbind_QPDF_Bridge.Close (Input);
+               Input_Open := False;
+               Ada.Text_IO.Put_Line
+                 (Ada.Text_IO.Standard_Error,
+                  "ezbind: cannot inspect source page geometry");
+               return 3;
+            end if;
+            if Descriptor.Visual_Width <=
+                 Long_Float (Settings.Crop_Left + Settings.Crop_Right)
+              or else Descriptor.Visual_Height <=
+                 Long_Float (Settings.Crop_Top + Settings.Crop_Bottom)
+            then
+               Ezbind_QPDF_Bridge.Close (Input);
+               Input_Open := False;
+               Ada.Text_IO.Put_Line
+                 (Ada.Text_IO.Standard_Error,
+                  "ezbind: source crop margins remove page content");
+               return 4;
+            end if;
+         end loop;
+      end;
+
       if not Ezbind_QPDF_Bridge.Create_Output
         (Sheet_Width, Sheet_Height, Output)
       then
@@ -456,6 +505,10 @@ package body Ezbind_Application is
                        (Input,
                         Placements (Slot).Source_Page - 1,
                         Output,
+                        Long_Float (Settings.Crop_Left),
+                        Long_Float (Settings.Crop_Bottom),
+                        Long_Float (Settings.Crop_Right),
+                        Long_Float (Settings.Crop_Top),
                         Long_Float (Placements (Slot).Region.Left),
                         Long_Float (Placements (Slot).Region.Bottom),
                         Long_Float (Placements (Slot).Region.Right),

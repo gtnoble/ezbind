@@ -18,6 +18,10 @@ package body Ezbind_CLI is
       Ada.Text_IO.Put_Line
         ("  -G V, --grid-spacing V  Set positive grid spacing in mm, in, or pt.");
       Ada.Text_IO.Put_Line
+        ("  --crop-top V; --crop-bottom V; --crop-left V; --crop-right V");
+      Ada.Text_IO.Put_Line
+        ("                   Remove source-page edges; visual edges, no auto-crop.");
+      Ada.Text_IO.Put_Line
         ("  -t V, --margin-top V; -b V, --margin-bottom V,");
       Ada.Text_IO.Put_Line
         ("  -e V, --margin-fore-edge V; -i V, --margin-spine V");

@@ -31,7 +31,8 @@ Implemented options:
 - `-s letter|a4`, `--sheet letter|a4` — select the physical output sheet; Letter is the default.
 - `-g`, `--grid` — add light-gray vector lines in all configured margin areas, without crossing source content.
 - `-G VALUE`, `--grid-spacing VALUE` — set positive grid spacing using a physical value with `mm`, `in`, or `pt` suffix; the default is 5 mm.
-- `-t VALUE`, `--margin-top VALUE`; `-b VALUE`, `--margin-bottom VALUE`; `-e VALUE`, `--margin-fore-edge VALUE`; `-i VALUE`, `--margin-spine VALUE` — set independent margins using `mm`, `in`, or `pt`; defaults are 36, 36, 36, and 48 pt.
+- `--crop-top VALUE`, `--crop-bottom VALUE`, `--crop-left VALUE`, `--crop-right VALUE` — remove source-page edge distances using `mm`, `in`, or `pt`; values are measured from the effective CropBox, falling back to MediaBox, and default to zero. Edges are visual page edges after rotation.
+- `-t VALUE`, `--margin-top VALUE`; `-b VALUE`, `--margin-bottom VALUE`; `-e VALUE`, `--margin-fore-edge VALUE`; `-i VALUE`, `--margin-spine VALUE` — set independent output margins using `mm`, `in`, or `pt`; defaults are 36, 36, 36, and 48 pt.
 - `-f`, `--force` — replace existing folio and cover outputs; replacement is refused by default.
 - `--cover-front PATH` — SVG artwork for the front cover. This option must be paired with the other cover options.
 - `--cover-back PATH` — SVG artwork for the back cover. This option must be paired with the other cover options.
@@ -40,13 +41,13 @@ Implemented options:
 
 When cover mode is selected, the cardstock output is one landscape Letter or A4 sheet. The back-cover SVG is rendered on the left half and the front-cover SVG on the right half, so the center cut puts both cut edges toward the spine. Artwork is rendered proportionally to fit its half-sheet viewport; matching the SVG aspect ratio to the selected card size is recommended. The folio output and cover output must be different paths when both modes are combined. Cover-only mode omits the positional input PDF and `--output`; it requires the three cover options and writes only `--cover-output`.
 
-Normal output uses a landscape Letter or A4 sheet with two finished-page rectangles. The nominal folio assignment is front-left 4, front-right 1, back-left 2, and back-right 3. Page counts are padded to a multiple of four with blank logical pages. Default margins are 36 pt top/bottom/fore-edge and 48 pt spine. Margins are minimum clearance around the uniformly scaled source page; the source is not cropped or distorted. Physical option values require an explicit `mm`, `in`, or `pt` suffix.
+Normal output uses a landscape Letter or A4 sheet with two finished-page rectangles. The nominal folio assignment is front-left 4, front-right 1, back-left 2, and back-right 3. Page counts are padded to a multiple of four with blank logical pages. Default output margins are 36 pt top/bottom/fore-edge and 48 pt spine. Source crop options are independent: the retained source page is clipped first, then fitted uniformly into the output content rectangle without distortion. Crop values are measured from each page's effective CropBox, falling back to MediaBox, and are interpreted as visual edges after rotation. Physical option values require an explicit `mm`, `in`, or `pt` suffix.
 
 Help returns status `0`. Invalid flags, missing option values, missing paths, duplicate positional input paths, incomplete cover options, and oversized paths return status `2` and print a diagnostic followed by the canonical usage line to standard error. Input-PDF failures return `3`; impossible layouts return `4`; output/filesystem or SVG-rendering failures return `5`; unexpected processing failures return `10`.
 
 Folio and cover outputs are written to sibling temporary files and committed only after successful generation. Ordinary diagnostics do not print extracted document text or complete PDF content.
 
-The current slice does not yet expose spine/fabric guides, crop/fold/registration marks, creep compensation, safe-area configuration, capability reporting, or full feature-preservation controls. Validate representative output before physical binding.
+The current slice does not yet expose auto-crop, spine/fabric guides, crop/fold/registration marks, creep compensation, safe-area configuration, capability reporting, or full feature-preservation controls. Source cropping applies to imported page content; annotation and form-field transformation remains subject to backend limitations. Validate representative output before physical binding.
 
 ## B2 verification
 

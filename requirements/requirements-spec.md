@@ -67,7 +67,7 @@ All physical dimensions shall be represented internally with sufficient precisio
 | REQ-CAP-001 | The program shall accept exactly one input PDF path and one output PDF path for a normal invocation. | Test | B2 |
 | REQ-CAP-002 | The program shall inspect the input PDF before output generation and shall reject an unreadable, empty, malformed, or unsupported input with a diagnostic and nonzero exit status. | Test | B1/B2 |
 | REQ-CAP-003 | The program shall support Letter, A4, and explicitly specified custom sheet dimensions. | Test | B1/B2 |
-| REQ-CAP-004 | The program shall treat the configured finished-page dimensions as the target page size for each source page and shall validate that the source content can be placed without unintended cropping. | Test/Analysis | B1 |
+| REQ-CAP-004 | The program shall treat the configured finished-page dimensions as the target page size for each source page and shall validate that the source content can be placed without unintended cropping unless explicit source crop parameters request it. | Test/Analysis | B1 |
 | REQ-CAP-005 | The program shall impose four logical page positions per folded sheet: two on the front side and two on the back side. | Test | B1 |
 | REQ-CAP-006 | For a four-page folded unit, the nominal logical-page assignment shall be front-left 4, front-right 1, back-left 2, and back-right 3, with orientations that produce pages 1 through 4 in reading order after folding. | Test/Demonstration | B1 |
 | REQ-CAP-007 | The program shall add blank logical pages as needed so the imposed logical-page count is a multiple of four, unless a future explicitly selected policy says otherwise. | Test | B1 |
@@ -82,6 +82,7 @@ All physical dimensions shall be represented internally with sufficient precisio
 | REQ-CAP-016 | The program shall provide blank margins by default. | Test | B1 |
 | REQ-CAP-017 | The program shall provide an optional graph-paper-like grid confined to margin areas and excluded from the source-content rectangle and spine/fabric reserve. | Test/Demonstration | B1/B2 |
 | REQ-CAP-018 | The default margin grid spacing shall be 5 mm when grid mode is selected; spacing shall be configurable to a positive physical value. | Test | B1/B2 |
+| REQ-CAP-027 | The program shall support independent top, bottom, left, and right source crop distances in mm, in, or pt, measured from each page's effective CropBox with MediaBox fallback, interpreted as visual edges after rotation, and applied before uniform placement into output margins. | Test/Analysis | B2 |
 | REQ-CAP-019 | Grid lines shall be vector lines with a default light-gray appearance and a default line width of 0.25 pt; color and line width may be configurable. | Test/Inspection | B2 |
 | REQ-CAP-020 | The program shall provide optional crop marks, fold marks, and registration marks, all disabled by default. | Test/Demonstration | B2 |
 | REQ-CAP-021 | The program shall provide creep compensation as an optional explicit value or supported mode, disabled by default, and shall not infer paper thickness without user input. | Test/Analysis | B3 |
@@ -95,7 +96,7 @@ All physical dimensions shall be represented internally with sufficient precisio
 
 | ID | Requirement | Verification | Planned build |
 |---|---|---|---|
-| REQ-CLI-001 | The command-line interface shall accept the input path, output path, sheet selection, page/geometry parameters, margin parameters, grid parameters, cover mode, guide mode, marks, creep, safe area, and overwrite option defined by the user manual. | Test/Demonstration | B2 |
+| REQ-CLI-001 | The command-line interface shall accept the input path, output path, sheet selection, page/geometry parameters, source crop parameters, margin parameters, grid parameters, cover mode, guide mode, marks, creep, safe area, and overwrite option defined by the user manual. | Test/Demonstration | B2 |
 | REQ-CLI-002 | The program shall provide a help operation that identifies usage, defaults, supported units, and error/exit behavior without requiring an input PDF. | Test | B2 |
 | REQ-CLI-003 | Normal diagnostics shall be written to standard error and shall not include extracted document text, passwords, or complete PDF content. | Inspection/Test | B2 |
 | REQ-CLI-004 | The program shall return exit status 0 on success, 2 for command-line usage errors, 3 for input-PDF errors, 4 for impossible layouts, 5 for output/filesystem errors, 6 for missing/unusable runtime dependencies, and 10 for unexpected internal errors. | Test | B2 |
@@ -110,7 +111,7 @@ All physical dimensions shall be represented internally with sufficient precisio
 
 | ID | Requirement | Verification | Planned build |
 |---|---|---|---|
-| REQ-DATA-001 | The layout model shall represent physical dimensions with explicit units and shall distinguish sheet dimensions, finished-page dimensions, margins, reserves, and grid spacing. | Inspection/Analysis | B1 |
+| REQ-DATA-001 | The layout model shall represent physical dimensions with explicit units and shall distinguish sheet dimensions, finished-page dimensions, source crop distances, margins, reserves, and grid spacing. | Inspection/Analysis | B1/B2 |
 | REQ-DATA-002 | The imposition model shall represent each output placement with a source/logical page identity, sheet index, side, position, rotation, and placement rectangle. | Inspection/Unit test | B1 |
 | REQ-DATA-003 | The program shall not require the entire input PDF content to remain resident in memory if the selected backend permits incremental processing. | Inspection/Analysis | B2 |
 
@@ -137,7 +138,7 @@ All physical dimensions shall be represented internally with sufficient precisio
 
 | ID | Requirement | Verification | Planned build |
 |---|---|---|---|
-| REQ-PDF-001 | The program shall preserve selectable text, hyperlinks, annotations, bookmarks, metadata, forms, and embedded fonts when supported by the selected backend, and shall document any unsupported or degraded feature. | Test/Inspection | B2 |
+| REQ-PDF-001 | The program shall preserve selectable text, hyperlinks, annotations, bookmarks, metadata, forms, and embedded fonts when supported by the selected backend, and shall document any unsupported or degraded feature. Source cropping shall preserve imported page content; annotation and form-field transformation limitations shall be documented. | Test/Inspection | B2 |
 | REQ-PDF-002 | The program shall reject encrypted input unless an explicitly supported authentication mechanism is supplied. | Test | B2 |
 | REQ-PDF-003 | The program shall preserve basic input metadata where supported and shall identify ezbind processing in output metadata. | Test/Inspection | B2 |
 

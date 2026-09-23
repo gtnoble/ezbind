@@ -94,7 +94,7 @@ The exact back-side transformation is represented in the placement model and ver
 
 ### 3.5 Source-page placement policy
 
-Use the effective source page box, preferring CropBox and falling back to MediaBox. Respect source page rotation and UserUnit through qpdf’s transformation-aware page import. Fit the complete source page uniformly inside the margin-bounded content rectangle without cropping or distortion. The configured top, bottom, fore-edge, and spine margins are minimum clearances; aspect-ratio differences may add letterboxing to one pair of edges. Existing whitespace inside the input page is preserved. Do not enlarge unless a later explicitly selected policy requires it.
+Use the effective source page box, preferring CropBox and falling back to MediaBox. Respect source page rotation and UserUnit through qpdf’s transformation-aware page import. Apply global visual source crop distances (top, bottom, left, right) to that effective CropBox, validate every page independently, and clip the retained source rectangle before fitting it uniformly inside the margin-bounded content rectangle without distortion. The configured top, bottom, fore-edge, and spine margins remain output clearances; aspect-ratio differences may add letterboxing to one pair of edges. Source crop distances default to zero. Auto-crop is not part of this build. An invalid retained rectangle fails before output creation.
 
 Mixed source-page dimensions are accepted only when each page independently fits the configured finished-page rectangle. An impossible placement causes validation failure before output creation.
 
@@ -213,7 +213,7 @@ The C bridge should expose opaque handles and plain C scalar/record parameters o
 ```text
 ez_qpdf_open_input
 ez_qpdf_get_page_count
-ez_qpdf_get_page_descriptor
+ez_qpdf_get_page_descriptor (effective visual CropBox dimensions)
 ez_qpdf_begin_output
 ez_qpdf_begin_page
 ez_qpdf_place_page
@@ -365,10 +365,11 @@ Purpose: implement native PDF import and output.
 Responsibilities:
 
 - open and validate input;
-- inspect page count and effective geometry;
+- inspect page count and effective visual page geometry;
 - import source pages as transformation-aware Form XObjects;
+- replace each fresh form BBox with the retained source rectangle before copying;
 - copy foreign objects into output;
-- place page Form XObjects into destination rectangles;
+- place clipped page Form XObjects into destination rectangles;
 - append vector content streams;
 - write output and expose errors through the C ABI.
 

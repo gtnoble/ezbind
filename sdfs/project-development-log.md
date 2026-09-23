@@ -128,3 +128,13 @@ Requirements and operational-concept products are in draft review. No implementa
 - **Implementation:** The application validates cover-only mode, checks the cover destination, renders directly through `Ezbind_SVG_Bridge`, commits the cover temporary output, and returns before `Ezbind_QPDF_Bridge.Open_Input`.
 - **Verification:** Cover-only Letter output passes `pdfinfo`, `qpdf --check`, and text extraction; invalid mixed/incomplete invocations return status 2 without output; combined mode still produces valid folio and cover PDFs; no cover temporary file remains after success.
 - **Process note:** This increment is self-evaluated by the developer; independent review of cover output remains required.
+
+## Entry 014 — Explicit source cropping
+
+- **Date:** 2026-09-23
+- **Activity:** Implemented deterministic source-page cropping; automatic whitespace detection remains deferred.
+- **Interface:** Added `--crop-top`, `--crop-bottom`, `--crop-left`, and `--crop-right`; values accept non-negative `mm`, `in`, or `pt` and default to zero.
+- **Implementation:** Added qpdf page descriptors for transformed CropBox dimensions; validated every source page before output creation; converted visual retained rectangles to source coordinates; replaced fresh Form XObject BBoxes before copying; retained proportional placement and output-margin behavior.
+- **Limitations:** Source page content is clipped during import. Annotation and form-field transformation remains subject to backend limitations. Auto-crop and raster/render dependencies were not added.
+- **Verification:** Root and nested development builds pass. CLI, qpdf validity, crop behavior, and invalid-retained-rectangle checks are recorded in the B2 test description.
+- **Process note:** This increment is self-evaluated by the developer; independent user review of cropped output remains required.
