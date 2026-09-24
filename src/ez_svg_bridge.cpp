@@ -115,6 +115,26 @@ extern "C" int ez_svg_render_cover_sheet(char const* back_path,
 
         if (okay)
         {
+            constexpr double cut_line_inset = 12.0;
+            constexpr double cut_line_width = 0.5;
+            constexpr double cut_dash[] = {4.0, 3.0};
+            cairo_save(context);
+            cairo_set_source_rgb(context, 0.45, 0.45, 0.45);
+            cairo_set_line_width(context, cut_line_width);
+            cairo_set_dash(context, cut_dash, 2, 0.0);
+            cairo_move_to(context, width / 2.0, cut_line_inset);
+            cairo_line_to(context, width / 2.0, height - cut_line_inset);
+            cairo_stroke(context);
+            cairo_restore(context);
+            okay = cairo_status(context) == CAIRO_STATUS_SUCCESS;
+            if (!okay)
+            {
+                set_error(error_text, error_size, "Cairo failed while drawing cover cut guide");
+            }
+        }
+
+        if (okay)
+        {
             cairo_show_page(context);
             okay = cairo_status(context) == CAIRO_STATUS_SUCCESS;
             if (!okay)

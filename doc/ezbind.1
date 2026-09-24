@@ -70,7 +70,9 @@ landscape cardstock sheet.
 .B --cover-output \fIPATH\fR
 Write a separate one-page cover PDF. The front artwork is rendered on the right
 half and the back artwork on the left half, placing both center-cut edges toward
-the spine. Artwork is fitted proportionally to each half-sheet viewport. When
+the spine. A dashed gray center cut guide is drawn over the artwork, 12 points
+short of the top and bottom edges. Artwork is fitted proportionally to each
+half-sheet viewport. When
 cover-only mode is used, no input PDF or folio --output is required; the three
 cover options are sufficient and only --cover-output is written.
 .SH DEFAULT LAYOUT
@@ -89,9 +91,10 @@ with a small asymmetric fixture before committing a valuable book.
 .PP
 When cover mode is selected, print the separate cover PDF on the selected
 cardstock size. The back artwork is on the left and the front artwork is on the
-right; cut vertically at the center so both cut edges face the spine. Cover
-artwork is rendered by librsvg onto a Cairo PDF surface and is fitted
-proportionally to each half-sheet viewport.
+right; cut along the dashed gray center guide so both cut edges face the spine.
+The guide is inset 12 points from the sheet edges. Cover artwork is rendered by
+librsvg onto a Cairo PDF surface and is fitted proportionally to each half-sheet
+viewport.
 .PP
 Folio and cover output are first written to sibling temporary files and
 committed after successful generation. A handled failure does not leave the

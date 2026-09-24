@@ -31,6 +31,7 @@ The physical acceptance environment will include a duplex-capable printer, the s
 | TEST-IMP | Verify page order, padding, side/position assignment, orientation, and fold sequence. | REQ-CAP-005..007; REQ-DATA-002; REQ-PHY-003 |
 | TEST-PDF | Verify input handling, page descriptors, CropBox/MediaBox fallback, clipping, rotation/UserUnit, output validity, visible preservation, metadata, and feature limitations. | REQ-CAP-002, 008..009, 027; REQ-PDF-001..003; REQ-QUAL-003 |
 | TEST-CLI | Verify options, defaults, help, canonical usage, invalid flags, diagnostics, exit statuses, cover/guide/mark behavior, and overwrite policy. | REQ-CAP-010..013, 020..021, 023..026; REQ-CLI-001..009 |
+| TEST-COVER | Verify SVG cover rendering, sheet dimensions, back/front placement, center cut-guide appearance, and cover-only/combined output lifecycle. | REQ-CAP-025..026; REQ-CLI-001..009 |
 | TEST-DOC | Verify `ezbind(1)` presence, required content, installation metadata, and correspondence with the executable interface. | REQ-DOC-001..003 |
 | TEST-SEC | Verify local-only processing, temporary-file policy, and content-free ordinary diagnostics. | REQ-ENV-002..003; REQ-QUAL-004 |
 | TEST-PHY | Verify printed duplex orientation, sequence, fold direction, stack order, and physical guides. | REQ-CAP-006, 012, 017; REQ-PHY-001..003 |

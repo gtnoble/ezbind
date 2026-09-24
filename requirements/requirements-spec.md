@@ -89,7 +89,7 @@ All physical dimensions shall be represented internally with sufficient precisio
 | REQ-CAP-022 | The program shall provide an optional printer safe-area reserve and shall reject a layout when the requested content, margins, and reserves do not fit. | Test | B2 |
 | REQ-CAP-023 | The program shall provide an explicit overwrite option and shall refuse to replace an existing output by default. | Test | B2 |
 | REQ-CAP-024 | The program shall report the selected non-default layout parameters sufficiently for a user to identify how the output was generated. | Test/Inspection | B2 |
-| REQ-CAP-025 | The program shall provide an optional SVG cover-card mode that accepts separate front and back SVG artwork and emits one landscape cardstock sheet with back artwork on the left half and front artwork on the right half, so the center cut edges face the spine. | Test/Demonstration | B2 |
+| REQ-CAP-025 | The program shall provide an optional SVG cover-card mode that accepts separate front and back SVG artwork and emits one landscape cardstock sheet with back artwork on the left half and front artwork on the right half, so the center cut edges face the spine; the sheet shall mark the center cut boundary with a 0.5 pt dashed gray line inset 12 pt from the top and bottom edges. | Test/Demonstration | B2 |
 | REQ-CAP-026 | The program shall allow SVG cover-card output without an input text-block PDF or folio output path when all three cover options are supplied. | Test | B2 |
 
 ### 4.2 External interface requirements
@@ -182,6 +182,7 @@ The following test groups are reserved in the Test Plan and will be expanded int
 | REQ-CAP-010..012 | TEST-CLI, TEST-PHY |
 | REQ-CAP-013..022 | TEST-GEO, TEST-CLI, TEST-PHY |
 | REQ-CAP-023..024 | TEST-CLI, TEST-PDF |
+| REQ-CAP-025..026 | TEST-COVER, TEST-CLI |
 | REQ-CLI-001..009 | TEST-CLI, TEST-SEC |
 | REQ-DATA-001..003 | TEST-GEO, unit inspection |
 | REQ-ENV-001..004 | TEST-SEC, TEST-PDF |

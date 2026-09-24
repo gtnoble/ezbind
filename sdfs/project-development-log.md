@@ -138,3 +138,11 @@ Requirements and operational-concept products are in draft review. No implementa
 - **Limitations:** Source page content is clipped during import. Annotation and form-field transformation remains subject to backend limitations. Auto-crop and raster/render dependencies were not added.
 - **Verification:** Root and nested development builds pass. CLI, qpdf validity, crop behavior, and invalid-retained-rectangle checks are recorded in the B2 test description.
 - **Process note:** This increment is self-evaluated by the developer; independent user review of cropped output remains required.
+
+## Entry 015 — Cover-card center cut guide
+
+- **Date:** 2026-09-24
+- **Activity:** Added an explicit vector cut guide to generated cover-card sheets.
+- **Design:** The shared SVG renderer draws a 0.5 pt dashed gray line at the sheet midpoint, inset 12 pt from the top and bottom, after both cover SVGs so the guide is visible over artwork. It is always enabled in cover output.
+- **Verification:** Root and nested Alire development builds pass. The Ada/native bridge test passes; Letter and A4 cover-only output has the expected dimensions and passes `qpdf --check`; 72 dpi Letter and A4 rasters confirm the center dash pattern, gray color, and 12 pt end insets. Combined A4 folio-plus-cover output succeeds and both PDFs pass validation.
+- **Process note:** This change is self-evaluated by the developer; independent review of the rendered cover and physical cutting workflow remains invited.
