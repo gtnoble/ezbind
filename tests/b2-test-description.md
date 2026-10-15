@@ -31,6 +31,7 @@ This record covers the implemented B2 slice: CLI parsing, qpdf input validation,
 | TEST-PDF-002 | Run malformed input. | Status 3; no output and no sibling temporary file. **Pass.** |
 | TEST-IMP-001 | Run a five-page synthetic PDF. | Four output sides after padding to eight logical positions. **Pass.** |
 | TEST-GEO-001 | Run five-page input with `--sheet a4 --grid`. | Four A4 output sides; `qpdf --check` passes; vector grid path is emitted. **Pass.** |
+| TEST-GEO-000 | Run the Ada geometry core check with zero margins. | The resulting left and right content rectangles equal their respective finished-page rectangles. **Pass.** |
 | TEST-GEO-002 | Run with independent margin options using `mm`, `in`, and `pt` values and a custom grid spacing. | Status 0; output remains valid and the selected values affect the layout. Invalid, negative, zero-spacing, or unitless values return status 2 without output. **Pass.** |
 | TEST-GEO-003 | Use asymmetric margins and inspect source placement/grid regions. | Spine clearance is on each fold-facing inner edge; fore-edge clearance is outer; source placement is uniformly fitted inside custom content rectangles and grid lines do not cross them. **Pass.** |
 | TEST-GEO-004 | Use `--crop-top`, `--crop-bottom`, `--crop-left`, and `--crop-right` with physical values. | Source crop values are parsed independently from output margins, applied before uniform fit, and crop margins that leave no positive-area page return status 4 without output. **Pass.** |

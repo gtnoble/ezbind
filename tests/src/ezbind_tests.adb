@@ -40,8 +40,8 @@ procedure Ezbind_Tests is
         Page_Width => 396.0,
         Page_Height => 612.0,
         Page_Margins =>
-          (Top => 36.0, Bottom => 36.0,
-           Fore_Edge => 36.0, Spine => 48.0));
+          (Top => 0.0, Bottom => 0.0,
+           Fore_Edge => 0.0, Spine => 0.0));
    Custom_Layout : constant Ezbind_Geometry.Sheet_Layout :=
      Ezbind_Geometry.Create_Layout
        (Sheet_Width => 792.0,
@@ -79,6 +79,14 @@ begin
    end if;
 
    if not Ezbind_Geometry.Is_Valid (Layout)
+     or else Layout.Left_Content.Left /= 0.0
+     or else Layout.Left_Content.Bottom /= 0.0
+     or else Layout.Left_Content.Right /= 396.0
+     or else Layout.Left_Content.Top /= 612.0
+     or else Layout.Right_Content.Left /= 396.0
+     or else Layout.Right_Content.Bottom /= 0.0
+     or else Layout.Right_Content.Right /= 792.0
+     or else Layout.Right_Content.Top /= 612.0
      or else not Ezbind_Geometry.Is_Valid (Custom_Layout)
      or else Custom_Layout.Left_Content.Left /= 24.0
      or else Custom_Layout.Left_Content.Right /= 336.0

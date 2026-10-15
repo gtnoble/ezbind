@@ -34,10 +34,10 @@ package body Ezbind_Application is
       Crop_Bottom       : Ezbind_Physical.Point_Value := 0.0;
       Crop_Left         : Ezbind_Physical.Point_Value := 0.0;
       Crop_Right        : Ezbind_Physical.Point_Value := 0.0;
-      Top_Margin        : Ezbind_Physical.Point_Value := 36.0;
-      Bottom_Margin     : Ezbind_Physical.Point_Value := 36.0;
-      Fore_Margin       : Ezbind_Physical.Point_Value := 36.0;
-      Spine_Margin      : Ezbind_Physical.Point_Value := 48.0;
+      Top_Margin        : Ezbind_Physical.Point_Value := 0.0;
+      Bottom_Margin     : Ezbind_Physical.Point_Value := 0.0;
+      Fore_Margin       : Ezbind_Physical.Point_Value := 0.0;
+      Spine_Margin      : Ezbind_Physical.Point_Value := 0.0;
       Grid_Spacing      : Ezbind_Physical.Point_Value := 14.1732283464567;
    end record;
 

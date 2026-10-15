@@ -47,13 +47,13 @@ spacing is 5 mm. Grid lines are not added unless this option is selected.
 Set the grid spacing. Values require a positive \fBmm\fR, \fBin\fR, or \fBpt\fR value; the default is 5 mm.
 .TP
 .BR --margin-top\~VALUE | \-t\~VALUE | --margin-bottom\~VALUE | \-b\~VALUE
-Set the minimum top or bottom clearance around the uniformly fitted source page. Values require a non-negative \fBmm\fR, \fBin\fR, or \fBpt\fR suffix. The defaults are 36 pt. These are output margins, not source crop values.
+Set the minimum top or bottom clearance around the uniformly fitted source page. Values require a non-negative \fBmm\fR, \fBin\fR, or \fBpt\fR suffix. The defaults are zero. These are output margins, not source crop values.
 .TP
 .BR --crop-top\~VALUE | --crop-bottom\~VALUE | --crop-left\~VALUE | --crop-right\~VALUE
 Remove the specified source-page edge distances before placement. The crop margins may remove source content, but they must leave a positive-width, positive-height page area. Values require a non-negative \fBmm\fR, \fBin\fR, or \fBpt\fR suffix and default to zero. Distances are measured from the effective CropBox, falling back to MediaBox, and top/bottom/left/right refer to visual edges after page rotation. Auto-crop is not enabled.
 .TP
 .BR --margin-fore-edge\~VALUE | \-e\~VALUE | --margin-spine\~VALUE | \-i\~VALUE
-Set the minimum fore-edge or spine clearance around the uniformly fitted source page. The spine is the fold-facing inner edge; the fore-edge is outer. Values require a non-negative \fBmm\fR, \fBin\fR, or \fBpt\fR suffix. The defaults are 36 pt and 48 pt.
+Set the minimum fore-edge or spine clearance around the uniformly fitted source page. The spine is the fold-facing inner edge; the fore-edge is outer. Values require a non-negative \fBmm\fR, \fBin\fR, or \fBpt\fR suffix. Both margins default to zero.
 .TP
 .BR --force , \-f
 Replace existing folio and cover output PDFs after successful generation. The
