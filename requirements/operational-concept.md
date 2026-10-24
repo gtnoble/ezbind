@@ -3,9 +3,9 @@
 **Project:** ezbind
 **Document:** Operational Concept Description (OCD)
 **Identifier:** EZBIND-OCD-001
-**Status:** Draft for requirements review
-**Date:** 2026-09-21
-**Revision:** 1.0
+**Status:** Draft project update under CHG-015
+**Date:** 2026-10-24
+**Revision:** 1.1 (project update under CHG-015)
 
 ## Contents
 
@@ -28,7 +28,7 @@ This document defines the intended user workflow and physical assumptions. Detai
 ## 2. Referenced documents
 
 - `plan/project-plan.md`, EZBIND-SDP-001, Revision 1.1.
-- `requirements/requirements-spec.md`, EZBIND-SRS-001, Revision 1.1.
+- `requirements/requirements-spec.md`, EZBIND-SRS-001, Revision 1.3 project update.
 - User-approved resolutions to the B0 open-decision register, 2026-09-21.
 
 ## 3. Current situation
@@ -59,7 +59,9 @@ The user is an operator who supplies the input PDF, selects physical/layout opti
 
 ### 5.2 Normal operation
 
-Folio mode uses two positional paths, INPUT.pdf OUTPUT.pdf. Combined mode adds all three named cover options; cover-only mode uses zero positional paths and requires --cover-front, --cover-back, and --cover-output. Options may be interspersed, -- ends option parsing, and examples prefer options first. Defaults produce Letter or A4 folded-folio output with zero margins, no creep, no printed marks, no cover artwork, and no spine/fabric guide. The program validates inputs, geometry, options, and path collisions before writing. Existing destinations are replaced without prompting only after successful generation.
+Text mode is invoked as `ezbind text [OPTIONS] INPUT.pdf OUTPUT.pdf`. It creates a folded-folio text PDF and accepts sheet selection (`--sheet`/`-s`) plus the supported text-layout options. Cover mode is invoked as `ezbind cover [OPTIONS] --front FRONT.svg --back BACK.svg OUTPUT.pdf`; it creates a separate cover-card PDF. Both commands accept interspersed options and `--`; examples prefer options first. Command-specific help is available for each command, top-level help lists the commands, and help is recognized on its own. The default sheet is Letter; margins and other layout defaults are as specified in the command manual. Text mode rejects artwork options, and cover mode rejects text-only options. There is no combined mode and no compatibility alias for the former `--cover-*` syntax. Users needing both outputs run the two commands separately.
+
+Each invocation validates its own inputs, geometry, options, and path collisions before writing. Existing destination files are replaced unconditionally only after successful generation. The per-invocation guarantee covers only that invocation's single output. Separate invocations cannot check cross-invocation destination collisions together; running both commands is not a transaction and provides no all-or-nothing guarantee.
 
 The source page is treated as the finished book-page size. A folded sheet contains two source-page positions on each side, for four logical pages per sheet. For a four-page unit, the nominal imposed positions are:
 
@@ -72,21 +74,9 @@ The exact duplex flip/orientation is a controlled implementation detail that mus
 
 ### 5.3 Optional operation
 
-The user may request:
+Text mode may request custom top, bottom, fore-edge, and spine margins; millimetres, inches, or points; a 5 mm default graph-paper-like vector grid; blank cover-card pages; a spine/fabric guide; crop, fold, or registration marks; explicit creep compensation; or a printer safe-area reserve where implemented. Cover mode accepts separate front/back SVG artwork and creates a cardstock cover-sheet PDF. Its `--front` and `--back` artwork paths must not be the output destination, including normalized path aliases.
 
-- separate front and back SVG cover artwork rendered to a cardstock cover-sheet PDF;
-- custom top, bottom, fore-edge, and spine margins;
-- millimetres, inches, or points for physical dimensions;
-- a 5 mm default graph-paper-like vector grid in margins;
-- blank cover-card pages;
-- a spine/fabric guide;
-- crop, fold, or registration marks;
-- explicit creep compensation;
-- a printer safe-area reserve;
-
-Existing outputs are replaced without prompting after successful generation.
-
-The application must describe active non-default options in diagnostics or output metadata sufficiently for the user to identify the layout used. The input PDF and source SVGs must not be destinations; normalized path aliases are rejected, and the two output paths must differ.
+Each invocation replaces its one existing destination without prompting only after successful generation. The text input must not be its output. Since the commands run separately, neither invocation can validate collisions between the other invocation's inputs and outputs.
 
 ### 5.4 Error operation
 
@@ -94,7 +84,7 @@ Invalid PDF input, unsupported PDF conditions, impossible geometry, missing depe
 
 ### 5.5 Physical additions
 
-Cover cards and fabric remain physical additions. The default folio output does not print cover artwork. When front/back SVG options are supplied, the program emits a separate cardstock cover-sheet PDF with back artwork left and front artwork right; the user prints it, cuts the center, and uses the two resulting cards. Optional blank cover-card pages and a spine/fabric guide remain aids for layout and registration only; they do not represent the physical materials.
+Cover cards and fabric remain physical additions. The default folio output does not print cover artwork. Cover mode emits a separate cardstock cover-sheet PDF with back artwork left and front artwork right; the user prints it, cuts the center, and uses the two resulting cards. Optional blank cover-card pages and a spine/fabric guide remain aids for layout and registration only; they do not represent the physical materials.
 
 ## 6. Operational environment
 
@@ -130,7 +120,7 @@ The user remains responsible for printer duplex settings, paper handling, physic
 
 ### 8.2 Accepted baseline assumptions
 
-The user accepted the proposed B0 resolutions on 2026-09-21:
+The user accepted the proposed B0 resolutions on 2026-09-21. CHG-015 subsequently authorizes the breaking command split; this concept revision does not claim fresh user acceptance:
 
 - Letter, A4, and custom physical dimensions are supported.
 - The source page represents the finished page.

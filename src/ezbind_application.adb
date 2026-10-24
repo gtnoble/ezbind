@@ -16,8 +16,10 @@ package body Ezbind_Application is
    use type Ezbind_Imposition.Side_Kind;
    use type Ezbind_Physical.Point_Value;
    type Sheet_Kind is (Letter, A4);
+   type Command_Kind is (Text_Command, Cover_Command);
 
    type Options is record
+      Command           : Command_Kind := Text_Command;
       Input_Path        : String (1 .. 1024) := (others => ' ');
       Input_Last        : Natural := 0;
       Output_Path       : String (1 .. 1024) := (others => ' ');
@@ -26,8 +28,6 @@ package body Ezbind_Application is
       Cover_Front_Last  : Natural := 0;
       Cover_Back_Path   : String (1 .. 1024) := (others => ' ');
       Cover_Back_Last   : Natural := 0;
-      Cover_Output_Path : String (1 .. 1024) := (others => ' ');
-      Cover_Output_Last : Natural := 0;
       Sheet             : Sheet_Kind := Letter;
       Grid              : Boolean := False;
       Crop_Top          : Ezbind_Physical.Point_Value := 0.0;
@@ -40,6 +40,16 @@ package body Ezbind_Application is
       Spine_Margin      : Ezbind_Physical.Point_Value := 0.0;
       Grid_Spacing      : Ezbind_Physical.Point_Value := 14.1732283464567;
    end record;
+
+   procedure Print_Usage_Error (Message : in String) is
+   begin
+      if Ada.Command_Line.Argument_Count > 0 then
+         Ezbind_CLI.Print_Usage_Error
+           (Message, Ada.Command_Line.Argument (1));
+      else
+         Ezbind_CLI.Print_Usage_Error (Message);
+      end if;
+   end Print_Usage_Error;
 
    function Value
      (Text : in String;
@@ -69,12 +79,12 @@ package body Ezbind_Application is
       Last        : in out Natural) return Boolean is
    begin
       if Index = Count then
-         Ezbind_CLI.Print_Usage_Error (Option_Name & " requires a path");
+         Print_Usage_Error (Option_Name & " requires a path");
          return False;
       end if;
       Index := Index + 1;
       if not Set_Path (Target, Last, Ada.Command_Line.Argument (Index)) then
-         Ezbind_CLI.Print_Usage_Error (Option_Name & " path is too long or empty");
+         Print_Usage_Error (Option_Name & " path is too long or empty");
          return False;
       end if;
       return True;
@@ -87,7 +97,7 @@ package body Ezbind_Application is
       Result      : out Ezbind_Physical.Point_Value) return Boolean is
    begin
       if Index = Count then
-         Ezbind_CLI.Print_Usage_Error (Option_Name & " requires a value in mm, in, or pt");
+         Print_Usage_Error (Option_Name & " requires a value in mm, in, or pt");
          return False;
       end if;
       Index := Index + 1;
@@ -97,7 +107,7 @@ package body Ezbind_Application is
          if not Ezbind_Physical.Parse
            (Ada.Command_Line.Argument (Index), Parsed)
          then
-            Ezbind_CLI.Print_Usage_Error
+            Print_Usage_Error
               (Option_Name & " requires a non-negative value in mm, in, or pt");
             return False;
          end if;
@@ -105,7 +115,7 @@ package body Ezbind_Application is
          return True;
       exception
          when others =>
-            Ezbind_CLI.Print_Usage_Error
+            Print_Usage_Error
               (Option_Name & " requires a non-negative value in mm, in, or pt");
             return False;
       end;
@@ -113,7 +123,7 @@ package body Ezbind_Application is
 
    function Parse_Options
      (Result : out Options) return Boolean is
-      Index : Positive := 1;
+      Index : Positive := 2;
       Count : constant Natural := Ada.Command_Line.Argument_Count;
       Options_Ended : Boolean := False;
 
@@ -124,18 +134,102 @@ package body Ezbind_Application is
              GNAT.OS_Lib.Normalize_Pathname (Right);
       end Same_Path;
 
-      function Conflicts_With_Source (Path : in String) return Boolean is
+      function Parse_Text_Option (Argument : in String) return Boolean is
       begin
-         return Same_Path
-           (Path, Value (Result.Input_Path, Result.Input_Last))
-           or else Same_Path
-             (Path, Value (Result.Cover_Front_Path, Result.Cover_Front_Last))
-           or else Same_Path
-             (Path, Value (Result.Cover_Back_Path, Result.Cover_Back_Last));
-      end Conflicts_With_Source;
+         if Argument = "--grid" or else Argument = "-g" then
+            Result.Grid := True;
+         elsif Argument = "--grid-spacing" or else Argument = "-G" then
+            if not Read_Physical
+              ("--grid-spacing", Index, Count, Result.Grid_Spacing)
+              or else Result.Grid_Spacing <= 0.0
+            then
+               Print_Usage_Error
+                 ("--grid-spacing requires a positive value in mm, in, or pt");
+               return False;
+            end if;
+         elsif Argument = "--crop-top" then
+            if not Read_Physical
+              ("--crop-top", Index, Count, Result.Crop_Top)
+            then
+               return False;
+            end if;
+         elsif Argument = "--crop-bottom" then
+            if not Read_Physical
+              ("--crop-bottom", Index, Count, Result.Crop_Bottom)
+            then
+               return False;
+            end if;
+         elsif Argument = "--crop-left" then
+            if not Read_Physical
+              ("--crop-left", Index, Count, Result.Crop_Left)
+            then
+               return False;
+            end if;
+         elsif Argument = "--crop-right" then
+            if not Read_Physical
+              ("--crop-right", Index, Count, Result.Crop_Right)
+            then
+               return False;
+            end if;
+         elsif Argument = "--margin-top" or else Argument = "-t" then
+            if not Read_Physical
+              ("--margin-top", Index, Count, Result.Top_Margin)
+            then
+               return False;
+            end if;
+         elsif Argument = "--margin-bottom" or else Argument = "-b" then
+            if not Read_Physical
+              ("--margin-bottom", Index, Count, Result.Bottom_Margin)
+            then
+               return False;
+            end if;
+         elsif Argument = "--margin-fore-edge" or else Argument = "-e" then
+            if not Read_Physical
+              ("--margin-fore-edge", Index, Count, Result.Fore_Margin)
+            then
+               return False;
+            end if;
+         elsif Argument = "--margin-spine" or else Argument = "-i" then
+            if not Read_Physical
+              ("--margin-spine", Index, Count, Result.Spine_Margin)
+            then
+               return False;
+            end if;
+         else
+            Print_Usage_Error
+              ("unknown or malformed text option: " & Argument);
+            return False;
+         end if;
+         return True;
+      end Parse_Text_Option;
+
+      function Parse_Cover_Option (Argument : in String) return Boolean is
+      begin
+         if Argument = "--front" then
+            return Read_Path
+              (Argument, Index, Count,
+               Result.Cover_Front_Path, Result.Cover_Front_Last);
+         elsif Argument = "--back" then
+            return Read_Path
+              (Argument, Index, Count,
+               Result.Cover_Back_Path, Result.Cover_Back_Last);
+         else
+            Print_Usage_Error
+              ("unknown or malformed cover option: " & Argument);
+            return False;
+         end if;
+      end Parse_Cover_Option;
    begin
       if Count = 0 then
-         Ezbind_CLI.Print_Usage_Error ("input and output PDF paths are required");
+         Print_Usage_Error ("a text or cover command is required");
+         return False;
+      elsif Ada.Command_Line.Argument (1) = "text" then
+         Result.Command := Text_Command;
+      elsif Ada.Command_Line.Argument (1) = "cover" then
+         Result.Command := Cover_Command;
+      else
+         Print_Usage_Error
+           ("unknown command; expected text or cover");
          return False;
       end if;
 
@@ -146,11 +240,13 @@ package body Ezbind_Application is
             if Options_Ended or else Argument'Length = 0
               or else Argument (Argument'First) /= '-'
             then
-               if Result.Input_Last = 0 then
+               if Result.Command = Text_Command
+                 and then Result.Input_Last = 0
+               then
                   if not Set_Path
                     (Result.Input_Path, Result.Input_Last, Argument)
                   then
-                     Ezbind_CLI.Print_Usage_Error
+                     Print_Usage_Error
                        ("input path is too long or empty");
                      return False;
                   end if;
@@ -158,92 +254,21 @@ package body Ezbind_Application is
                   if not Set_Path
                     (Result.Output_Path, Result.Output_Last, Argument)
                   then
-                     Ezbind_CLI.Print_Usage_Error
+                     Print_Usage_Error
                        ("output path is too long or empty");
                      return False;
                   end if;
                else
-                  Ezbind_CLI.Print_Usage_Error
-                    ("exactly two PDF paths are required: input then output");
+                  Print_Usage_Error
+                    ("too many positional paths for this command");
                   return False;
                end if;
             elsif Argument = "--" then
                Options_Ended := True;
-            elsif Argument = "--cover-front" then
-               if not Read_Path
-                 ("--cover-front", Index, Count,
-                  Result.Cover_Front_Path, Result.Cover_Front_Last)
-               then
-                  return False;
-               end if;
-            elsif Argument = "--cover-back" then
-               if not Read_Path
-                 ("--cover-back", Index, Count,
-                  Result.Cover_Back_Path, Result.Cover_Back_Last)
-               then
-                  return False;
-               end if;
-            elsif Argument = "--cover-output" then
-               if not Read_Path
-                 ("--cover-output", Index, Count,
-                  Result.Cover_Output_Path, Result.Cover_Output_Last)
-               then
-                  return False;
-               end if;
-            elsif Argument = "--grid" or else Argument = "-g" then
-               Result.Grid := True;
-            elsif Argument = "--grid-spacing" or else Argument = "-G" then
-               if not Read_Physical
-                 ("--grid-spacing", Index, Count, Result.Grid_Spacing)
-                 or else Result.Grid_Spacing <= 0.0
-               then
-                  Ezbind_CLI.Print_Usage_Error
-                    ("--grid-spacing requires a positive value in mm, in, or pt");
-                  return False;
-               end if;
-            elsif Argument = "--crop-top" then
-               if not Read_Physical ("--crop-top", Index, Count, Result.Crop_Top) then
-                  return False;
-               end if;
-            elsif Argument = "--crop-bottom" then
-               if not Read_Physical ("--crop-bottom", Index, Count, Result.Crop_Bottom) then
-                  return False;
-               end if;
-            elsif Argument = "--crop-left" then
-               if not Read_Physical ("--crop-left", Index, Count, Result.Crop_Left) then
-                  return False;
-               end if;
-            elsif Argument = "--crop-right" then
-               if not Read_Physical ("--crop-right", Index, Count, Result.Crop_Right) then
-                  return False;
-               end if;
-            elsif Argument = "--margin-top" or else Argument = "-t" then
-               if not Read_Physical
-                 ("--margin-top", Index, Count, Result.Top_Margin)
-               then
-                  return False;
-               end if;
-            elsif Argument = "--margin-bottom" or else Argument = "-b" then
-               if not Read_Physical
-                 ("--margin-bottom", Index, Count, Result.Bottom_Margin)
-               then
-                  return False;
-               end if;
-            elsif Argument = "--margin-fore-edge" or else Argument = "-e" then
-               if not Read_Physical
-                 ("--margin-fore-edge", Index, Count, Result.Fore_Margin)
-               then
-                  return False;
-               end if;
-            elsif Argument = "--margin-spine" or else Argument = "-i" then
-               if not Read_Physical
-                 ("--margin-spine", Index, Count, Result.Spine_Margin)
-               then
-                  return False;
-               end if;
             elsif Argument = "--sheet" or else Argument = "-s" then
                if Index = Count then
-                  Ezbind_CLI.Print_Usage_Error ("--sheet requires letter or a4");
+                  Print_Usage_Error
+                    ("--sheet requires letter or a4");
                   return False;
                end if;
                Index := Index + 1;
@@ -255,70 +280,52 @@ package body Ezbind_Application is
                   elsif Sheet = "a4" then
                      Result.Sheet := A4;
                   else
-                     Ezbind_CLI.Print_Usage_Error
+                     Print_Usage_Error
                        ("--sheet accepts only letter or a4");
                      return False;
                   end if;
                end;
-            else
-               Ezbind_CLI.Print_Usage_Error
-                 ("unknown or malformed option: " & Argument);
+            elsif Result.Command = Text_Command then
+               if not Parse_Text_Option (Argument) then
+                  return False;
+               end if;
+            elsif not Parse_Cover_Option (Argument) then
                return False;
             end if;
          end;
          Index := Index + 1;
       end loop;
 
-      declare
-         Cover_Options : constant Boolean :=
-           Result.Cover_Front_Last /= 0
-           or else Result.Cover_Back_Last /= 0
-           or else Result.Cover_Output_Last /= 0;
-         Complete_Cover_Options : constant Boolean :=
-           Result.Cover_Front_Last /= 0
-           and then Result.Cover_Back_Last /= 0
-           and then Result.Cover_Output_Last /= 0;
-         Cover_Only : constant Boolean :=
-           Complete_Cover_Options
-           and then Result.Input_Last = 0
-           and then Result.Output_Last = 0;
-      begin
-         if Cover_Options and then not Complete_Cover_Options then
-            Ezbind_CLI.Print_Usage_Error
-              ("--cover-front, --cover-back, and --cover-output are required together");
-            return False;
-         end if;
+      if Result.Command = Text_Command and then Result.Input_Last = 0 then
+         Print_Usage_Error ("missing input PDF path");
+         return False;
+      elsif Result.Command = Cover_Command
+        and then (Result.Cover_Front_Last = 0
+                  or else Result.Cover_Back_Last = 0)
+      then
+         Print_Usage_Error
+           ("cover requires both --front and --back SVG paths");
+         return False;
+      elsif Result.Output_Last = 0 then
+         Print_Usage_Error ("missing output PDF path");
+         return False;
+      end if;
 
-         if not Cover_Only then
-            if Result.Input_Last = 0 then
-               Ezbind_CLI.Print_Usage_Error ("missing input PDF path");
-               return False;
-            elsif Result.Output_Last = 0 then
-               Ezbind_CLI.Print_Usage_Error ("missing output PDF path");
-               return False;
-            end if;
-         end if;
-
-         if Same_Path
-           (Value (Result.Output_Path, Result.Output_Last),
-            Value (Result.Cover_Output_Path, Result.Cover_Output_Last))
-         then
-            Ezbind_CLI.Print_Usage_Error
-              ("folio output and --cover-output must name different files");
-            return False;
-         end if;
-
-         if Conflicts_With_Source
-           (Value (Result.Output_Path, Result.Output_Last))
-           or else Conflicts_With_Source
-             (Value (Result.Cover_Output_Path, Result.Cover_Output_Last))
-         then
-            Ezbind_CLI.Print_Usage_Error
-              ("output paths must not name source PDF or SVG files");
-            return False;
-         end if;
-         return True;
-      end;
+      if Same_Path
+        (Value (Result.Output_Path, Result.Output_Last),
+         Value (Result.Input_Path, Result.Input_Last))
+        or else Same_Path
+          (Value (Result.Output_Path, Result.Output_Last),
+           Value (Result.Cover_Front_Path, Result.Cover_Front_Last))
+        or else Same_Path
+          (Value (Result.Output_Path, Result.Output_Last),
+           Value (Result.Cover_Back_Path, Result.Cover_Back_Last))
+      then
+         Print_Usage_Error
+           ("output path must not name a source PDF or SVG file");
+         return False;
+      end if;
+      return True;
    end Parse_Options;
 
    procedure Geometry
@@ -388,7 +395,7 @@ package body Ezbind_Application is
       return Good;
    end Draw_Grid;
 
-   function Produce
+   function Produce_Text
      (Settings : in Options) return Integer is
       Input       : Ezbind_QPDF_Bridge.Input_Handle;
       Output      : Ezbind_QPDF_Bridge.Output_Handle;
@@ -402,22 +409,9 @@ package body Ezbind_Application is
          Bottom => Settings.Bottom_Margin,
          Fore_Edge => Settings.Fore_Margin,
          Spine => Settings.Spine_Margin);
-      Cover_Mode : constant Boolean := Settings.Cover_Front_Last /= 0;
-      Cover_Only : constant Boolean :=
-        Cover_Mode and then Settings.Input_Last = 0;
       Output_Path : constant String :=
-        (if Settings.Output_Last /= 0
-         then Value (Settings.Output_Path, Settings.Output_Last)
-         else Value (Settings.Cover_Output_Path, Settings.Cover_Output_Last));
-      Cover_Output_Path : constant String :=
-        (if Cover_Mode
-         then Value (Settings.Cover_Output_Path, Settings.Cover_Output_Last)
-         else Output_Path & ".unused-cover.pdf");
-      Temporary_Path : constant String :=
-        (if Cover_Only
-         then Cover_Output_Path & ".unused-folio.pdf"
-         else Output_Path & ".ezbind.tmp");
-      Cover_Temporary_Path : constant String := Cover_Output_Path & ".ezbind.tmp";
+        Value (Settings.Output_Path, Settings.Output_Last);
+      Temporary_Path : constant String := Output_Path & ".ezbind.tmp";
       Input_Open  : Boolean := False;
       Output_Open : Boolean := False;
       Layout      : Ezbind_Geometry.Sheet_Layout;
@@ -435,25 +429,6 @@ package body Ezbind_Application is
          Ada.Text_IO.Put_Line
            (Ada.Text_IO.Standard_Error, "ezbind: requested layout does not fit");
          return 4;
-      end if;
-
-      if Cover_Only then
-         if not Ezbind_SVG_Bridge.Render_Cover_Sheet
-           (Value (Settings.Cover_Back_Path, Settings.Cover_Back_Last),
-            Value (Settings.Cover_Front_Path, Settings.Cover_Front_Last),
-            Sheet_Width, Sheet_Height, Cover_Temporary_Path)
-           or else not Commit_Output
-             (Cover_Temporary_Path, Cover_Output_Path)
-         then
-            if Ada.Directories.Exists (Cover_Temporary_Path) then
-               Ada.Directories.Delete_File (Cover_Temporary_Path);
-            end if;
-            Ada.Text_IO.Put_Line
-              (Ada.Text_IO.Standard_Error, "ezbind: cover SVG rendering failed");
-            return 5;
-         end if;
-         Ada.Text_IO.Put_Line ("ezbind: wrote " & Cover_Output_Path);
-         return 0;
       end if;
 
       if not Ezbind_QPDF_Bridge.Open_Input
@@ -561,38 +536,6 @@ package body Ezbind_Application is
       Input_Open := False;
       Output_Open := False;
 
-      if Cover_Mode
-        and then not Ezbind_SVG_Bridge.Render_Cover_Sheet
-          (Value (Settings.Cover_Back_Path, Settings.Cover_Back_Last),
-           Value (Settings.Cover_Front_Path, Settings.Cover_Front_Last),
-           Sheet_Width, Sheet_Height, Cover_Temporary_Path)
-      then
-         if Ada.Directories.Exists (Temporary_Path) then
-            Ada.Directories.Delete_File (Temporary_Path);
-         end if;
-         if Ada.Directories.Exists (Cover_Temporary_Path) then
-            Ada.Directories.Delete_File (Cover_Temporary_Path);
-         end if;
-         Ada.Text_IO.Put_Line
-           (Ada.Text_IO.Standard_Error, "ezbind: cover SVG rendering failed");
-         return 5;
-      end if;
-
-      if Cover_Mode
-        and then not Commit_Output
-          (Cover_Temporary_Path, Cover_Output_Path)
-      then
-         if Ada.Directories.Exists (Temporary_Path) then
-            Ada.Directories.Delete_File (Temporary_Path);
-         end if;
-         if Ada.Directories.Exists (Cover_Temporary_Path) then
-            Ada.Directories.Delete_File (Cover_Temporary_Path);
-         end if;
-         Ada.Text_IO.Put_Line
-           (Ada.Text_IO.Standard_Error, "ezbind: cannot commit cover output PDF");
-         return 5;
-      end if;
-
       if not Commit_Output (Temporary_Path, Output_Path) then
          if Ada.Directories.Exists (Temporary_Path) then
             Ada.Directories.Delete_File (Temporary_Path);
@@ -602,9 +545,6 @@ package body Ezbind_Application is
          return 5;
       end if;
       Ada.Text_IO.Put_Line ("ezbind: wrote " & Output_Path);
-      if Cover_Mode then
-         Ada.Text_IO.Put_Line ("ezbind: wrote " & Cover_Output_Path);
-      end if;
       return 0;
    exception
       when others =>
@@ -617,27 +557,82 @@ package body Ezbind_Application is
          if Ada.Directories.Exists (Temporary_Path) then
             Ada.Directories.Delete_File (Temporary_Path);
          end if;
-         if Ada.Directories.Exists (Cover_Temporary_Path) then
-            Ada.Directories.Delete_File (Cover_Temporary_Path);
+         Ada.Text_IO.Put_Line
+           (Ada.Text_IO.Standard_Error, "ezbind: internal processing error");
+         return 10;
+   end Produce_Text;
+
+   function Produce_Cover
+     (Settings : in Options) return Integer is
+      Sheet_Width  : Long_Float;
+      Sheet_Height : Long_Float;
+      Page_Width   : Long_Float;
+      Page_Height  : Long_Float;
+      Output_Path : constant String :=
+        Value (Settings.Output_Path, Settings.Output_Last);
+      Temporary_Path : constant String := Output_Path & ".ezbind.tmp";
+   begin
+      Geometry
+        (Settings.Sheet, Sheet_Width, Sheet_Height, Page_Width, Page_Height);
+      if not Ezbind_SVG_Bridge.Render_Cover_Sheet
+        (Value (Settings.Cover_Back_Path, Settings.Cover_Back_Last),
+         Value (Settings.Cover_Front_Path, Settings.Cover_Front_Last),
+         Sheet_Width, Sheet_Height, Temporary_Path)
+      then
+         if Ada.Directories.Exists (Temporary_Path) then
+            Ada.Directories.Delete_File (Temporary_Path);
+         end if;
+         Ada.Text_IO.Put_Line
+           (Ada.Text_IO.Standard_Error, "ezbind: cover SVG rendering failed");
+         return 5;
+      end if;
+      if not Commit_Output (Temporary_Path, Output_Path) then
+         if Ada.Directories.Exists (Temporary_Path) then
+            Ada.Directories.Delete_File (Temporary_Path);
+         end if;
+         Ada.Text_IO.Put_Line
+           (Ada.Text_IO.Standard_Error, "ezbind: cannot commit cover output PDF");
+         return 5;
+      end if;
+      Ada.Text_IO.Put_Line ("ezbind: wrote " & Output_Path);
+      return 0;
+   exception
+      when others =>
+         if Ada.Directories.Exists (Temporary_Path) then
+            Ada.Directories.Delete_File (Temporary_Path);
          end if;
          Ada.Text_IO.Put_Line
            (Ada.Text_IO.Standard_Error, "ezbind: internal processing error");
          return 10;
-   end Produce;
+   end Produce_Cover;
 
    function Run return Integer is
       Settings : Options;
+      Count : constant Natural := Ada.Command_Line.Argument_Count;
    begin
-      if Ada.Command_Line.Argument_Count = 1
+      if Count = 1
         and then (Ada.Command_Line.Argument (1) = "--help"
                   or else Ada.Command_Line.Argument (1) = "-h")
       then
          Ezbind_CLI.Print_Help;
          return 0;
+      elsif Count = 2
+        and then (Ada.Command_Line.Argument (1) = "text"
+                  or else Ada.Command_Line.Argument (1) = "cover")
+        and then (Ada.Command_Line.Argument (2) = "--help"
+                  or else Ada.Command_Line.Argument (2) = "-h")
+      then
+         Ezbind_CLI.Print_Help (Ada.Command_Line.Argument (1));
+         return 0;
       elsif not Parse_Options (Settings) then
          return 2;
       else
-         return Produce (Settings);
+         case Settings.Command is
+            when Text_Command =>
+               return Produce_Text (Settings);
+            when Cover_Command =>
+               return Produce_Cover (Settings);
+         end case;
       end if;
    end Run;
 end Ezbind_Application;

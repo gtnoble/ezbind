@@ -10,7 +10,11 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURES = ROOT / "tests" / "fixtures"
-USAGE = "Usage: ezbind [OPTIONS] INPUT.pdf OUTPUT.pdf"
+USAGE = "Usage: ezbind COMMAND [OPTIONS]"
+TEXT_USAGE = "Usage: ezbind text [OPTIONS] INPUT.pdf OUTPUT.pdf"
+COVER_USAGE = (
+    "Usage: ezbind cover [OPTIONS] --front FRONT.svg --back BACK.svg OUTPUT.pdf"
+)
 
 
 def executable_path():
@@ -32,12 +36,8 @@ class EzbindCliTests(unittest.TestCase):
         cls.work = Path(cls.fixture_dir.name)
         cls.source_pdf = cls.work / "fixture-source.pdf"
         result = subprocess.run(
-            [
-                str(cls.exe),
-                "--cover-front", str(FIXTURES / "cover-front.svg"),
-                "--cover-back", str(FIXTURES / "cover-back.svg"),
-                "--cover-output", str(cls.source_pdf),
-            ],
+            [str(cls.exe), "cover", "--front", str(FIXTURES / "cover-front.svg"),
+             "--back", str(FIXTURES / "cover-back.svg"), str(cls.source_pdf)],
             capture_output=True,
             text=True,
             check=False,
@@ -45,7 +45,7 @@ class EzbindCliTests(unittest.TestCase):
         if result.returncode != 0 or not cls.source_pdf.is_file():
             cls.fixture_dir.cleanup()
             raise RuntimeError(
-                "could not create isolated PDF fixture with cover-only CLI:\n"
+                "could not create isolated PDF fixture with cover command:\n"
                 f"status={result.returncode}\nstdout={result.stdout}\nstderr={result.stderr}"
             )
 
@@ -75,10 +75,13 @@ class EzbindCliTests(unittest.TestCase):
             timeout=15,
         )
 
-    def assert_usage_error(self, result):
+    def assert_usage_error(self, result, usage=None):
+        if usage is None:
+            command = result.args[1] if len(result.args) > 1 else ""
+            usage = {"text": TEXT_USAGE, "cover": COVER_USAGE}.get(command, USAGE)
         self.assertEqual(result.returncode, 2, result.stderr)
         self.assertEqual(result.stdout, "")
-        self.assertIn(USAGE, result.stderr)
+        self.assertEqual(result.stderr.splitlines()[-1], usage)
 
     def assert_success(self, result):
         self.assertEqual(result.returncode, 0, result.stderr)
@@ -89,207 +92,292 @@ class EzbindCliTests(unittest.TestCase):
         self.assertGreater(path.stat().st_size, 0)
         self.assertTrue(path.read_bytes().startswith(b"%PDF-"), f"not a PDF: {path}")
 
-    def cover_args(self, output):
-        return (
-            "--cover-front", self.front,
-            "--cover-back", self.back,
-            "--cover-output", output,
-        )
-
-    def test_help_describes_the_new_interface(self):
-        for flag in ("-h", "--help"):
-            with self.subTest(flag=flag):
-                result = self.run_cli(flag)
-                self.assert_success(result)
-                self.assertEqual(result.stdout.splitlines()[0], USAGE)
-                self.assertIn("replaced without prompting", result.stdout)
-                self.assertNotIn("--force", result.stdout)
-                self.assertNotIn("--output", result.stdout)
-
-    def test_combined_svg_failure_preserves_both_destinations(self):
-        folio = self.dir / "folio.pdf"
-        cover = self.dir / "cover.pdf"
-        folio.write_bytes(b"folio sentinel")
-        cover.write_bytes(b"cover sentinel")
-        result = self.run_cli(
-            "--cover-front", self.dir / "missing.svg",
-            "--cover-back", self.back, "--cover-output", cover,
-            self.input_pdf, folio,
-        )
-        self.assertEqual(result.returncode, 5, result.stderr)
-        self.assertEqual(folio.read_bytes(), b"folio sentinel")
-        self.assertEqual(cover.read_bytes(), b"cover sentinel")
-        self.assertFalse(list(self.dir.glob("*.ezbind.tmp")))
-
-    def test_folio_generation_and_unconditional_overwrite(self):
-        output = self.dir / "folio.pdf"
-        result = self.run_cli(self.input_pdf, output)
-        self.assert_success(result)
-        self.assert_valid_pdf(output)
-        self.assertNotIn(str(self.input_pdf), result.stdout + result.stderr)
-        output.write_bytes(b"pre-existing sentinel")
-        result = self.run_cli(self.input_pdf, output)
-        self.assert_success(result)
-        self.assert_valid_pdf(output)
-        self.assertNotEqual(output.read_bytes(), b"pre-existing sentinel")
-
-    def test_cover_only_generation_and_unconditional_overwrite(self):
-        output = self.dir / "cover.pdf"
-        result = self.run_cli(*self.cover_args(output))
-        self.assert_success(result)
-        self.assert_valid_pdf(output)
-        self.assert_output_does_not_disclose_sources(result, output)
-        output.write_bytes(b"cover sentinel")
-        result = self.run_cli(*self.cover_args(output))
-        self.assert_success(result)
-        self.assert_valid_pdf(output)
-        self.assertNotEqual(output.read_bytes(), b"cover sentinel")
-
-    def test_combined_generation_overwrites_both_outputs(self):
-        folio = self.dir / "combined-folio.pdf"
-        cover = self.dir / "combined-cover.pdf"
-        folio.write_bytes(b"folio sentinel")
-        cover.write_bytes(b"cover sentinel")
-        result = self.run_cli(
-            "--cover-front", self.front,
-            self.input_pdf,
-            "--cover-back", self.back,
-            folio,
-            "--cover-output", cover,
-        )
-        self.assert_success(result)
-        self.assert_valid_pdf(folio)
-        self.assert_valid_pdf(cover)
-        self.assertNotEqual(folio.read_bytes(), b"folio sentinel")
-        self.assertNotEqual(cover.read_bytes(), b"cover sentinel")
-        self.assert_output_does_not_disclose_sources(result, folio, cover)
-
-    def assert_output_does_not_disclose_sources(self, result, *allowed_outputs):
+    def assert_output_does_not_disclose_sources(self, result):
         transcript = result.stdout + result.stderr
-        forbidden = [self.input_pdf, self.front, self.back]
-        # Success may identify either destination, but not source paths.
-        for path in forbidden:
+        for path in (self.input_pdf, self.front, self.back):
             self.assertNotIn(str(path), transcript)
             self.assertNotIn(str(path.resolve()), transcript)
 
-    def test_retired_output_and_force_flags_are_usage_errors(self):
-        for flag in ("-o", "--output", "-f", "--force"):
-            with self.subTest(flag=flag):
-                target = self.dir / (flag.replace("-", "") + ".pdf")
-                target.write_bytes(b"untouched sentinel")
-                result = self.run_cli(self.input_pdf, flag, target)
-                self.assert_usage_error(result)
-                self.assertEqual(target.read_bytes(), b"untouched sentinel")
+    def assert_no_temp_output(self):
+        self.assertFalse(list(self.dir.glob("*.ezbind.tmp")))
 
-    def test_malformed_positional_arity_is_usage_error(self):
-        cases = (
-            (),
-            (self.input_pdf,),
-            (self.input_pdf, self.dir / "one.pdf", self.dir / "extra.pdf"),
-            ("", self.dir / "empty-input-output.pdf"),
-            (self.input_pdf, ""),
-            ("--cover-front", self.front, "--cover-back", self.back,
-             "--cover-output", self.dir / "cover.pdf", self.input_pdf),
-        )
-        for args in cases:
+    def test_help_usage_and_standalone_only(self):
+        for args, first_line in (
+            (("--help",), USAGE), (("-h",), USAGE),
+            (("text", "--help"), TEXT_USAGE), (("text", "-h"), TEXT_USAGE),
+            (("cover", "--help"), COVER_USAGE), (("cover", "-h"), COVER_USAGE),
+        ):
+            with self.subTest(args=args):
+                result = self.run_cli(*args)
+                self.assert_success(result)
+                self.assertEqual(result.stdout.splitlines()[0], first_line)
+        global_help = self.run_cli("--help").stdout
+        self.assertIn("text   ", global_help)
+        self.assertIn("cover  ", global_help)
+        text_help = self.run_cli("text", "--help").stdout
+        for option in ("--front", "--back"):
+            self.assertNotIn(option, text_help)
+        cover_help = self.run_cli("cover", "--help").stdout
+        for option in ("--crop", "--grid", "--margin"):
+            self.assertNotIn(option, cover_help)
+        for args in (("--help", "text"), ("text", "--help", self.input_pdf),
+                     ("cover", "--help", "--front", self.front),
+                     ("unknown", "--help")):
             with self.subTest(args=args):
                 self.assert_usage_error(self.run_cli(*args))
 
-    def test_oversized_positional_path_is_usage_error(self):
-        oversized = "x" * 4096
-        self.assert_usage_error(self.run_cli(self.input_pdf, oversized))
+    def test_missing_unknown_and_legacy_commands_are_usage_errors(self):
+        for args in ((), ("unknown",), ("--sheet", "letter", self.input_pdf,
+                                         self.dir / "output.pdf"),
+                     (self.input_pdf, self.dir / "legacy.pdf")):
+            with self.subTest(args=args):
+                self.assert_usage_error(self.run_cli(*args))
 
-    def test_end_of_options_allows_dash_leading_paths(self):
-        dash_input = self.dir / "-source.pdf"
-        dash_output = self.dir / "-result.pdf"
-        dash_input.write_bytes(self.input_pdf.read_bytes())
-        result = self.run_cli("--", dash_input.name, dash_output.name)
+    def test_text_path_arities_empty_and_oversized_paths(self):
+        cases = (
+            (("text",), TEXT_USAGE),
+            (("text", self.input_pdf), TEXT_USAGE),
+            (("text", self.input_pdf, self.dir / "one.pdf", self.dir / "extra.pdf"), TEXT_USAGE),
+            (("text", "", self.dir / "empty-input.pdf"), TEXT_USAGE),
+            (("text", self.input_pdf, ""), TEXT_USAGE),
+            (("text", self.input_pdf, "x" * 1025), TEXT_USAGE),
+            (("text", "x" * 1025, self.dir / "output.pdf"), TEXT_USAGE),
+        )
+        for args, usage in cases:
+            with self.subTest(args=args[:2]):
+                self.assert_usage_error(self.run_cli(*args), usage)
+
+    def test_text_generation_replacement_and_path_aliases(self):
+        output = self.dir / "folio.pdf"
+        for prior in (None, b"pre-existing sentinel"):
+            if prior is not None:
+                output.write_bytes(prior)
+            result = self.run_cli("text", self.input_pdf, output)
+            self.assert_success(result)
+            self.assert_valid_pdf(output)
+            if prior is not None:
+                self.assertNotEqual(output.read_bytes(), prior)
+        self.assertNotIn(str(self.input_pdf), result.stdout + result.stderr)
+        (self.dir / "nested").mkdir()
+        for destination in (self.input_pdf, self.dir / "." / "input.pdf",
+                            self.dir / "nested" / ".." / "input.pdf"):
+            with self.subTest(destination=destination):
+                self.assert_usage_error(self.run_cli("text", self.input_pdf, destination))
+
+    def test_cover_generation_replacement_and_path_validation(self):
+        output = self.dir / "cover.pdf"
+        valid = ("cover", "--front", self.front, "--back", self.back, output)
+        result = self.run_cli(*valid)
+        self.assert_success(result)
+        self.assert_valid_pdf(output)
+        self.assert_output_does_not_disclose_sources(result)
+        output.write_bytes(b"cover sentinel")
+        result = self.run_cli(*valid)
+        self.assert_success(result)
+        self.assert_valid_pdf(output)
+        self.assertNotEqual(output.read_bytes(), b"cover sentinel")
+        invalid_cases = (
+            ("cover",), ("cover", output),
+            ("cover", "--front", self.front, output),
+            ("cover", "--back", self.back, output),
+            ("cover", "--front", self.front, "--back", self.back),
+            (*valid, self.dir / "extra.pdf"),
+            ("cover", "--front"),
+            ("cover", "--back"),
+            ("cover", "--front", self.front, "--back", self.back, output,
+             "--front"),
+            ("cover", "--front", "", "--back", self.back, output),
+            ("cover", "--front", "x" * 1025, "--back", self.back, output),
+            ("cover", "--front", self.front, "--back", "", output),
+            ("cover", "--front", self.front, "--back", "x" * 1025, output),
+            ("cover", "--front", self.front, "--back", self.back, ""),
+            ("cover", "--front", self.front, "--back", self.back, "x" * 1025),
+        )
+        for args in invalid_cases:
+            with self.subTest(args=args[:4]):
+                self.assert_usage_error(self.run_cli(*args))
+
+    def test_shared_sheet_option_values_and_cover_interspersing(self):
+        text_prefix = ("text", self.input_pdf, self.dir / "text.pdf")
+        cover_prefix = ("cover", "--front", self.front, "--back", self.back,
+                        self.dir / "cover.pdf")
+        for prefix in (text_prefix, cover_prefix):
+            command = prefix[0]
+            for args in (("--sheet", "legal"), ("-s", "")):
+                with self.subTest(command=command, args=args):
+                    self.assert_usage_error(self.run_cli(command, *args, *prefix[1:]))
+            with self.subTest(command=command, missing="long"):
+                self.assert_usage_error(self.run_cli(*prefix, "--sheet"))
+            with self.subTest(command=command, missing="short"):
+                self.assert_usage_error(self.run_cli(*prefix, "-s"))
+        text = self.dir / "sheet-text.pdf"
+        result = self.run_cli("text", self.input_pdf, "--sheet", "a4", text)
+        self.assert_success(result)
+        self.assert_valid_pdf(text)
+        cover = self.dir / "sheet-cover.pdf"
+        result = self.run_cli("cover", "--front", self.front, "--sheet", "letter",
+                              "--back", self.back, cover)
+        self.assert_success(result)
+        self.assert_valid_pdf(cover)
+        dash_output = self.dir / "-cover-output.pdf"
+        result = self.run_cli("cover", "--front", self.front, "--back", self.back,
+                              "--", dash_output.name)
         self.assert_success(result)
         self.assert_valid_pdf(dash_output)
 
-    def test_interspersed_options_are_accepted(self):
-        output = self.dir / "interspersed.pdf"
-        result = self.run_cli(
-            self.input_pdf, "--sheet", "letter", output,
-            "--cover-front", self.front,
-            "--cover-back", self.back,
-            "--cover-output", self.dir / "interspersed-cover.pdf",
+    def test_all_mode_specific_options_are_rejected_by_other_mode(self):
+        text_options = (
+            ("--grid",), ("-g",), ("--grid-spacing", "1mm"), ("-G", "1mm"),
+            ("--crop-top", "1mm"), ("--crop-bottom", "1mm"),
+            ("--crop-left", "1mm"), ("--crop-right", "1mm"),
+            ("--margin-top", "1mm"), ("-t", "1mm"),
+            ("--margin-bottom", "1mm"), ("-b", "1mm"),
+            ("--margin-fore-edge", "1mm"), ("-e", "1mm"),
+            ("--margin-spine", "1mm"), ("-i", "1mm"),
         )
+        text_input = (self.input_pdf, self.dir / "text.pdf")
+        cover_args = ("--front", self.front, "--back", self.back,
+                      self.dir / "cover.pdf")
+        for option in text_options:
+            with self.subTest(mode="cover", option=option):
+                self.assert_usage_error(self.run_cli("cover", *option, *cover_args))
+        for flag in ("--front", "--back", "--cover-front", "--cover-back",
+                     "--cover-output"):
+            args = ("text", *text_input, flag, self.front)
+            with self.subTest(mode="text", flag=flag):
+                self.assert_usage_error(self.run_cli(*args))
+        for flag in ("-o", "--output", "-f", "--force"):
+            sentinel = self.dir / "legacy-sentinel.pdf"
+            sentinel.write_bytes(b"untouched sentinel")
+            result = self.run_cli("text", self.input_pdf, flag, sentinel)
+            self.assert_usage_error(result)
+            self.assertEqual(sentinel.read_bytes(), b"untouched sentinel")
+
+    def test_text_options_interspersed_and_dash_paths(self):
+        output = self.dir / "options.pdf"
+        result = self.run_cli("text", "--grid", "-G", "2mm", self.input_pdf,
+                              "-s", "a4", "--crop-top", "1mm", output)
         self.assert_success(result)
         self.assert_valid_pdf(output)
-        self.assert_valid_pdf(self.dir / "interspersed-cover.pdf")
+        dash_input = self.dir / "-source.pdf"
+        dash_output = self.dir / "-result.pdf"
+        dash_input.write_bytes(self.input_pdf.read_bytes())
+        result = self.run_cli("text", "--", dash_input.name, dash_output.name)
+        self.assert_success(result)
+        self.assert_valid_pdf(dash_output)
 
-    def test_invalid_pdf_does_not_modify_existing_destinations(self):
+    def test_two_command_workflow_keeps_outputs_independent(self):
+        text_output = self.dir / "text.pdf"
+        cover_output = self.dir / "cover.pdf"
+        self.assert_success(self.run_cli("text", self.input_pdf, text_output))
+        text_bytes = text_output.read_bytes()
+        self.assert_success(self.run_cli("cover", "--front", self.front,
+                                         "--back", self.back, cover_output))
+        self.assertEqual(text_output.read_bytes(), text_bytes)
+        cover_bytes = cover_output.read_bytes()
+        self.assert_success(self.run_cli("text", "--sheet", "a4",
+                                         self.input_pdf, text_output))
+        self.assertEqual(cover_output.read_bytes(), cover_bytes)
+        failure = self.run_cli("cover", "--front", self.dir / "missing.svg",
+                               "--back", self.back, cover_output)
+        self.assertEqual(failure.returncode, 5, failure.stderr)
+        self.assertEqual(cover_output.read_bytes(), cover_bytes)
+        self.assert_valid_pdf(text_output)
+        self.assert_no_temp_output()
+
+    def test_text_physical_options_and_invalid_values(self):
+        output = self.dir / "physical-options.pdf"
+        options = ("--crop-top", "1mm", "--crop-bottom", "1mm",
+                   "--crop-left", "1mm", "--crop-right", "1mm",
+                   "--margin-top", "1mm", "--margin-bottom", "1mm",
+                   "--margin-fore-edge", "1mm", "--margin-spine", "1mm",
+                   "-t", "1mm", "-b", "1mm", "-e", "1mm", "-i", "1mm",
+                   "-g", "--grid-spacing", "2mm")
+        self.assert_success(self.run_cli("text", *options, self.input_pdf, output))
+        for flag in ("--crop-top", "--crop-bottom", "--crop-left", "--crop-right",
+                     "--margin-top", "--margin-bottom", "--margin-fore-edge",
+                     "--margin-spine", "-t", "-b", "-e", "-i",
+                     "--grid-spacing", "-G"):
+            for value in ("-1mm", "1", "bogus"):
+                with self.subTest(flag=flag, value=value):
+                    self.assert_usage_error(self.run_cli(
+                        "text", flag, value, self.input_pdf, output))
+            with self.subTest(flag=flag, missing=True):
+                self.assert_usage_error(self.run_cli(
+                    "text", self.input_pdf, output, flag))
+        self.assert_usage_error(self.run_cli(
+            "text", "--grid-spacing", "0mm", self.input_pdf, output))
+        prior = output.read_bytes()
+        for flag in ("--crop-left", "--margin-spine"):
+            with self.subTest(impossible=flag):
+                result = self.run_cli("text", flag, "100in", self.input_pdf, output)
+                self.assertEqual(result.returncode, 4, result.stderr)
+                self.assertEqual(output.read_bytes(), prior)
+                self.assert_no_temp_output()
+
+    def test_malformed_pdf_preserves_destination_and_cleans_temp(self):
         invalid = self.dir / "invalid.pdf"
         invalid.write_bytes(b"not a PDF")
-        folio = self.dir / "folio-existing.pdf"
-        cover = self.dir / "cover-existing.pdf"
-        folio.write_bytes(b"folio sentinel")
-        cover.write_bytes(b"cover sentinel")
-        result = self.run_cli(
-            "--cover-front", self.front,
-            invalid,
-            "--cover-back", self.back,
-            folio,
-            "--cover-output", cover,
-        )
-        self.assertNotEqual(result.returncode, 0)
-        self.assertEqual(folio.read_bytes(), b"folio sentinel")
-        self.assertEqual(cover.read_bytes(), b"cover sentinel")
+        output = self.dir / "existing.pdf"
+        output.write_bytes(b"PDF sentinel")
+        result = self.run_cli("text", invalid, output)
+        self.assertEqual(result.returncode, 3, result.stderr)
+        self.assertEqual(output.read_bytes(), b"PDF sentinel")
+        self.assert_no_temp_output()
 
-    def test_svg_render_failure_does_not_modify_existing_cover(self):
+    def test_missing_svg_preserves_destination_and_cleans_temp(self):
+        output = self.dir / "cover.pdf"
+        output.write_bytes(b"cover sentinel")
+        result = self.run_cli("cover", "--front", self.dir / "missing.svg",
+                              "--back", self.back, output)
+        self.assertEqual(result.returncode, 5, result.stderr)
+        self.assertEqual(output.read_bytes(), b"cover sentinel")
+        self.assert_no_temp_output()
+
+    def test_failed_output_commit_preserves_destination_and_cleans_temp(self):
+        for command, args in (
+            ("text", (self.input_pdf,)),
+            ("cover", ("--front", self.front, "--back", self.back)),
+        ):
+            with self.subTest(command=command):
+                destination = self.dir / f"{command}-directory.pdf"
+                destination.mkdir()
+                marker = destination / "sentinel"
+                marker.write_bytes(b"directory sentinel")
+                result = self.run_cli(command, *args, destination)
+                self.assertEqual(result.returncode, 5, result.stderr)
+                self.assertEqual(marker.read_bytes(), b"directory sentinel")
+                self.assert_no_temp_output()
+
+    def test_missing_input_failure_preserves_destination_and_cleans_temp(self):
+        output = self.dir / "folio.pdf"
+        output.write_bytes(b"folio sentinel")
+        result = self.run_cli("text", self.dir / "missing.pdf", output)
+        self.assertEqual(result.returncode, 3, result.stderr)
+        self.assertEqual(output.read_bytes(), b"folio sentinel")
+        self.assert_no_temp_output()
+
+    def test_cover_render_failure_preserves_destination_and_cleans_temp(self):
         invalid_svg = self.dir / "invalid.svg"
         invalid_svg.write_text("<svg><unclosed>", encoding="utf-8")
-        cover = self.dir / "cover-existing.pdf"
-        cover.write_bytes(b"cover sentinel")
-        result = self.run_cli(
-            "--cover-front", invalid_svg,
-            "--cover-back", self.back,
-            "--cover-output", cover,
-        )
-        self.assertNotEqual(result.returncode, 0)
-        self.assertEqual(cover.read_bytes(), b"cover sentinel")
+        output = self.dir / "cover.pdf"
+        output.write_bytes(b"cover sentinel")
+        result = self.run_cli("cover", "--front", invalid_svg, "--back", self.back,
+                              output)
+        self.assertEqual(result.returncode, 5, result.stderr)
+        self.assertEqual(output.read_bytes(), b"cover sentinel")
+        self.assert_no_temp_output()
 
-    def test_normalized_path_aliases_are_rejected(self):
-        (self.dir / "nested").mkdir()
-        output = self.dir / "nested" / ".." / "input.pdf"
-        cases = [
-            (self.input_pdf, output),
-            (self.input_pdf, self.dir / "." / "input.pdf"),
-        ]
-        for source, destination in cases:
-            with self.subTest(destination=destination):
-                self.assert_usage_error(self.run_cli(source, destination))
-
-    def test_symbolic_link_aliases_and_source_svg_collisions_are_rejected(self):
+    def test_symbolic_link_and_source_artwork_collisions_are_rejected(self):
         input_link = self.dir / "input-link.pdf"
         input_link.symlink_to(self.input_pdf)
-        self.assert_usage_error(self.run_cli(self.input_pdf, input_link))
+        self.assert_usage_error(self.run_cli("text", self.input_pdf, input_link))
         copied_svg = self.dir / "front-copy.svg"
         copied_svg.write_bytes(self.front.read_bytes())
         svg_link = self.dir / "front-link.svg"
         svg_link.symlink_to(copied_svg)
-        self.assert_usage_error(
-            self.run_cli(
-                "--cover-front", copied_svg,
-                "--cover-back", self.back,
-                "--cover-output", svg_link,
-            )
-        )
-
-    def test_combined_output_collisions_are_rejected(self):
-        (self.dir / "nested").mkdir()
-        folio = self.dir / "same.pdf"
-        cover_alias = self.dir / "nested" / ".." / "same.pdf"
-        self.assert_usage_error(
-            self.run_cli(
-                "--cover-front", self.front,
-                self.input_pdf,
-                "--cover-back", self.back,
-                folio,
-                "--cover-output", cover_alias,
-            )
-        )
+        self.assert_usage_error(self.run_cli("cover", "--front", copied_svg,
+                                             "--back", self.back, svg_link))
 
 
 if __name__ == "__main__":

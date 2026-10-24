@@ -3,9 +3,9 @@
 **Project:** ezbind
 **Document:** Software Design Description (SDD)
 **Identifier:** EZBIND-SDD-001
-**Status:** Project update to client-acknowledged baseline
+**Status:** Draft project update under CHG-015
 **Date:** 2026-10-24
-**Revision:** 1.1
+**Revision:** 1.3 (project update; CHG-015 targeted implementation verification complete)
 
 ## Contents
 
@@ -20,16 +20,16 @@
 
 ## 1. Scope
 
-This document defines the proposed design of `EZBIND-CLI`, the Ada command-line application that transforms one input PDF into a folded-folio bookbinding layout. It covers the logical architecture, interfaces, geometry model, PDF backend boundary, diagnostics, error handling, and implementation units used by the B1 proof of concept and B2 implementation slice.
+This document describes the design of `EZBIND-CLI`, the Ada command-line application with separate `text` and `cover` operations. It covers the logical architecture, interfaces, geometry model, PDF backend boundaries, diagnostics, error handling, and implementation units used by the B1 proof of concept and B2 implementation slice.
 
-The design satisfies the client-controlled requirements in `requirements/requirements-spec.md`, EZBIND-SRS-001 Revision 1.1. It does not change those requirements.
+This project update records the CHG-015 interface and implementation. Targeted implementation verification is complete and recorded in `tests/b2-test-description.md`; broader acceptance and independent physical review remain pending. Earlier combined-mode behavior is superseded.
 
 ## 2. Referenced documents
 
 - `plan/project-plan.md`, EZBIND-SDP-001, Revision 1.1.
-- `requirements/operational-concept.md`, EZBIND-OCD-001, Revision 1.0.
-- `requirements/requirements-spec.md`, EZBIND-SRS-001, Revision 1.1.
-- `tests/test-plan.md`, EZBIND-STP-001, Revision 1.1 draft.
+- `requirements/operational-concept.md`, EZBIND-OCD-001, Revision 1.1 project update.
+- `requirements/requirements-spec.md`, EZBIND-SRS-001, Revision 1.3 project update.
+- `tests/test-plan.md`, EZBIND-STP-001, Revision 1.2 project update.
 - `sdfs/project-development-log.md`, EZBIND-SDF-001.
 - Independent PDF backend review, 2026-09-21, recorded in Section 7 and the development log.
 
@@ -113,7 +113,7 @@ The grid is generated as vector line content in the four reserved strips outside
 
 ### 3.7 Cover and physical-material policy
 
-The default folio output excludes cover artwork. When all three cover options are supplied, the application emits a separate one-page landscape cardstock PDF. The back SVG is rendered on the left half and the front SVG on the right half, so a center cut places both cut edges toward the spine. After rendering both SVGs, the bridge draws a 0.5 pt dashed gray vector cut line at the sheet midpoint, inset 12 pt from the top and bottom edges; drawing last ensures the guide remains visible over artwork. The guide is always present in cover output and has no CLI switch. Rendering uses the project-owned librsvg/Cairo bridge, with proportional fitting to each half-sheet viewport. The SVG bridge writes a temporary PDF and the application commits it only after successful rendering. Physical cover cards, adhesive, and fabric remain user-supplied.
+The default folio output excludes cover artwork. The distinct `cover` command emits a one-page landscape cardstock PDF from front/back SVG artwork; the `text` command produces only the folded-folio PDF. The back SVG is rendered on the left half and the front SVG on the right half, so a center cut places both cut edges toward the spine. After rendering both SVGs, the bridge draws a 0.5 pt dashed gray vector cut line at the sheet midpoint, inset 12 pt from the top and bottom edges; drawing last ensures the guide remains visible over artwork. The guide is always present in cover output and has no CLI switch. Rendering uses the project-owned librsvg/Cairo bridge, with proportional fitting to each half-sheet viewport. The SVG bridge writes a temporary PDF and the application commits it only after successful rendering. Physical cover cards, adhesive, and fabric remain user-supplied.
 
 The SVG renderer is intentionally separate from the qpdf folio compositor. qpdf remains responsible for importing and imposing the input PDF; librsvg and Cairo render static SVG artwork directly to PDF. SVG feature support, external resources, and font availability are documented limitations.
 
@@ -134,13 +134,9 @@ Diagnostics identify the category and corrective action without printing extract
 
 ### 3.9 CLI and documentation contract
 
-The first line of help, also printed after the diagnostic on usage errors, is exactly:
+The public commands are `ezbind text [OPTIONS] INPUT.pdf OUTPUT.pdf` and `ezbind cover [OPTIONS] --front FRONT.svg --back BACK.svg OUTPUT.pdf`. Each invocation produces one output. There is no combined mode and no compatibility alias for the former `--cover-*` options. Text-only options are rejected by `cover`; artwork options are rejected by `text`. Shared sheet geometry and output-commit helpers may be reused, while text and cover have distinct producer functions. Cover generation does not validate text layout.
 
-```text
-Usage: ezbind [OPTIONS] INPUT.pdf OUTPUT.pdf
-```
-
-`--help` and `-h` print the usage line, concise option summary, and exit-status summary to standard output and return 0. Folio mode uses two positional paths; cover-only mode uses zero positional paths and the three named cover options; combined mode adds those options to the folio paths. Parsing accepts `--` and interspersed options; examples prefer options first. `-o`/`--output` and `-f`/`--force` are unsupported. Invalid invocations print a diagnostic and the canonical usage line to standard error and return 2. The command manual is `doc/ezbind.1`; the installable form is `ezbind(1)`.
+Top-level help lists commands; each command has its own help and canonical usage for errors. Help on its own exits 0. Both commands accept `--sheet`/`-s`, interspersed options, and `--` to end option parsing. Each command writes a temporary sibling and replaces its single destination only after successful generation. Separate invocations cannot check cross-invocation path collisions together; two commands do not form a transaction. The command manual is `doc/ezbind.1`; the installable form is `ezbind(1)`.
 
 Status 6 remains part of the required interface, but the current application has no dependency-error return path. Dynamic-loader errors occur before `Run`.
 
@@ -154,44 +150,40 @@ The application reports selected non-default layout options in a concise summary
 
 | ID | Unit | Language/type | Purpose |
 |---|---|---|---|
-| UNIT-CLI | `Ezbind_CLI` | Ada package | Parse arguments, implement help/usage, map errors to exit statuses. |
-| UNIT-APP | `Ezbind_Application` | Ada package | Orchestrate validation, layout, backend lifecycle, diagnostics, and atomic output. |
+| UNIT-CLI | `Ezbind_CLI` | Ada package | Render top-level and command-specific help and usage text; provide usage-formatting support. It does not parse or dispatch commands. |
+| UNIT-APP | `Ezbind_Application` | Ada package | Own `Run` and `Parse_Options`; parse/validate arguments, handle help and command dispatch, and own `Produce_Text` / `Produce_Cover`. Uses shared geometry and per-output commit behavior. |
 | UNIT-PHY | `Ezbind_Physical` | Ada package | Parse and convert physical dimensions and units. |
 | UNIT-GEO | `Ezbind_Geometry` | Ada package | Compute sheet, finished-page, margin, reserve, and grid rectangles. |
 | UNIT-IMP | `Ezbind_Imposition` | Ada package | Produce padded logical pages, sides, positions, rotations, and placement records. |
 | UNIT-GRD | `Ezbind_Guides` | Ada package | Generate vector grid, spine guide, fold/crop/registration marks, and cover placeholders. |
-| UNIT-PDF | `Ezbind_PDF_Backend` | Ada package | Backend-neutral PDF lifecycle and placement interface. |
+| UNIT-PDF | `Ezbind_PDF_Backend` | Planned conceptual unit | Backend-neutral PDF lifecycle and placement interface; not claimed as a separate current package. |
 | UNIT-QPDF | `ez_qpdf_bridge` | C++ with C ABI | Open/read/write PDFs, create/import Form XObjects, place pages, append content. |
 | UNIT-SVG | `ez_svg_bridge` | C++ with C ABI | Load static SVG files through librsvg and render front/back cover art to a Cairo PDF surface. |
-| UNIT-CONT | `Ezbind_Capabilities` | Ada package | Track preserved, degraded, and unsupported source features. |
+| UNIT-CONT | `Ezbind_Capabilities` | Planned conceptual unit | Track preserved, degraded, and unsupported source features; not claimed as a separate current package. |
 | UNIT-DOC | `doc/ezbind.1` | roff man page | User-facing command reference synchronized with CLI behavior. |
 | UNIT-TEST | `tests/` | Ada and shell support | Unit/integration/acceptance fixtures and independent PDF checks. |
 
 ### 4.2 Static relationships
 
-- `UNIT-CLI` depends on `UNIT-APP` and shared error/option types.
-- `UNIT-APP` depends on `UNIT-PHY`, `UNIT-GEO`, `UNIT-IMP`, `UNIT-GRD`, `UNIT-PDF`, and `UNIT-CONT`.
-- `UNIT-GEO` depends on `UNIT-PHY` but not on PDF or CLI units.
-- `UNIT-IMP` depends on geometry placement types but not on qpdf.
-- `UNIT-GRD` produces backend-neutral vector guide commands or content streams.
-- `UNIT-PDF` defines the Ada-side abstract operations implemented by `UNIT-QPDF`.
+- `UNIT-APP` owns option parsing, validation, help dispatch, command selection, and distinct `Produce_Text` / `Produce_Cover` paths. `UNIT-CLI` supplies help and usage rendering only.
+- The text producer uses the implemented physical-unit, geometry, and imposition packages plus the qpdf bridge. Guide generation is currently performed in the application; the guide package is a scaffold. The backend-neutral PDF and capability packages remain planned. Cover production uses its cover path without text-layout or qpdf input processing.
+- In the conceptual target decomposition, geometry depends on physical-unit conversion and not on PDF or CLI responsibilities.
+- In the conceptual target decomposition, imposition depends on geometry placement types but not on qpdf.
+- In the conceptual target decomposition, guide generation produces backend-neutral vector commands or content streams.
+- The conceptual PDF-backend interface isolates native qpdf operations behind the C-compatible bridge.
 - `UNIT-QPDF` and `UNIT-SVG` are the only units that include native PDF/rendering headers or use C/C++ interop. `UNIT-SVG` depends on librsvg 2.58, Cairo, GLib/GIO, GDK-Pixbuf, and Pango/Cairo as provided by the platform.
-- `UNIT-DOC` is maintained against the public option model and canonical usage constant.
+- `UNIT-DOC` is maintained against the two command-specific usage models and shared option inventory; this is a documentation contract, not a parser implemented by `UNIT-CLI`.
 
 ### 4.3 Dynamic execution sequence
 
-1. `UNIT-CLI` parses arguments.
-2. `UNIT-CLI` handles help immediately, without requiring an input file.
-3. `UNIT-APP` validates paths, options, units, and geometry.
-4. `UNIT-PDF` opens and validates the input through `UNIT-QPDF`.
-5. `UNIT-IMP` computes page padding and all output placements.
-6. `UNIT-APP` creates a temporary output PDF through `UNIT-QPDF`.
-7. For each output sheet side, `UNIT-QPDF` creates a destination page and places the two source Form XObjects.
-8. `UNIT-GRD` emits enabled vector guides into permitted regions.
-9. `UNIT-QPDF` writes and closes the temporary output.
-10. If cover options are enabled, `UNIT-SVG` renders back-left/front-right artwork to a separate temporary cardstock PDF; only after both outputs are generated does `UNIT-APP` commit the cover.
-11. `UNIT-APP` atomically renames the temporary folio output to the requested path. The two commits are separate; a failed folio commit does not roll back the cover. In cover-only mode, the PDF input/imposition steps are skipped and only the cover is rendered and committed.
-12. `UNIT-CLI` prints a concise success summary and returns 0.
+The dispatcher selects distinct producers. Shared geometry and single-output commit helpers do not imply a combined operation. The cover producer does not invoke text-layout validation.
+
+1. `UNIT-APP.Run` handles standalone help without opening inputs; otherwise `UNIT-APP.Parse_Options` selects `text` or `cover`, validates command-specific options, interspersed arguments, `--`, and positional arity, and rejects options exclusive to the other command. `UNIT-CLI` renders applicable help/usage.
+2. The text producer validates text paths and layout, opens the input through the qpdf bridge, computes imposition, writes all folio sides and enabled guides to a temporary output, then commits its single destination after success.
+3. The cover producer validates SVG paths and its single destination, computes shared sheet geometry only, renders back-left/front-right artwork through `UNIT-SVG` to a temporary PDF, then commits that destination after success. It does not open a text PDF.
+4. The selected producer reports success and application orchestration returns status 0.
+
+Separate invocations have no cross-output collision check or transactional relationship.
 
 Any expected failure closes backend handles, removes temporary output, prints a content-free diagnostic, and returns the mapped status.
 
@@ -232,7 +224,7 @@ The implemented bridge ABI is defined by `src/ez_qpdf_bridge.h` and the Ada bind
 
 #### CLI interface
 
-The public command is `ezbind`. Folio mode takes exactly INPUT.pdf OUTPUT.pdf; cover-only mode takes zero positional paths and requires the three named cover options; combined mode takes both folio paths plus those options. Options may be interspersed and `--` ends option parsing. Reject normalized source/destination collisions and identical outputs; replace existing valid destinations without prompting only after successful generation. Standard error is for diagnostics and invalid invocation output. Exit statuses are those defined in the SRS.
+The public commands are `ezbind text [OPTIONS] INPUT.pdf OUTPUT.pdf` and `ezbind cover [OPTIONS] --front FRONT.svg --back BACK.svg OUTPUT.pdf`. Both accept `--sheet`/`-s`, interspersed options, and `--`. Text rejects artwork flags; cover rejects text-only flags. Reject same-invocation source/destination collisions and replace the single existing destination only after successful generation. No cross-invocation collision or two-command transaction is promised. Top-level and command-specific help are supported. Diagnostics use standard error; exit statuses are those defined in the SRS.
 
 #### PDF backend interface
 
@@ -240,7 +232,7 @@ Native dependencies are qpdf through `UNIT-QPDF` and librsvg/Cairo through `UNIT
 
 #### Filesystem interface
 
-The application creates temporary sibling outputs, rejects normalized source/destination path collisions and identical outputs, then replaces existing destinations without prompting only after successful generation. GNAT.OS_Lib provides symbolic-link-aware path normalization and POSIX replacement rename on the supported Linux target; replacement does not delete the old destination before rename. Combined outputs are committed separately, not as a transaction. Temporary-file names still use the existing fixed suffix; unique temporary ownership and multi-output rollback remain separate hardening work.
+Each producer creates one temporary sibling output, rejects its own normalized source/destination collisions, and replaces its destination only after successful generation. GNAT.OS_Lib provides symbolic-link-aware path normalization and POSIX replacement rename on the supported Linux target; replacement does not delete the old destination before rename. Separate invocations cannot check each other’s paths together and are not transactional. Temporary-file names still use the existing fixed suffix; unique temporary ownership remains separate hardening work.
 
 ### 4.6 Data flow
 
@@ -377,37 +369,37 @@ Responsibilities:
 
 The bridge was tested independently with POC-001 and is now integrated with the Ada application orchestration for the B2 implementation slice.
 
-### 5.7 `Ezbind_CLI` / UNIT-CLI
+### 5.7 `Ezbind_Application` / UNIT-APP
 
-Purpose: define stable command behavior.
+Purpose: coordinate command-line processing and the selected producer.
 
-Rules:
+Implemented responsibilities include `Run` and `Parse_Options`; parsing and validating command-specific options and positional arguments; standalone and command-specific help dispatch; rejecting combined mode, legacy `--cover-*` syntax, and cross-command options; and invoking `Produce_Text` or `Produce_Cover`. Each producer generates and commits only its own output. Cover production does not enter text-layout validation or qpdf input processing. The two producer invocations are independent and are not transactional.
 
-- parse `--help` and `-h` before requiring positional input;
-- accept documented short aliases where provided; crop and cover options have no short aliases;
-- emit the exact canonical usage as the first help line and after the diagnostic for usage errors;
-- reject unknown flags and missing values;
-- route diagnostics to standard error;
-- map all expected errors to the SRS status codes;
-- never open or replace the output for usage errors.
+### 5.8 `Ezbind_CLI` / UNIT-CLI
 
-### 5.8 `ezbind(1)` / UNIT-DOC
+Purpose: render CLI help and usage text.
+
+Implemented responsibilities are top-level and command-specific help text and applicable canonical usage rendering. Argument parsing, option validation, command dispatch, and producer ownership reside in `Ezbind_Application`, not this package.
+
+### 5.9 `ezbind(1)` / UNIT-DOC
 
 Purpose: document the public command interface.
 
-The man page is generated/maintained from the same option inventory and canonical usage contract used by `UNIT-CLI`. It must include synopsis, description, options, defaults, units, output behavior, exit statuses, limitations, physical workflow, and examples.
+The man page is maintained against the shared option inventory and canonical usage contract implemented across application parsing and `UNIT-CLI` usage rendering. It must include synopsis, description, options, defaults, units, output behavior, exit statuses, limitations, physical workflow, and examples.
 
 ## 6. Requirements traceability
+
+The text and cover producers are distinct; shared geometry/commit behavior does not imply one combined transaction. REQ-CAP-001/023/025/026 and REQ-CLI-001/002/006/008 trace to parsing/dispatch in `UNIT-APP`, help/usage rendering in `UNIT-CLI`, command-specific producer paths, planned geometry responsibilities, `UNIT-QPDF` or `UNIT-SVG`, and `UNIT-DOC`. Cover verification confirms that text-layout validation and qpdf input processing are bypassed.
 
 | Requirement group | Design units |
 |---|---|
 | REQ-CAP-001..024 | UNIT-APP, UNIT-PHY, UNIT-GEO, UNIT-IMP, UNIT-GRD, UNIT-PDF, UNIT-QPDF |
-| REQ-CLI-001..009 | UNIT-CLI, UNIT-APP, UNIT-DOC |
+| REQ-CLI-001..009 | UNIT-APP (parsing/dispatch), UNIT-CLI (help/usage rendering), UNIT-DOC |
 | REQ-DATA-001..003 | UNIT-PHY, UNIT-GEO, UNIT-IMP, UNIT-PDF |
 | REQ-ENV-001..004 | UNIT-APP, UNIT-PDF, UNIT-QPDF |
 | REQ-QUAL-001..005 | All units; project build and library controls |
 | REQ-PDF-001..003 | UNIT-PDF, UNIT-QPDF, UNIT-CONT |
-| REQ-DOC-001..003 | UNIT-DOC, UNIT-CLI, release packaging |
+| REQ-DOC-001..003 | UNIT-DOC, UNIT-CLI (usage rendering), release packaging |
 | REQ-PHY-001..003 | UNIT-IMP, UNIT-GRD, UNIT-DOC, physical fixture |
 
 ## 7. Backend evaluation and proof-of-concept plan
@@ -460,6 +452,9 @@ The qpdf and librsvg/Cairo development headers and C++ toolchain are available i
 
 ### 8.2 Self-evaluation
 
+This update is self-evaluated by the implementing developer; the evaluation is not independent. The user is invited to review the revised design and its eventual implementation evidence.
+
+
 - **Scope and references:** Present and aligned with the client-controlled SRS.
 - **Component-wide decisions:** Backend, units, page model, errors, output policy, CLI, and capability boundary are stated with rationale.
 - **Architecture:** Units, static/dynamic relationships, interfaces, and execution concept are identified.
@@ -468,12 +463,12 @@ The qpdf and librsvg/Cairo development headers and C++ toolchain are available i
 - **Feasibility:** The design uses a narrow bridge to isolate the principal native dependency and defines a proof-of-concept gate.
 - **Independence limitation:** This design is self-evaluated by the implementing developer; user design review is required before baseline.
 
-Result: **accepted as the client-controlled design baseline after user acknowledgement on 2026-09-21.**
+Historical result: **the original design was accepted as the client-controlled baseline after user acknowledgement on 2026-09-21.** This project update has not undergone independent evaluation or new user acceptance; user review is invited.
 
 ## 9. Current gate
 
-The requirements and design baselines are accepted. B1 implementation and dependency pinning are complete, and the first B2 application-orchestration slice is implemented and tested. The project is at the B2 implementation-slice/test-readiness gate; broader option coverage and acceptance qualification remain future work.
+The original requirements and design baselines were accepted. B1 implementation and dependency pinning are complete, and CHG-015 split-command implementation with targeted verification is complete. The project remains at the B2 implementation-slice/test-readiness gate; broader option coverage, acceptance qualification, and physical duplex/fold review remain future work.
 
 ## 10. Design baseline acknowledgement
 
-The user reviewed and accepted this Design Description on 2026-09-21, including the qpdf native backend recommendation, C-compatible C++ bridge, Ada architecture, and proof-of-concept exit criteria. This document is now client-controlled Revision 1.0. Changes require a Problem/Change Log entry and user agreement before modification.
+The user accepted the original Design Description on 2026-09-21. This Revision 1.3 project update records the user-authorized split as CHG-015. Targeted implementation verification is complete; broader acceptance and independent physical review remain pending. It does not claim new user acceptance of the revised design. The developer self-evaluated the implementation evidence; independent review remains invited.

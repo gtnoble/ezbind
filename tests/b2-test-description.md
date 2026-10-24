@@ -3,9 +3,9 @@
 **Project:** EZBIND  
 **Document:** B2 Test Description  
 **Identifier:** EZBIND-B2-TD-001  
-**Status:** B2 implementation-slice execution record  
+**Status:** B2 implementation-slice execution record; CHG-015 targeted verification complete, broader acceptance pending
 **Date:** 2026-10-24
-**Revision:** 1.1
+**Revision:** 1.3
 
 ## Scope
 
@@ -21,7 +21,7 @@ This record covers the implemented B2 slice: CLI parsing, qpdf input validation,
 
 ## Historical executed cases
 
-These cases describe the pre-2026-10-24 interface. See the supersession note and CLI replacement-policy verification below for the current interface; old output/force flags are no longer accepted.
+These cases describe the interface before the 2026-10-24 CHG-013 update. Later results document that intervening interface, now also superseded by CHG-015; neither historical result set verifies the authorized split. Old output/force flags were removed by CHG-013.
 
 | ID | Procedure | Expected/result |
 |---|---|---|
@@ -51,11 +51,11 @@ These cases describe the pre-2026-10-24 interface. See the supersession note and
 
 Spine/fabric guides, crop/fold/registration marks, creep, safe-area configuration, broad PDF feature preservation, encrypted-input policy, capability reporting, deterministic metadata, and physical duplex acceptance remain deferred or incomplete in this implementation slice. SVG compatibility beyond librsvg's supported static SVG subset and font/resource portability remain subject to artwork-specific validation.
 
-## Supersession note — CLI and overwrite policy
+## Historical supersession note — CHG-013 CLI and overwrite policy
 
-The original executed cases are historical records for the interface in effect when executed. Their **Pass** results are preserved and do not verify the subsequently approved CLI. The approved change removes `-o`/`--output` and `-f`/`--force`, uses two positional paths in folio/combined mode and zero in cover-only mode, replaces existing destinations without prompting after successful generation, supports `--` and interspersed options, and rejects normalized source/destination aliases. The following new run verifies the revised behavior rather than changing those historical outcomes.
+The original executed cases are historical records for the interface in effect when executed. Their **Pass** results are preserved. CHG-013 then removed `-o`/`--output` and `-f`/`--force`; its verification is recorded separately below. CHG-015 subsequently supersedes that combined/cover-only interface with explicit `text` and `cover` subcommands. Neither earlier set of passes verifies CHG-015; targeted CHG-015 results are recorded separately below.
 
-## CLI replacement-policy verification — 2026-10-24
+## Historical CLI replacement-policy verification (CHG-013) — 2026-10-24
 
 - Root `alr build --development` and nested `(cd tests && alr build --development)` passed, run sequentially. A final root development build restored generated development configuration after the nested build.
 - `python3 tests/test_cli.py`: **15 tests passed**. Covers canonical help, positional folio generation, cover-only and combined generation, replacement of existing destinations, retired flags, missing/extra/empty/oversized operands, `--`, interspersed options, normalized and symbolic-link collisions, and unchanged destinations on invalid PDF/SVG generation failures.
@@ -63,6 +63,20 @@ The original executed cases are historical records for the interface in effect w
 - The nested Ada test executable passed core, qpdf input/placement, and librsvg/Cairo cover bridge checks using those temporary fixtures; both bridge outputs passed `qpdf --check`.
 - `groff -man -Tutf8 doc/ezbind.1` and `git diff --check` passed.
 - This is targeted implementation verification, not full acceptance of the broader B2 requirements. Existing fixed-suffix temporary files and nontransactional two-output commits remain separate hardening work.
+
+## CHG-015 split-command targeted implementation verification — complete
+
+This update is self-evaluated by the implementing developer and is not an independent acceptance evaluation. The user is invited to review the implementation and evidence.
+
+The authorized interface defines `ezbind text [OPTIONS] INPUT.pdf OUTPUT.pdf` and `ezbind cover [OPTIONS] --front FRONT.svg --back BACK.svg OUTPUT.pdf`. The targeted checks covered top-level and command-specific help on their own; `--sheet`/`-s`, interspersed options, and `--`; option ownership and positional arity; rejection of combined mode and old `--cover-*` syntax; cover operation without text input or text-layout validation; per-invocation replacement and normalized collision behavior; and the two-command workflow. The final CLI suite passed **16 test methods**, including assertions requiring the exact selected-command usage line, independent two-command generation, all physical-option parsing, invalid values, and impossible crop/layout preservation.
+
+Sequential root `alr build --development`, nested `(cd tests && alr build --development)`, and final root development build passed. After review identified a usage-output expectation mismatch, the source was corrected, the root rebuilt, and the expanded 16-method CLI suite passed with the strengthened exact-usage assertion.
+
+`/tmp/ezbind-split-integration.py` was executed. It generated source from the checked-in cover SVGs and ran both commands twice each for Letter and A4, using the text grid, 5 mm spacing, 12 mm spine margin, and 1 mm top source crop. Checks confirmed one cover page and two text sides, exact Letter/A4 geometry, BACK/FRONT extraction, and `qpdf --check` success for all outputs. Nested executable core, qpdf, and librsvg bridge smoke tests passed; both native bridge outputs passed qpdf validation. No sibling temporary file remained. Source inspection confirmed the cover producer has no text-layout validation or qpdf input path.
+
+`groff -man -Tutf8 doc/ezbind.1` and `git diff --check` passed.
+
+This is targeted implementation verification, not broader B2 acceptance. Each command commits one output; separate invocations are not transactional and no transaction guarantee is made. Historical results above remain intact and apply only to their interfaces. Independent acceptance and physical duplex/fold review remain pending.
 
 ## Independence limitation
 

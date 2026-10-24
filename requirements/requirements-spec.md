@@ -3,9 +3,9 @@
 **Project:** ezbind
 **Document:** Software Requirements Specification (SRS)
 **Identifier:** EZBIND-SRS-001
-**Status:** Project update to client-acknowledged baseline
+**Status:** Draft project update under CHG-015
 **Date:** 2026-10-24
-**Revision:** 1.2
+**Revision:** 1.3 (project update; CHG-015 targeted implementation verification complete)
 
 ## Contents
 
@@ -20,7 +20,7 @@
 
 ### 1.1 Component
 
-This specification covers the `EZBIND-CLI` software component: a local Ada command-line application that reads one ebook PDF and writes an imposed PDF for folded-folio home bookbinding.
+This specification covers `EZBIND-CLI`: a local Ada command-line application with separate `text` and `cover` subcommands that produce a folded-folio PDF or a cover-art PDF, respectively.
 
 ### 1.2 Product boundary
 
@@ -38,8 +38,8 @@ Each requirement states one primary verification method:
 ## 2. Referenced documents
 
 - `plan/project-plan.md`, EZBIND-SDP-001, Revision 1.1.
-- `requirements/operational-concept.md`, EZBIND-OCD-001, Revision 1.0.
-- `tests/test-plan.md`, EZBIND-STP-001, Revision 1.1 draft.
+- `requirements/operational-concept.md`, EZBIND-OCD-001, Revision 1.1 project update.
+- `tests/test-plan.md`, EZBIND-STP-001, Revision 1.2 project update.
 - User-approved B0 resolutions, 2026-09-21.
 
 ## 3. Definitions and conventions
@@ -64,7 +64,7 @@ All physical dimensions shall be represented internally with sufficient precisio
 
 | ID | Requirement | Verification | Planned build |
 |---|---|---|---|
-| REQ-CAP-001 | Folio mode shall accept exactly two positional paths: one input PDF followed by one folio output PDF. Cover-only mode shall accept zero positional paths and require all three named cover options; combined mode shall use the two folio paths plus those options. | Test | B2 |
+| REQ-CAP-001 | The `text` subcommand shall accept exactly INPUT.pdf and OUTPUT.pdf as positional paths; the `cover` subcommand shall accept FRONT.svg and BACK.svg through required named options and exactly one positional OUTPUT.pdf. A single invocation shall produce only its selected output type; combined mode is not supported. | Test | B2 |
 | REQ-CAP-002 | The program shall inspect the input PDF before output generation and shall reject an unreadable, empty, malformed, or unsupported input with a diagnostic and nonzero exit status. | Test | B1/B2 |
 | REQ-CAP-003 | The program shall support Letter, A4, and explicitly specified custom sheet dimensions. | Test | B1/B2 |
 | REQ-CAP-004 | The program shall treat the configured finished-page dimensions as the target page size for each source page and shall validate that the source content can be placed without unintended cropping unless explicit source crop parameters request it. | Test/Analysis | B1 |
@@ -73,9 +73,9 @@ All physical dimensions shall be represented internally with sufficient precisio
 | REQ-CAP-007 | The program shall add blank logical pages as needed so the imposed logical-page count is a multiple of four, unless a future explicitly selected policy says otherwise. | Test | B1 |
 | REQ-CAP-008 | The program shall preserve the visible appearance of each source page, including text, raster images, vector graphics, and page rotation, subject to declared backend limitations. | Test/Inspection | B1/B2 |
 | REQ-CAP-009 | The program shall emit a valid PDF whose physical sheet dimensions match the selected sheet dimensions. | Test | B1/B2 |
-| REQ-CAP-010 | The program shall provide a mode that excludes cover-card pages and shall make that mode the default. | Test | B2 |
-| REQ-CAP-011 | The program shall provide an optional mode that adds one blank front cover-card page and one blank back cover-card page, each with the configured finished-page dimensions. | Test | B2 |
-| REQ-CAP-012 | The program shall provide an optional spine/fabric guide and shall leave it disabled by default. | Test/Demonstration | B2 |
+| REQ-CAP-010 | The `text` command shall exclude cover-card pages by default. | Test | B2 |
+| REQ-CAP-011 | The `text` command shall provide an optional mode that adds one blank front cover-card page and one blank back cover-card page, each with the configured finished-page dimensions. | Test | B2 |
+| REQ-CAP-012 | The `text` command shall provide an optional spine/fabric guide and shall leave it disabled by default. | Test/Demonstration | B2 |
 | REQ-CAP-013 | The program shall support independent top, bottom, fore-edge, and spine margins. | Test | B1/B2 |
 | REQ-CAP-014 | The program shall interpret margins from the finished-page edges and shall reserve the spine margin from source content. | Test/Analysis | B1 |
 | REQ-CAP-015 | The program shall accept physical dimensions in millimetres, inches, and PDF points, and shall reject invalid or negative dimensions. | Test | B1 |
@@ -87,27 +87,27 @@ All physical dimensions shall be represented internally with sufficient precisio
 | REQ-CAP-020 | The program shall provide optional crop marks, fold marks, and registration marks, all disabled by default. | Test/Demonstration | B2 |
 | REQ-CAP-021 | The program shall provide creep compensation as an optional explicit value or supported mode, disabled by default, and shall not infer paper thickness without user input. | Test/Analysis | B3 |
 | REQ-CAP-022 | The program shall provide an optional printer safe-area reserve and shall reject a layout when the requested content, margins, and reserves do not fit. | Test | B2 |
-| REQ-CAP-023 | After successful generation, the program shall replace existing folio and/or cover destinations without prompting; it shall not replace destination files when generation fails. | Test | B2 |
+| REQ-CAP-023 | Each `text` or `cover` invocation shall replace its single existing destination without prompting only after successful generation; it shall not replace that destination when generation fails. The guarantee applies per invocation and makes no claim about collisions or atomicity across separate invocations. | Test | B2 |
 | REQ-CAP-024 | The program shall report the selected non-default layout parameters sufficiently for a user to identify how the output was generated. | Test/Inspection | B2 |
-| REQ-CAP-025 | The program shall provide an optional SVG cover-card mode that accepts separate front and back SVG artwork and emits one landscape cardstock sheet with back artwork on the left half and front artwork on the right half, so the center cut edges face the spine; the sheet shall mark the center cut boundary with a 0.5 pt dashed gray line inset 12 pt from the top and bottom edges. | Test/Demonstration | B2 |
-| REQ-CAP-026 | The program shall allow SVG cover-card output without an input text-block PDF or folio output path when all three named cover options are supplied; cover-only mode shall use zero positional paths. | Test | B2 |
+| REQ-CAP-025 | The `cover` subcommand shall require separate front and back SVG artwork and emit one landscape cardstock sheet with back artwork on the left half and front artwork on the right half, so the center cut edges face the spine; the sheet shall mark the center cut boundary with a 0.5 pt dashed gray line inset 12 pt from the top and bottom edges. | Test/Demonstration | B2 |
+| REQ-CAP-026 | The `cover` subcommand shall produce a cover PDF without an input text-block PDF and shall require exactly one positional output path plus `--front FRONT.svg` and `--back BACK.svg`. | Test | B2 |
 
 ### 4.2 External interface requirements
 
 | ID | Requirement | Verification | Planned build |
 |---|---|---|---|
-| REQ-CLI-001 | The CLI shall accept exactly INPUT.pdf OUTPUT.pdf positionally in folio mode, optionally with the three named cover options; cover-only mode shall accept those options and zero positional paths. The CLI shall also accept the sheet, page/geometry, source crop, margin, grid, guide, marks, creep, and safe-area options defined by the user manual. | Test/Demonstration | B2 |
-| REQ-CLI-002 | The program shall provide a help operation that identifies usage, defaults, supported units, and error/exit behavior without requiring an input PDF. | Test | B2 |
+| REQ-CLI-001 | The CLI shall accept `ezbind text [OPTIONS] INPUT.pdf OUTPUT.pdf` and `ezbind cover [OPTIONS] --front FRONT.svg --back BACK.svg OUTPUT.pdf`. `text` shall accept `--sheet`/`-s` and its text-layout options; `cover` shall accept shared `--sheet`/`-s` and the `--front`/`--back` artwork options only. Other text-layout options shall be rejected in cover mode. Each command shall reject the other command’s exclusive options. The former `--cover-*` syntax and combined mode shall not be accepted as compatibility aliases. | Test/Demonstration | B2 |
+| REQ-CLI-002 | The CLI shall provide top-level help listing subcommands and command-specific help describing that command’s usage, options, defaults, units, and error/exit behavior without requiring input files. Help on its own shall succeed. | Test | B2 |
 | REQ-CLI-003 | Normal diagnostics shall be written to standard error and shall not include extracted document text, passwords, or complete PDF content. | Inspection/Test | B2 |
 | REQ-CLI-004 | The program shall return exit status 0 on success, 2 for command-line usage errors, 3 for input-PDF errors, 4 for impossible layouts, 5 for output/filesystem errors, 6 for missing/unusable runtime dependencies, and 10 for unexpected internal errors. | Test | B2 |
-| REQ-CLI-005 | The program shall operate on one input PDF per invocation; batch processing is not required for this baseline. | Inspection/Test | B2 |
-| REQ-CLI-006 | The program shall recognize `--help` and `-h` without requiring an input PDF, print the canonical usage statement and help text to standard output, and return exit status 0. | Test | B2 |
-| REQ-CLI-007 | When the invocation contains an unknown flag, malformed option, missing option value, or other command-line usage error, the program shall print a diagnostic followed by the canonical usage statement to standard error, shall not create or replace an output PDF, and shall return exit status 2. | Test | B2 |
-| REQ-CLI-008 | The canonical usage statement shall be identical in help and invalid-invocation paths and exactly `Usage: ezbind [OPTIONS] INPUT.pdf OUTPUT.pdf` as its first line. | Test/Inspection | B2 |
-| REQ-CLI-009 | Help output shall print the canonical usage line followed by a concise option summary and exit-status summary; invalid-invocation output shall print the command-line diagnostic followed by the same canonical usage line and shall not be required to print the full option summary. | Test | B2 |
+| REQ-CLI-005 | The `text` command shall operate on one input PDF per invocation; `cover` shall require no input PDF. Batch processing is not required for this baseline. | Inspection/Test | B2 |
+| REQ-CLI-006 | The CLI shall recognize top-level and command-specific `--help`/`-h` without requiring input files, print the applicable usage and help text to standard output, and return exit status 0. | Test | B2 |
+| REQ-CLI-007 | When an invocation contains an unknown flag, malformed option, missing option value, command/option mismatch, or other usage error, the program shall print a diagnostic followed by that command’s canonical usage to standard error, shall not create or replace its output PDF, and shall return exit status 2. | Test | B2 |
+| REQ-CLI-008 | Each command shall have a canonical usage statement matching that command’s help and invalid-invocation output; top-level help shall identify the `text` and `cover` subcommands. | Test/Inspection | B2 |
+| REQ-CLI-009 | Top-level and command-specific help shall print applicable usage followed by concise command/option and exit-status summaries; invalid-invocation output shall print the command-line diagnostic followed by the corresponding canonical usage and need not print the full option summary. | Test | B2 |
 | REQ-CLI-010 | For every supported long CLI option with a documented short alias, the program shall accept that alias with the same behavior. | Test | B2 |
 | REQ-CLI-011 | The parser shall accept `--` to end option parsing and permit interspersed options; examples shall prefer options first. | Test | B2 |
-| REQ-CLI-012 | The program shall reject source PDF/SVG destinations, including normalized path aliases, and identical folio/cover outputs; valid existing destinations shall be replaced without prompting only after successful generation. | Test | B2 |
+| REQ-CLI-012 | Each command shall reject normalized same-invocation input/artwork-to-output path aliases and shall replace only its one existing destination after successful generation. Separate invocations shall not be represented as jointly checking path collisions or as a transaction. | Test | B2 |
 
 ### 4.3 Internal data requirements
 
@@ -193,7 +193,7 @@ The following test groups are reserved in the Test Plan and will be expanded int
 | REQ-PHY-001..003 | TEST-PHY, inspection |
 | REQ-DOC-001..003 | TEST-DOC, inspection |
 
-The detailed Test Description will identify exact input data, steps, expected results, and pass/fail criteria before acceptance testing. It will compare help and invalid-invocation output against the canonical usage line byte-for-byte, excluding platform line-ending normalization. The revised interface, normalized path-collision rules, and replacement policy were verified by the 2026-10-24 regression run recorded in the B2 Test Description; independent physical acceptance remains pending.
+The detailed Test Description will identify exact input data, steps, expected results, and pass/fail criteria before acceptance testing. Historical results apply only to their superseded interfaces. CHG-015 targeted implementation verification is recorded separately in the B2 Test Description. Broader B2 acceptance and independent physical acceptance remain pending.
 
 ### 5.3 Requirements-to-source traceability
 
@@ -201,7 +201,9 @@ All requirements in this draft trace to the user initiating brief and the user-a
 
 ## 6. Notes
 
-- This specification was accepted by the user on 2026-09-21 and is client-controlled Revision 1.1.
+- This Revision 1.3 project update specifies the user-authorized command split recorded as CHG-015 and supersedes combined-mode and former `--cover-*` interface requirements. Targeted implementation verification is recorded in the B2 Test Description; this does not constitute broader acceptance or new user acceptance.
+
+- The original Revision 1.1 baseline was accepted by the user on 2026-09-21; this Revision 1.3 project update is not newly user-accepted.
 - The initial man-page scope is `ezbind(1)`; additional man pages are not required until another user-facing command or file format is introduced.
 - The PDF backend is intentionally not selected by this document; backend selection is a design activity constrained by these requirements.
 - The physical duplex flip direction must be confirmed with a printed fixture because printer driver settings vary.
@@ -209,13 +211,16 @@ All requirements in this draft trace to the user initiating brief and the user-a
 
 ## Self-evaluation
 
+This project update is self-evaluated by the implementing developer; the evaluation is not independent. The user is invited to review the revised requirements and the verification evidence before acceptance.
+
+
 - Applicable SRS checklist sections are present: scope, references, requirements by category, verification methods, qualification provisions, traceability, and notes.
 - Every listed requirement has a verification method and planned build.
 - CLI usage behavior and the `ezbind(1)` deliverable are explicitly specified and traceable to tests.
 - The scope and accepted physical baseline are represented.
 - Remaining implementation choices are identified as design decisions.
-- Result: **accepted as the client-controlled requirements baseline after user acknowledgement on 2026-09-21.**
+- Historical result: **Revision 1.1 was accepted as the client-controlled requirements baseline after user acknowledgement on 2026-09-21.** The Revision 1.3 update is self-evaluated, not independently evaluated; user review is invited.
 
 ## 7. Requirements baseline acknowledgement
 
-The user accepted the requirements in this specification on 2026-09-21, including the `ezbind(1)` man-page requirements and canonical usage behavior. This document is now client-controlled Revision 1.1. Changes require a Problem/Change Log entry and user agreement before modification.
+The user accepted the original requirements on 2026-09-21. This authorized project update is Revision 1.3 and is not represented as newly user-accepted. Client-control status and any required baseline acknowledgement remain subject to the project change-control procedure. CHG-015 records the authorization to implement the recommended split. Targeted implementation verification is complete; broader acceptance and any required client baseline acknowledgement remain pending.

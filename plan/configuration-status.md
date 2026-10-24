@@ -1,7 +1,7 @@
 # ezbind Configuration Status
 
 **Project:** EZBIND
-**Status:** Client-acknowledged baseline; B2 implementation slice under project control
+**Status:** Original baseline acknowledged; CHG-015 implemented and targeted verification complete; acceptance and physical review pending
 **Date:** 2026-10-24
 
 | Configuration item | Identifier | Revision/status | Control level | Notes |
@@ -10,10 +10,10 @@
 | Problem/Change Log | EZBIND-PCL-001 | Initial | Project | Active |
 | Configuration Status | EZBIND-CS-001 | Initial | Project | Active |
 | Project Development Log | EZBIND-SDF-001 | Initial | Project | Active |
-| Requirements Specification | EZBIND-SRS-001 | Rev 1.2 project update | Project | CHG-013 records user-approved positional paths and replacement policy; targeted verification passed |
-| Design Description | EZBIND-SDD-001 | Rev 1.1 project update | Project | CHG-013 documents revised CLI, path normalization, and Unix replacement rename |
-| Source code | EZBIND-CLI | B2 positional CLI increment | Project | Removed output/force switches, added positional paths and unconditional replacement; root/nested builds pass |
-| Test products | EZBIND-TEST | B2 TD Rev 1.1 | Project | 15 CLI regressions, core/native bridge tests, and Letter/A4 replacement/qpdf checks pass; physical acceptance pending |
+| Requirements Specification | EZBIND-SRS-001 | Rev 1.3 project update | Project | CHG-015 text/cover split implemented; targeted verification complete; broader acceptance pending |
+| Design Description | EZBIND-SDD-001 | Rev 1.3 project update | Project | Corrected package ownership: Ezbind_Application parses/dispatches and owns producers; Ezbind_CLI renders help/usage. Target architecture and remaining conceptual units identified |
+| Source code | EZBIND-CLI | B2 split-command implementation | Project | CHG-015 implementation and targeted verification recorded in the B2 Test Description; independently evaluated acceptance remains pending |
+| Test products | EZBIND-TEST | B2 TD Rev 1.3 targeted execution update | Project | Historical outcomes preserved; CHG-015 targeted verification recorded; broader B2 acceptance and physical review pending |
 
 ## Control rules
 

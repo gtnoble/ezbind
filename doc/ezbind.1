@@ -1,66 +1,69 @@
 .TH EZBIND 1 "2026-10-24" "ezbind 0.1.0-dev B2" "User Commands"
+.\" CHG-015 split-command interface; targeted implementation verification complete.
 .SH NAME
-ezbind \- prepare an ebook PDF for folded-folio home bookbinding
+ezbind \- prepare PDFs for folded-folio home bookbinding
 .SH SYNOPSIS
-.B ezbind
+.B ezbind text
 .RB [ OPTIONS ]
 .I INPUT.pdf
 .I OUTPUT.pdf
 .PP
-.B ezbind
+.B ezbind cover
 .RB [ OPTIONS ]
-.B --cover-back
-.I BACK.svg
-.B --cover-front
+.B --front
 .I FRONT.svg
-.B --cover-output
-.I COVERS.pdf
+.B --back
+.I BACK.svg
+.I OUTPUT.pdf
+.PP
+.B ezbind --help
 .SH DESCRIPTION
 .B ezbind
-reads a local input PDF and writes a duplex folded-folio arrangement in folio
-mode. Each output sheet has two finished-page positions on each side. The
-nominal folio assignment is front-left 4, front-right 1, back-left 2, and
-back-right 3. Incomplete final folios are padded with blank logical pages.
+provides separate text and cover commands. The text command reads a local input
+PDF and writes a duplex folded-folio arrangement. Each output sheet has two
+finished-page positions on each side. The nominal folio assignment is
+front-left 4, front-right 1, back-left 2, and back-right 3. Incomplete final
+folios are padded with blank logical pages.
 .PP
-Cover-only mode reads the supplied front and back SVG files and writes a
-separate cover PDF without opening a text-block PDF. Combined mode generates
-both folio and cover PDFs.
+The cover command reads front and back SVG files and writes a separate cover
+PDF without opening a text-block PDF. Each invocation produces one output.
+There is no combined mode and no compatibility alias for the former
+.BR --cover-*
+options; users needing both outputs run the commands separately.
 .PP
-The canonical usage statement for folio mode is the first line of help.
-Usage errors print a diagnostic followed by this same line:
+Top-level help lists the commands; each command has command-specific help and
+usage. Help works on its own. The text command takes exactly INPUT.pdf and
+OUTPUT.pdf. The cover command takes exactly one positional output and requires
+.B --front
+and
+.BR --back .
+Options may be interspersed with positional paths;
+.B --
+ends option parsing. Examples prefer options first. Supply values as separate
+arguments, such as
+.BR --sheet a4 ,
+not
+.BR --sheet=a4 .
+Attached short values and grouped short flags are not supported. Each command
+rejects its own normalized source/destination path collisions.
 .PP
-.nf
-Usage: ezbind [OPTIONS] INPUT.pdf OUTPUT.pdf
-.fi
-.PP
-Folio and combined modes take exactly two positional paths. Cover-only mode
-takes zero positional paths and requires --cover-front, --cover-back, and
---cover-output.
-Options may be interspersed with positional paths; \fB--\fR ends option
-parsing. Examples prefer options first. Supply values as separate arguments,
-such as \fB--sheet a4\fR, not \fB--sheet=a4\fR. Attached short values and
-grouped short flags are not supported. The input PDF and source SVGs must not
-also be destinations, including normalized path aliases; folio and cover
-destinations must differ.
-.PP
-Existing destinations are replaced without prompting only after successful
-generation. The current B2 slice supports Letter and A4 sheets, an optional
-margin grid, and separate SVG cover output. The former \fB-o\fR/\fB--output\fR
-and \fB-f\fR/\fB--force\fR options are no longer accepted; name the folio
-output as the second positional argument. Physical cover cards, adhesive,
-and fabric remain user-supplied.
+Each command replaces its single destination without prompting only after
+successful generation. The previously verified B2 interface predates this
+split-command update. Targeted CHG-015 implementation verification is recorded in
+the B2 Test Description; broader B2 acceptance and independent physical review remain pending.
+Physical cover cards, adhesive, and fabric remain user-supplied.
 .SH OPTIONS
 .TP
 .BR --help , \-h
-Print usage, a concise option summary, and exit-status summary without requiring
-an input PDF; return status 0. Invoke --help or -h on its own.
+Print applicable help without requiring input files and return status 0. Top-level
+help lists commands; invoke command-specific help on its own.
 .TP
 .BR --sheet\~letter | \-s\~letter | --sheet\~a4 | \-s\~a4
 Select the physical output sheet. Letter is the default. Output is landscape:
 792 x 612 points for Letter and approximately 841.89 x 595.28 points for A4.
 .TP
 .BR --grid , \-g
-Add light-gray vector grid lines in the margin areas. The default spacing is
+Add light-gray vector grid lines in text-mode margin areas. The default spacing is
 5 mm. Grid lines are not added unless this option is selected.
 .TP
 .B --grid-spacing \fIVALUE\fR, -G \fIVALUE\fR
@@ -68,65 +71,59 @@ Set positive grid spacing in \fBmm\fR, \fBin\fR, or \fBpt\fR; the default is
 5 mm. This option does not enable the grid; also supply --grid.
 .TP
 .BR --margin-top\~VALUE | \-t\~VALUE | --margin-bottom\~VALUE | \-b\~VALUE
-Set top or bottom output clearance. Values require a non-negative \fBmm\fR,
-\fBin\fR, or \fBpt\fR suffix. Defaults are zero.
+Set text-mode top or bottom output clearance. Values require a non-negative
+\fBmm\fR, \fBin\fR, or \fBpt\fR suffix. Defaults are zero.
 .TP
 .BR --crop-top\~VALUE | --crop-bottom\~VALUE | --crop-left\~VALUE | --crop-right\~VALUE
-Remove source-page edge distances before placement. Cropping may remove source
-content but must leave positive page area. Values require a non-negative
-\fBmm\fR, \fBin\fR, or \fBpt\fR suffix and default to zero. Distances are
-measured from the effective CropBox, falling back to MediaBox; edge names refer
-to visual edges after rotation. Auto-crop is not enabled.
+Remove text-mode source-page edge distances before placement. Cropping may
+remove source content but must leave positive page area. Values require a
+non-negative \fBmm\fR, \fBin\fR, or \fBpt\fR suffix and default to zero.
+Distances are measured from the effective CropBox, falling back to MediaBox;
+edge names refer to visual edges after rotation. Auto-crop is not enabled.
 .TP
 .BR --margin-fore-edge\~VALUE | \-e\~VALUE | --margin-spine\~VALUE | \-i\~VALUE
-Set fore-edge or spine output clearance. The spine is the fold-facing inner
-edge; the fore-edge is outer. Values require a non-negative \fBmm\fR, \fBin\fR,
-or \fBpt\fR suffix. Both defaults are zero.
+Set text-mode fore-edge or spine output clearance. The spine is the fold-facing
+inner edge; the fore-edge is outer. Values require a non-negative \fBmm\fR,
+\fBin\fR, or \fBpt\fR suffix. Both defaults are zero.
 .TP
-.B --cover-front \fIPATH\fR
-SVG artwork for the front cover. Supply it together with --cover-back and
---cover-output.
+.B --front \fIPATH\fR
+Required front SVG artwork for the cover command.
 .TP
-.B --cover-back \fIPATH\fR
-SVG artwork for the back cover, rendered on the left half of the landscape
-cover sheet.
-.TP
-.B --cover-output \fIPATH\fR
-Write a separate one-page cover PDF. Front artwork is rendered on the right
-half and back artwork on the left. A dashed gray center cut guide is drawn over
-the artwork, inset 12 points from the top and bottom edges. Artwork is fitted
+.B --back \fIPATH\fR
+Required back SVG artwork, rendered on the left half of the landscape cover
+sheet. The output PDF is the final positional argument. Front artwork is
+rendered on the right half; a dashed gray center cut guide is drawn over the
+artwork, inset 12 points from the top and bottom edges. Artwork is fitted
 proportionally to each half-sheet viewport.
 .SH DEFAULT LAYOUT
-Default minimum clearances are zero points at the top, bottom, fore-edge, and
-spine. Source pages are fitted uniformly inside the resulting content
+Text mode uses a landscape Letter or A4 sheet with two finished-page positions
+per side. Source pages are fitted uniformly inside the resulting content
 rectangle without distortion. Source crop options are applied before this fit.
 Aspect-ratio differences may leave additional letterboxing. The optional grid
 occupies reserved strips and does not cross source content. A one-page source
 produces two physical output sides; source counts are padded to multiples of
 four.
 .SH OUTPUT AND PHYSICAL WORKFLOW
-Print duplex using the printer setting appropriate for the selected paper. Fold
-each sheet once with the fold toward the spine, keep the generated folio order,
-and stack before gluing the spine side. Confirm duplex orientation with a small
-asymmetric fixture before committing a valuable book.
+Print text output duplex using the printer setting appropriate for the selected
+paper. Fold each sheet once with the fold toward the spine, keep the generated
+folio order, and stack before gluing the spine side. Confirm duplex orientation
+with a small asymmetric fixture before committing a valuable book.
 .PP
-When cover mode is selected, print the separate cover PDF on the selected
-cardstock size. The back artwork is on the left and the front artwork is on the
-right; cut along the dashed gray center guide so both cut edges face the spine.
-The guide is inset 12 points from the sheet edges. Cover artwork is rendered by
+For the cover command, print the separate cover PDF on the selected cardstock
+size. The back artwork is on the left and the front artwork is on the right;
+cut along the dashed gray center guide so both cut edges face the spine. The
+guide is inset 12 points from the sheet edges. Cover artwork is rendered by
 librsvg onto a Cairo PDF surface and fitted proportionally to each half-sheet
 viewport.
 .PP
-Existing folio and cover outputs are replaced without prompting only after
-successful generation. Outputs are first written to sibling temporary files
-named DESTINATION.ezbind.tmp. Do not use those names for source files or other
-data, or run concurrent invocations targeting the same destination.
-.PP
-Combined output is not transactional: the cover is committed first, then the
-folio. If the folio commit fails, the cover may already have been replaced even
-though the command returns an error. Generation failures before commit leave
-existing destinations unchanged. Path checks resolve relative components and
-symbolic links but do not identify distinct hard links to the same file.
+Each command writes to a sibling temporary file named
+DESTINATION.ezbind.tmp before replacement. Do not use these names for source
+files or other data, or run concurrent invocations targeting the same
+ destination. Each invocation only commits its own output after successful
+generation. If both outputs are needed, run two commands. Separate invocations
+cannot check cross-invocation path collisions together and are not
+transactional. Path checks resolve relative components and symbolic links but
+do not identify distinct hard links to the same file.
 .SH EXIT STATUS
 .TP
 .B 0
@@ -152,10 +149,10 @@ loader failures occur before application error handling.
 .B 10
 Unexpected internal processing error.
 .SH DIAGNOSTICS
-Usage errors are written to standard error and include the diagnostic followed
-by the canonical usage line. Ordinary diagnostics do not include extracted
-source text, passwords, or complete PDF content. Success messages identifying
-written destinations are printed to standard output.
+Usage errors are written to standard error and include the selected command's
+usage. Ordinary diagnostics do not include extracted source text, passwords,
+or complete PDF content. Success messages identifying written destinations are
+printed to standard output.
 .SH PDF LIMITATIONS
 The qpdf backend preserves visible page content and selectable text for the
 implemented folio placement path. Cover artwork is rendered through librsvg
@@ -167,27 +164,31 @@ reporting are not yet exposed by this B2 slice. Source-page annotations and
 form fields may not follow clipped content.
 .SH EXAMPLE
 .nf
-ezbind --sheet a4 --grid book.pdf book-bound.pdf
+ezbind text --sheet a4 --grid book.pdf book-bound.pdf
 .fi
 .PP
-Generate a folio and separate cover sheet:
+Generate a separate cover sheet:
 .PP
 .nf
-ezbind --sheet letter --cover-back back.svg --cover-front front.svg \\
-  --cover-output covers.pdf book.pdf book-bound.pdf
+ezbind cover --sheet letter --back back.svg --front front.svg covers.pdf
 .fi
 .PP
-Generate a cover without a text-block PDF:
+The cover command does not require a text-block PDF:
 .PP
 .nf
-ezbind --sheet letter --cover-back back.svg \\
-  --cover-front front.svg --cover-output covers.pdf
+ezbind cover --sheet letter --back back.svg \
+  --front front.svg covers.pdf
 .fi
 .PP
 Handle dash-leading positional filenames by ending option parsing:
 .PP
 .nf
-ezbind --sheet a4 -- -book.pdf -bound.pdf
+ezbind text --sheet a4 -- -book.pdf -bound.pdf
 .fi
+.SH CHANGE STATUS
+This documentation describes the user-authorized CHG-015 interface. Targeted
+implementation verification is complete and recorded in the project test record.
+Historical combined-mode results do not verify this interface. Broader B2
+acceptance and independent physical review remain pending.
 .SH SEE ALSO
 .BR qpdf (1)

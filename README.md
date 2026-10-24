@@ -4,7 +4,7 @@
 
 ## Project status
 
-The project is in **Build B2 implementation**. The current usable slice validates inputs, imposes four logical pages per folded sheet, pads incomplete folios with blanks, supports Letter/A4 output selection, optionally draws a vector margin grid, and generates a separate one-sheet cover PDF from front/back SVG artwork. The broader option set in the requirements remains staged work.
+The project remains in **Build B2 implementation and targeted verification**. The `text` and `cover` commands are implemented. CHG-015 targeted implementation verification is complete; broader B2 acceptance and independent physical duplex/fold review remain pending. The wider option set in the requirements remains staged work.
 
 ## Build with Alire
 
@@ -19,41 +19,43 @@ Builds should be run sequentially because the nested test crate pins the root cr
 
 The tested native environment is Linux with qpdf 11.9.0, Alire 2.1.0, and Alire-selected GNAT native 15.2.1.
 
-## Current command behavior
+## Commands
 
 ```text
-Usage: ezbind [OPTIONS] INPUT.pdf OUTPUT.pdf
+ezbind text [OPTIONS] INPUT.pdf OUTPUT.pdf
+ezbind cover [OPTIONS] --front FRONT.svg --back BACK.svg OUTPUT.pdf
+ezbind --help
 ```
 
-The second positional path, `OUTPUT.pdf`, is the required folio output path. For example: `ezbind --sheet a4 book.pdf bound.pdf`.
+`text` produces only the imposed folio PDF. `cover` produces only the separate cardstock cover PDF. Use two separate invocations when both are needed. There is no combined mode and no compatibility alias for the former `--cover-front`, `--cover-back`, or `--cover-output` spelling. Top-level help lists commands; `ezbind text --help` and `ezbind cover --help` show command-specific help. Help works on its own.
 
-Implemented options:
+The `text` command’s second positional path, `OUTPUT.pdf`, is its folio output path. For example: `ezbind text --sheet a4 book.pdf bound.pdf`.
+
+Implemented command options:
 
 - `-s letter|a4`, `--sheet letter|a4` — select the physical output sheet; Letter is the default.
 - `-g`, `--grid` — add light-gray vector lines in all configured margin areas, without crossing source content.
 - `-G VALUE`, `--grid-spacing VALUE` — set positive grid spacing using a physical value with `mm`, `in`, or `pt` suffix; the default is 5 mm.
 - `--crop-top VALUE`, `--crop-bottom VALUE`, `--crop-left VALUE`, `--crop-right VALUE` — remove source-page edge distances using `mm`, `in`, or `pt`; values are measured from the effective CropBox, falling back to MediaBox, and default to zero. Edges are visual page edges after rotation.
 - `-t VALUE`, `--margin-top VALUE`; `-b VALUE`, `--margin-bottom VALUE`; `-e VALUE`, `--margin-fore-edge VALUE`; `-i VALUE`, `--margin-spine VALUE` — set independent output margins using `mm`, `in`, or `pt`; defaults are zero for all four margins.
-- `--cover-front PATH` — SVG artwork for the front cover. This option must be paired with the other cover options.
-- `--cover-back PATH` — SVG artwork for the back cover. This option must be paired with the other cover options.
-- `--cover-output PATH` — separate one-page PDF output for the cardstock cover sheet.
+- `--front PATH` and `--back PATH` — required SVG artwork paths for `cover`; cover output is the final positional path.
 - `-h`, `--help` — print help without requiring an input PDF.
 
-Folio mode requires exactly two positional paths (`INPUT.pdf OUTPUT.pdf`). Options may appear before, between, or after them; `--` ends option parsing. Prefer placing options first. Supply option values as separate arguments (`--sheet a4`, not `--sheet=a4`); attached short values and grouped short flags are not supported. Invoke `ezbind --help` or `ezbind -h` on its own. Combined mode adds all three cover options. Cover-only mode supplies zero positional paths and requires `--cover-front`, `--cover-back`, and `--cover-output`.
+`text` requires exactly two positional paths (`INPUT.pdf OUTPUT.pdf`); `cover` requires the artwork flags and exactly one positional `OUTPUT.pdf`. Both accept interspersed options and `--` to end option parsing. Prefer placing options first. Supply option values as separate arguments (`--sheet a4`, not `--sheet=a4`); attached short values and grouped short flags are not supported. Text-only options are rejected by cover; artwork options are rejected by text.
 
-When cover mode is selected, the cardstock output is one landscape Letter or A4 sheet. The back-cover SVG is rendered on the left half and the front-cover SVG on the right half, so the center cut puts both cut edges toward the spine. A dashed gray center cut guide is printed over the artwork, inset 12 pt from the top and bottom edges. Artwork is rendered proportionally to fit its half-sheet viewport; matching the SVG aspect ratio to the selected card size is recommended. The folio output and cover output must be different paths when both modes are combined. Cover-only mode omits both positional paths; it requires the three named cover options and writes only `--cover-output`.
+The cover command writes one landscape Letter or A4 cardstock sheet. The back-cover SVG is rendered on the left half and the front-cover SVG on the right half, so the center cut puts both cut edges toward the spine. A dashed gray center cut guide is printed over the artwork, inset 12 pt from the top and bottom edges. Artwork is rendered proportionally to fit its half-sheet viewport; matching the SVG aspect ratio to the selected card size is recommended. Each invocation has one output. The text input or cover artwork files must not be the same destination in that invocation.
 
 Normal output uses a landscape Letter or A4 sheet with two finished-page rectangles. The nominal folio assignment is front-left 4, front-right 1, back-left 2, and back-right 3. Page counts are padded to a multiple of four with blank logical pages. Default output margins are zero on all four edges. Source crop options are independent: the requested edge content is removed, the remaining positive-area source page is clipped, and it is then fitted uniformly into the output content rectangle without distortion. Crop values are measured from each page's effective CropBox, falling back to MediaBox, and are interpreted as visual edges after rotation. Physical option values require an explicit `mm`, `in`, or `pt` suffix.
 
-Help returns status `0`. Invalid flags, missing option values, missing paths, extra positional paths, incomplete cover options, and oversized paths return status `2` and print a diagnostic followed by the canonical usage line to standard error. Input-PDF failures return `3`; impossible layouts return `4`; output/filesystem or SVG-rendering failures return `5`; unexpected processing failures return `10`. Status `6` is reserved for missing/unusable runtime dependencies by the interface contract, but is not currently returned by the application; loader failures occur before its error handling.
+Help returns status `0`. Invalid flags, missing option values, missing paths, extra positional paths, incomplete cover options, command/option mismatches, and oversized paths return status `2` and print a diagnostic followed by the applicable command usage to standard error. Input-PDF failures return `3`; impossible layouts return `4`; output/filesystem or SVG-rendering failures return `5`; unexpected processing failures return `10`. Status `6` is reserved for missing/unusable runtime dependencies by the interface contract, but is not currently returned by the application; loader failures occur before its error handling.
 
 ### Output replacement and safety
 
-Existing destination files are replaced without prompting after successful generation; there is no overwrite switch. The folio and cover output paths must be distinct. The input PDF and source SVG paths must not also be destinations. Path checks resolve relative components and symbolic links, but do not identify distinct hard links to the same file.
+Each command replaces its existing destination without prompting only after successful generation; there is no overwrite switch. Same-invocation source/destination collisions are rejected. Separate invocations cannot check cross-invocation path collisions together.
 
 Outputs are written to sibling files named `DESTINATION.ezbind.tmp` before replacement. Do not use these names for source files or other data, or run concurrent invocations targeting the same destination. Temporary-file ownership is not yet hardened.
 
-Combined output is not transactional: the cover is committed first, then the folio. A later folio-commit failure can leave a replaced cover even though the command returns an error. Generation failures before commit leave existing destinations unchanged; a nonzero exit status does not guarantee that neither output changed.
+Each command commits its one output only after successful generation. If both outputs are desired, run two commands; they are independent, cannot check cross-invocation path collisions together, and do not form a transaction. One command’s success or failure makes no claim about the other command’s destination.
 
 Success messages identify written destinations on standard output; errors and usage diagnostics go to standard error. Ordinary diagnostics do not print extracted document text or complete PDF content.
 
@@ -62,29 +64,28 @@ Success messages identify written destinations on standard output; errors and us
 Create an A4 folio with a 12 mm spine margin:
 
 ```sh
-ezbind --sheet a4 --margin-spine 12mm book.pdf bound.pdf
+ezbind text --sheet a4 --margin-spine 12mm book.pdf bound.pdf
 ```
 
-Generate a folio and a separate cover sheet:
+Generate a separate cover sheet (run the text command separately if a folio is also needed):
 
 ```sh
-ezbind --sheet a4 --cover-back back.svg --cover-front front.svg \
-  --cover-output covers.pdf book.pdf bound.pdf
+ezbind cover --sheet a4 --back back.svg --front front.svg covers.pdf
 ```
 
 Generate only a cover sheet:
 
 ```sh
-ezbind --cover-back back.svg --cover-front front.svg --cover-output covers.pdf
+ezbind cover --back back.svg --front front.svg covers.pdf
 ```
 
 Use `--` before positional filenames that begin with a dash:
 
 ```sh
-ezbind --sheet a4 -- -book.pdf -bound.pdf
+ezbind text --sheet a4 -- -book.pdf -bound.pdf
 ```
 
-**Migration:** `-o`/`--output` and `-f`/`--force` were removed, with no compatibility aliases. Replace `ezbind book.pdf -o bound.pdf --force` with `ezbind book.pdf bound.pdf`. All destinations are now replaced without prompting.
+**Migration:** the former combined and `--cover-*` syntax is removed without compatibility aliases. Replace a combined invocation with two commands, for example `ezbind text book.pdf bound.pdf` and `ezbind cover --front front.svg --back back.svg covers.pdf`. Each destination is replaced only after its own command succeeds.
 
 ### Printing and binding
 
@@ -94,7 +95,7 @@ The current slice does not yet expose auto-crop, spine/fabric guides, crop/fold/
 
 ## B2 verification
 
-Run the CLI regression suite from the repository root after building:
+The targeted CHG-015 CLI regression suite was executed from the repository root after building; see the dated evidence in the B2 Test Description. To repeat it:
 
 ```sh
 python3 tests/test_cli.py
@@ -110,7 +111,7 @@ The nested test executable runs Ada core checks and, when supplied a source PDF,
 qpdf --check /tmp/ezbind-b1-output.pdf
 ```
 
-The B2 execution record is [`tests/b2-test-description.md`](tests/b2-test-description.md). Historical CLI results are preserved with a supersession note. The 2026-10-24 verification section records the new positional interface and unconditional-overwrite checks. Run the executable-level regression suite with `python3 tests/test_cli.py` after building.
+The B2 execution record is [`tests/b2-test-description.md`](tests/b2-test-description.md). Historical CLI results are preserved with supersession notes. The CHG-015 section records targeted implementation verification of the `text`/`cover` split; earlier results do not verify this interface. This does not complete broader B2 acceptance. Independent user review and physical duplex/fold qualification remain pending.
 
 ## Controlled project structure
 

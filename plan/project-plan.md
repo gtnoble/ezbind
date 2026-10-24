@@ -104,8 +104,8 @@ Build boundaries are provisional and may be revised only through the change-cont
 | System design (§5.4) | Complete for current scope | Single software system; accepted architecture is recorded in the SDD. |
 | Software requirements analysis (§5.5) | Complete for current scope | Client-controlled SRS and requirement-to-test traceability are recorded. |
 | Software design (§5.6) | Complete for current scope | Client-controlled SDD records the accepted architecture and B1 design basis. |
-| Implementation/unit test (§5.7) | Active in B2 | Ada application orchestration, native bridge, and core units are implemented and tested; results are recorded in the B1/B2 Test Descriptions and SDF. |
-| Unit integration/test (§5.8) | Active in B2 | Two-sided PDF generation, padding, Letter/A4 selection, grid emission, overwrite handling, and sequential Alire root/test builds are integrated and tested. |
+| Implementation/unit test (§5.7) | Active in B2 | Ada application orchestration, native bridge, and core units are implemented; CHG-015 implementation and targeted verification are recorded in the B2 Test Description and SDF. |
+| Unit integration/test (§5.8) | Active in B2 | Two-sided PDF generation, padding, Letter/A4 selection, grid emission, overwrite handling, and CHG-015 split-command integration are targeted-verified; broader integration/acceptance remains active. |
 | Acceptance testing (§5.9) | Planned after B2 slice | User-facing CLI and output-PDF qualification remain separate from the developer-run B2 implementation-slice tests; independence limitation applies. |
 | HW/SW integration (§5.10) | Not applicable | Software-only project. |
 | System acceptance (§5.11) | Conditional | May be combined with component acceptance because the system is software-only; confirm at requirements review. |
@@ -115,7 +115,7 @@ Build boundaries are provisional and may be revised only through the change-cont
 | Product evaluation (§5.15) | Active | Self-evaluate each artifact before presenting it; independence limitation recorded. |
 | Quality assurance (§5.16) | Active, inline | Process/product checks by the developer; independence limitation recorded. |
 | Corrective action (§5.17) | Active | Problem/change log with category and priority for every entry. |
-| Joint reviews (§5.18) | Active | Plan, requirements, and design reviews are complete; B2 implementation-slice results and test-readiness review are next. |
+| Joint reviews (§5.18) | Active | Plan, requirements, and design reviews are complete; CHG-015 targeted results are recorded; broader B2 test-readiness and acceptance reviews remain next. |
 | Risk management (§5.19.1) | Active | Risk register in this plan; update at every review. |
 | Management indicators (§5.19.2) | Active | Report requirements volatility, component progress, open problems, milestone status, scope changes, and test trend. |
 | Security/privacy (§5.19.3) | Conditional | Local PDFs may contain sensitive content; confirm process and product expectations below. No network processing is planned. |
@@ -260,7 +260,7 @@ Result: **accepted as the client-controlled baseline after user acknowledgement 
 
 ## 16. Current gate
 
-The B0 plan/open-decisions, requirements, and design gates were closed by user acknowledgement on 2026-09-21. The B1 proof-of-concept and the first B2 implementation slice are complete. The project is at the B2 implementation-slice/test-readiness gate; broader CLI options, acceptance testing, and physical qualification remain incomplete.
+The B0 plan/open-decisions, requirements, and original design gates were closed by user acknowledgement on 2026-09-21. B1 and the first B2 implementation slice are complete. CHG-015 implementation and targeted verification are complete; broader B2 option coverage, acceptance testing, independent physical duplex/fold review, and any required client baseline acknowledgement remain incomplete.
 
 ## 17. Notes
 
@@ -268,4 +268,4 @@ The plan is tailored for a greenfield, software-only, single-developer project. 
 
 ## 18. Baseline acknowledgement
 
-The user acknowledged the Project Plan and accepted the proposed resolutions for all Section 13 decision items on 2026-09-21. The user subsequently requested the `ezbind(1)` man page and canonical CLI usage behavior on 2026-09-21; this authorized Revision 1.1. The user accepted the requirements baseline and Design Description on 2026-09-21. B1 implementation, the B2 implementation slice, and their documentation are recorded; B2 expansion and acceptance testing remain active. The plan remains client-controlled. Any further change to the accepted baseline requires a Problem/Change Log entry and user agreement.
+The user acknowledged the Project Plan and accepted the proposed resolutions for all Section 13 decision items on 2026-09-21. The user subsequently authorized the man page and canonical CLI behavior and accepted the initial requirements/design baselines. On 2026-10-24, the user authorized implementation of the explicit `text`/`cover` subcommand split. CHG-015 implementation and targeted verification are complete as recorded in the B2 Test Description; broader B2 acceptance, independent physical duplex/fold review, and any required client baseline acknowledgement remain pending. Historical baselines and outcomes remain identifiable.
