@@ -4,6 +4,7 @@
 with Ada.Command_Line;
 with Ada.Directories;
 with Ada.Text_IO;
+with GNAT.OS_Lib;
 with Ezbind_CLI;
 with Ezbind_Geometry;
 with Ezbind_Imposition;
@@ -28,7 +29,6 @@ package body Ezbind_Application is
       Cover_Output_Path : String (1 .. 1024) := (others => ' ');
       Cover_Output_Last : Natural := 0;
       Sheet             : Sheet_Kind := Letter;
-      Force             : Boolean := False;
       Grid              : Boolean := False;
       Crop_Top          : Ezbind_Physical.Point_Value := 0.0;
       Crop_Bottom       : Ezbind_Physical.Point_Value := 0.0;
@@ -115,9 +115,27 @@ package body Ezbind_Application is
      (Result : out Options) return Boolean is
       Index : Positive := 1;
       Count : constant Natural := Ada.Command_Line.Argument_Count;
+      Options_Ended : Boolean := False;
+
+      function Same_Path (Left, Right : in String) return Boolean is
+      begin
+         return Left'Length /= 0 and then Right'Length /= 0
+           and then GNAT.OS_Lib.Normalize_Pathname (Left) =
+             GNAT.OS_Lib.Normalize_Pathname (Right);
+      end Same_Path;
+
+      function Conflicts_With_Source (Path : in String) return Boolean is
+      begin
+         return Same_Path
+           (Path, Value (Result.Input_Path, Result.Input_Last))
+           or else Same_Path
+             (Path, Value (Result.Cover_Front_Path, Result.Cover_Front_Last))
+           or else Same_Path
+             (Path, Value (Result.Cover_Back_Path, Result.Cover_Back_Last));
+      end Conflicts_With_Source;
    begin
       if Count = 0 then
-         Ezbind_CLI.Print_Usage_Error ("an input PDF and --output are required");
+         Ezbind_CLI.Print_Usage_Error ("input and output PDF paths are required");
          return False;
       end if;
 
@@ -125,13 +143,32 @@ package body Ezbind_Application is
          declare
             Argument : constant String := Ada.Command_Line.Argument (Index);
          begin
-            if Argument = "--output" or else Argument = "-o" then
-               if not Read_Path
-                 ("--output", Index, Count,
-                  Result.Output_Path, Result.Output_Last)
-               then
+            if Options_Ended or else Argument'Length = 0
+              or else Argument (Argument'First) /= '-'
+            then
+               if Result.Input_Last = 0 then
+                  if not Set_Path
+                    (Result.Input_Path, Result.Input_Last, Argument)
+                  then
+                     Ezbind_CLI.Print_Usage_Error
+                       ("input path is too long or empty");
+                     return False;
+                  end if;
+               elsif Result.Output_Last = 0 then
+                  if not Set_Path
+                    (Result.Output_Path, Result.Output_Last, Argument)
+                  then
+                     Ezbind_CLI.Print_Usage_Error
+                       ("output path is too long or empty");
+                     return False;
+                  end if;
+               else
+                  Ezbind_CLI.Print_Usage_Error
+                    ("exactly two PDF paths are required: input then output");
                   return False;
                end if;
+            elsif Argument = "--" then
+               Options_Ended := True;
             elsif Argument = "--cover-front" then
                if not Read_Path
                  ("--cover-front", Index, Count,
@@ -153,8 +190,6 @@ package body Ezbind_Application is
                then
                   return False;
                end if;
-            elsif Argument = "--force" or else Argument = "-f" then
-               Result.Force := True;
             elsif Argument = "--grid" or else Argument = "-g" then
                Result.Grid := True;
             elsif Argument = "--grid-spacing" or else Argument = "-G" then
@@ -225,19 +260,10 @@ package body Ezbind_Application is
                      return False;
                   end if;
                end;
-            elsif Argument'Length > 0 and then Argument (Argument'First) = '-' then
-               Ezbind_CLI.Print_Usage_Error ("unknown or malformed option");
-               return False;
-            elsif Result.Input_Last /= 0 then
-               Ezbind_CLI.Print_Usage_Error ("exactly one input PDF is required");
-               return False;
             else
-               if not Set_Path
-                 (Result.Input_Path, Result.Input_Last, Argument)
-               then
-                  Ezbind_CLI.Print_Usage_Error ("input path is too long");
-                  return False;
-               end if;
+               Ezbind_CLI.Print_Usage_Error
+                 ("unknown or malformed option: " & Argument);
+               return False;
             end if;
          end;
          Index := Index + 1;
@@ -263,22 +289,32 @@ package body Ezbind_Application is
             return False;
          end if;
 
-         if Cover_Only then
-            return True;
+         if not Cover_Only then
+            if Result.Input_Last = 0 then
+               Ezbind_CLI.Print_Usage_Error ("missing input PDF path");
+               return False;
+            elsif Result.Output_Last = 0 then
+               Ezbind_CLI.Print_Usage_Error ("missing output PDF path");
+               return False;
+            end if;
          end if;
 
-         if Result.Input_Last = 0 or else Result.Output_Last = 0 then
+         if Same_Path
+           (Value (Result.Output_Path, Result.Output_Last),
+            Value (Result.Cover_Output_Path, Result.Cover_Output_Last))
+         then
             Ezbind_CLI.Print_Usage_Error
-              ("an input PDF and --output are required unless cover-only mode is used");
+              ("folio output and --cover-output must name different files");
             return False;
          end if;
 
-         if Result.Cover_Output_Last /= 0
-           and then Value (Result.Output_Path, Result.Output_Last) =
-             Value (Result.Cover_Output_Path, Result.Cover_Output_Last)
+         if Conflicts_With_Source
+           (Value (Result.Output_Path, Result.Output_Last))
+           or else Conflicts_With_Source
+             (Value (Result.Cover_Output_Path, Result.Cover_Output_Last))
          then
             Ezbind_CLI.Print_Usage_Error
-              ("--output and --cover-output must name different files");
+              ("output paths must not name source PDF or SVG files");
             return False;
          end if;
          return True;
@@ -308,14 +344,13 @@ package body Ezbind_Application is
 
    function Commit_Output
      (Temporary_Path : in String;
-      Output_Path    : in String;
-      Force          : in Boolean) return Boolean is
+      Output_Path    : in String) return Boolean is
+      Success : Boolean;
    begin
-      if Force and then Ada.Directories.Exists (Output_Path) then
-         Ada.Directories.Delete_File (Output_Path);
-      end if;
-      Ada.Directories.Rename (Temporary_Path, Output_Path);
-      return True;
+      --  On Unix, GNAT uses POSIX rename to replace the destination without
+      --  deleting it first. Ada.Directories.Rename refuses existing targets.
+      GNAT.OS_Lib.Rename_File (Temporary_Path, Output_Path, Success);
+      return Success;
    exception
       when others =>
          return False;
@@ -388,25 +423,6 @@ package body Ezbind_Application is
       Layout      : Ezbind_Geometry.Sheet_Layout;
       Good        : Boolean := True;
    begin
-      if not Cover_Only
-        and then Ada.Directories.Exists (Output_Path)
-        and then not Settings.Force
-      then
-         Ada.Text_IO.Put_Line
-           (Ada.Text_IO.Standard_Error,
-            "ezbind: output exists; use --force to replace it");
-         return 5;
-      end if;
-      if Cover_Mode
-        and then Ada.Directories.Exists (Cover_Output_Path)
-        and then not Settings.Force
-      then
-         Ada.Text_IO.Put_Line
-           (Ada.Text_IO.Standard_Error,
-            "ezbind: cover output exists; use --force to replace it");
-         return 5;
-      end if;
-
       Geometry
         (Settings.Sheet, Sheet_Width, Sheet_Height, Page_Width, Page_Height);
       Layout := Ezbind_Geometry.Create_Layout
@@ -427,7 +443,7 @@ package body Ezbind_Application is
             Value (Settings.Cover_Front_Path, Settings.Cover_Front_Last),
             Sheet_Width, Sheet_Height, Cover_Temporary_Path)
            or else not Commit_Output
-             (Cover_Temporary_Path, Cover_Output_Path, Settings.Force)
+             (Cover_Temporary_Path, Cover_Output_Path)
          then
             if Ada.Directories.Exists (Cover_Temporary_Path) then
                Ada.Directories.Delete_File (Cover_Temporary_Path);
@@ -564,7 +580,7 @@ package body Ezbind_Application is
 
       if Cover_Mode
         and then not Commit_Output
-          (Cover_Temporary_Path, Cover_Output_Path, Settings.Force)
+          (Cover_Temporary_Path, Cover_Output_Path)
       then
          if Ada.Directories.Exists (Temporary_Path) then
             Ada.Directories.Delete_File (Temporary_Path);
@@ -577,7 +593,7 @@ package body Ezbind_Application is
          return 5;
       end if;
 
-      if not Commit_Output (Temporary_Path, Output_Path, Settings.Force) then
+      if not Commit_Output (Temporary_Path, Output_Path) then
          if Ada.Directories.Exists (Temporary_Path) then
             Ada.Directories.Delete_File (Temporary_Path);
          end if;

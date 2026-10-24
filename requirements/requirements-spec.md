@@ -64,7 +64,7 @@ All physical dimensions shall be represented internally with sufficient precisio
 
 | ID | Requirement | Verification | Planned build |
 |---|---|---|---|
-| REQ-CAP-001 | The program shall accept exactly one input PDF path and one output PDF path for a normal invocation. | Test | B2 |
+| REQ-CAP-001 | Folio mode shall accept exactly two positional paths: one input PDF followed by one folio output PDF. Cover-only mode shall accept zero positional paths and require all three named cover options; combined mode shall use the two folio paths plus those options. | Test | B2 |
 | REQ-CAP-002 | The program shall inspect the input PDF before output generation and shall reject an unreadable, empty, malformed, or unsupported input with a diagnostic and nonzero exit status. | Test | B1/B2 |
 | REQ-CAP-003 | The program shall support Letter, A4, and explicitly specified custom sheet dimensions. | Test | B1/B2 |
 | REQ-CAP-004 | The program shall treat the configured finished-page dimensions as the target page size for each source page and shall validate that the source content can be placed without unintended cropping unless explicit source crop parameters request it. | Test/Analysis | B1 |
@@ -87,25 +87,27 @@ All physical dimensions shall be represented internally with sufficient precisio
 | REQ-CAP-020 | The program shall provide optional crop marks, fold marks, and registration marks, all disabled by default. | Test/Demonstration | B2 |
 | REQ-CAP-021 | The program shall provide creep compensation as an optional explicit value or supported mode, disabled by default, and shall not infer paper thickness without user input. | Test/Analysis | B3 |
 | REQ-CAP-022 | The program shall provide an optional printer safe-area reserve and shall reject a layout when the requested content, margins, and reserves do not fit. | Test | B2 |
-| REQ-CAP-023 | The program shall provide an explicit overwrite option and shall refuse to replace an existing output by default. | Test | B2 |
+| REQ-CAP-023 | After successful generation, the program shall replace existing folio and/or cover destinations without prompting; it shall not replace destination files when generation fails. | Test | B2 |
 | REQ-CAP-024 | The program shall report the selected non-default layout parameters sufficiently for a user to identify how the output was generated. | Test/Inspection | B2 |
 | REQ-CAP-025 | The program shall provide an optional SVG cover-card mode that accepts separate front and back SVG artwork and emits one landscape cardstock sheet with back artwork on the left half and front artwork on the right half, so the center cut edges face the spine; the sheet shall mark the center cut boundary with a 0.5 pt dashed gray line inset 12 pt from the top and bottom edges. | Test/Demonstration | B2 |
-| REQ-CAP-026 | The program shall allow SVG cover-card output without an input text-block PDF or folio output path when all three cover options are supplied. | Test | B2 |
+| REQ-CAP-026 | The program shall allow SVG cover-card output without an input text-block PDF or folio output path when all three named cover options are supplied; cover-only mode shall use zero positional paths. | Test | B2 |
 
 ### 4.2 External interface requirements
 
 | ID | Requirement | Verification | Planned build |
 |---|---|---|---|
-| REQ-CLI-001 | The command-line interface shall accept the input path, output path, sheet selection, page/geometry parameters, source crop parameters, margin parameters, grid parameters, cover mode, guide mode, marks, creep, safe area, and overwrite option defined by the user manual. | Test/Demonstration | B2 |
+| REQ-CLI-001 | The CLI shall accept exactly INPUT.pdf OUTPUT.pdf positionally in folio mode, optionally with the three named cover options; cover-only mode shall accept those options and zero positional paths. The CLI shall also accept the sheet, page/geometry, source crop, margin, grid, guide, marks, creep, and safe-area options defined by the user manual. | Test/Demonstration | B2 |
 | REQ-CLI-002 | The program shall provide a help operation that identifies usage, defaults, supported units, and error/exit behavior without requiring an input PDF. | Test | B2 |
 | REQ-CLI-003 | Normal diagnostics shall be written to standard error and shall not include extracted document text, passwords, or complete PDF content. | Inspection/Test | B2 |
 | REQ-CLI-004 | The program shall return exit status 0 on success, 2 for command-line usage errors, 3 for input-PDF errors, 4 for impossible layouts, 5 for output/filesystem errors, 6 for missing/unusable runtime dependencies, and 10 for unexpected internal errors. | Test | B2 |
 | REQ-CLI-005 | The program shall operate on one input PDF per invocation; batch processing is not required for this baseline. | Inspection/Test | B2 |
 | REQ-CLI-006 | The program shall recognize `--help` and `-h` without requiring an input PDF, print the canonical usage statement and help text to standard output, and return exit status 0. | Test | B2 |
 | REQ-CLI-007 | When the invocation contains an unknown flag, malformed option, missing option value, or other command-line usage error, the program shall print a diagnostic followed by the canonical usage statement to standard error, shall not create or replace an output PDF, and shall return exit status 2. | Test | B2 |
-| REQ-CLI-008 | The canonical usage statement shall be identical in the help and invalid-invocation paths and shall be exactly `Usage: ezbind [OPTIONS] INPUT.pdf --output OUTPUT.pdf` as its first line. | Test/Inspection | B2 |
+| REQ-CLI-008 | The canonical usage statement shall be identical in help and invalid-invocation paths and exactly `Usage: ezbind [OPTIONS] INPUT.pdf OUTPUT.pdf` as its first line. | Test/Inspection | B2 |
 | REQ-CLI-009 | Help output shall print the canonical usage line followed by a concise option summary and exit-status summary; invalid-invocation output shall print the command-line diagnostic followed by the same canonical usage line and shall not be required to print the full option summary. | Test | B2 |
-| REQ-CLI-010 | For every existing long CLI option, the program shall accept the documented corresponding short option alias with the same value and behavior. | Test | B2 |
+| REQ-CLI-010 | For every supported long CLI option with a documented short alias, the program shall accept that alias with the same behavior. | Test | B2 |
+| REQ-CLI-011 | The parser shall accept `--` to end option parsing and permit interspersed options; examples shall prefer options first. | Test | B2 |
+| REQ-CLI-012 | The program shall reject source PDF/SVG destinations, including normalized path aliases, and identical folio/cover outputs; valid existing destinations shall be replaced without prompting only after successful generation. | Test | B2 |
 
 ### 4.3 Internal data requirements
 
@@ -169,7 +171,7 @@ The following test groups are reserved in the Test Plan and will be expanded int
 | TEST-GEO | Unit conversion, dimensions, margins, safe-area fit, grid rectangles. |
 | TEST-IMP | Page ordering, padding, sides, positions, rotations, and fold sequence. |
 | TEST-PDF | Input validation, output validity, visual preservation, metadata, unsupported features. |
-| TEST-CLI | Options, defaults, help, canonical usage, invalid flags, diagnostics, exit statuses, overwrite policy. |
+| TEST-CLI | Options, defaults, help, canonical usage, invalid flags, diagnostics, exit statuses, positional-path modes, path-collision rules, and post-success replacement policy. |
 | TEST-DOC | Man-page presence, content, version correspondence, and installation metadata. |
 | TEST-PHY | Printed duplex/fold/stack fixture and optional physical guides. |
 | TEST-SEC | Local-only behavior, temporary files, and content-free diagnostics. |
@@ -191,7 +193,7 @@ The following test groups are reserved in the Test Plan and will be expanded int
 | REQ-PHY-001..003 | TEST-PHY, inspection |
 | REQ-DOC-001..003 | TEST-DOC, inspection |
 
-The detailed Test Description will identify exact input data, steps, expected results, and pass/fail criteria before acceptance testing. It will compare help and invalid-invocation output against the canonical usage line byte-for-byte, excluding platform line-ending normalization.
+The detailed Test Description will identify exact input data, steps, expected results, and pass/fail criteria before acceptance testing. It will compare help and invalid-invocation output against the canonical usage line byte-for-byte, excluding platform line-ending normalization. The revised interface, normalized path-collision rules, and replacement policy were verified by the 2026-10-24 regression run recorded in the B2 Test Description; independent physical acceptance remains pending.
 
 ### 5.3 Requirements-to-source traceability
 

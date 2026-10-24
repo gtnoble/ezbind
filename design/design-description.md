@@ -137,10 +137,10 @@ Diagnostics identify the category and corrective action without printing extract
 The canonical first line for help and usage errors is exactly:
 
 ```text
-Usage: ezbind [OPTIONS] INPUT.pdf --output OUTPUT.pdf
+Usage: ezbind [OPTIONS] INPUT.pdf OUTPUT.pdf
 ```
 
-`--help` and `-h` print the usage line, concise option summary, and exit-status summary to standard output and return 0. Each other long option has a corresponding short alias: `-o`, `-f`, `-g`, `-G`, `-t`, `-b`, `-e`, `-i`, and `-s`. Invalid flags and malformed invocations print a diagnostic followed by the same usage line to standard error and return 2. The command manual source is `doc/ezbind.1`; the Alire crate owns the generated GPR/configuration files; the generated/installable form is `ezbind(1)`.
+`--help` and `-h` print the usage line, concise option summary, and exit-status summary to standard output and return 0. Folio mode uses two positional paths; cover-only mode uses zero positional paths and the three named cover options; combined mode adds those options to the folio paths. Parsing accepts `--` and interspersed options; examples prefer options first. `-o`/`--output` and `-f`/`--force` are unsupported. Invalid invocations print a diagnostic and the canonical usage line to standard error and return 2. The command manual is `doc/ezbind.1`; the installable form is `ezbind(1)`.
 
 ### 3.10 Reproducibility and capability reporting
 
@@ -230,7 +230,7 @@ The implemented bridge ABI is defined by `src/ez_qpdf_bridge.h` and the Ada bind
 
 #### CLI interface
 
-The public command is `ezbind`. Input is one local PDF path; output is a local PDF path. Standard output is for help and success summaries. Standard error is for diagnostics and invalid invocation output. Exit statuses are those defined in the SRS.
+The public command is `ezbind`. Folio mode takes exactly INPUT.pdf OUTPUT.pdf; cover-only mode takes zero positional paths and requires the three named cover options; combined mode takes both folio paths plus those options. Options may be interspersed and `--` ends option parsing. Reject normalized source/destination collisions and identical outputs; replace existing valid destinations without prompting only after successful generation. Standard error is for diagnostics and invalid invocation output. Exit statuses are those defined in the SRS.
 
 #### PDF backend interface
 
@@ -238,7 +238,7 @@ The only native dependency is qpdf through the project bridge. Build-time requir
 
 #### Filesystem interface
 
-The application reads the input path, creates a temporary sibling output, and commits it by rename. Existing output is refused unless `--force` is specified.
+The application creates temporary sibling outputs, rejects normalized source/destination path collisions and identical outputs, then replaces existing destinations without prompting only after successful generation. GNAT.OS_Lib provides symbolic-link-aware path normalization and POSIX replacement rename on the supported Linux target; replacement does not delete the old destination before rename. Combined outputs are committed separately, not as a transaction. Temporary-file names still use the existing fixed suffix; unique temporary ownership and multi-output rollback remain separate hardening work.
 
 ### 4.6 Data flow
 

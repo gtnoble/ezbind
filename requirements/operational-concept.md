@@ -59,7 +59,7 @@ The user is an operator who supplies the input PDF, selects physical/layout opti
 
 ### 5.2 Normal operation
 
-The user invokes one command with one input path and one folio output path. Defaults produce Letter or A4 folded-folio output with blank margins, no creep, no printed marks, no cover artwork, and no spine/fabric guide. Optional front/back SVG cover mode writes a separate cover output path. The program validates the input, requested geometry, and paired cover options before writing output.
+Folio mode uses two positional paths, INPUT.pdf OUTPUT.pdf. Combined mode adds all three named cover options; cover-only mode uses zero positional paths and requires --cover-front, --cover-back, and --cover-output. Options may be interspersed, -- ends option parsing, and examples prefer options first. Defaults produce Letter or A4 folded-folio output with zero margins, no creep, no printed marks, no cover artwork, and no spine/fabric guide. The program validates inputs, geometry, options, and path collisions before writing. Existing destinations are replaced without prompting only after successful generation.
 
 The source page is treated as the finished book-page size. A folded sheet contains two source-page positions on each side, for four logical pages per sheet. For a four-page unit, the nominal imposed positions are:
 
@@ -83,9 +83,10 @@ The user may request:
 - crop, fold, or registration marks;
 - explicit creep compensation;
 - a printer safe-area reserve;
-- forced overwrite of an existing output.
 
-The application must describe active non-default options in diagnostics or output metadata sufficiently for the user to identify the layout used.
+Existing outputs are replaced without prompting after successful generation.
+
+The application must describe active non-default options in diagnostics or output metadata sufficiently for the user to identify the layout used. The input PDF and source SVGs must not be destinations; normalized path aliases are rejected, and the two output paths must differ.
 
 ### 5.4 Error operation
 

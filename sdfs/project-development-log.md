@@ -146,3 +146,14 @@ Requirements and operational-concept products are in draft review. No implementa
 - **Design:** The shared SVG renderer draws a 0.5 pt dashed gray line at the sheet midpoint, inset 12 pt from the top and bottom, after both cover SVGs so the guide is visible over artwork. It is always enabled in cover output.
 - **Verification:** Root and nested Alire development builds pass. The Ada/native bridge test passes; Letter and A4 cover-only output has the expected dimensions and passes `qpdf --check`; 72 dpi Letter and A4 rasters confirm the center dash pattern, gray color, and 12 pt end insets. Combined A4 folio-plus-cover output succeeds and both PDFs pass validation.
 - **Process note:** This change is self-evaluated by the developer; independent review of the rendered cover and physical cutting workflow remains invited.
+
+## Entry 016 — Approved breaking CLI and overwrite-policy change
+
+- **Date:** 2026-10-24
+- **Activity:** Documentation and requirements update under CHG-013.
+- **Decision:** Folio usage is exactly `ezbind [OPTIONS] INPUT.pdf OUTPUT.pdf`. Remove `-o`/`--output` and `-f`/`--force`; after successful generation existing destinations are replaced without prompting. Cover-only mode has zero positional paths and the three named cover options; combined mode uses two positional paths and those cover options. The parser supports `--` and interspersed options; examples prefer options first. Reject source PDF/SVG destinations including normalized aliases, and require distinct outputs.
+- **Implementation:** Parser accepts the two positional PDF paths and `--`, removes retired switches, and rejects normalized source/destination collisions. GNAT.OS_Lib supplies Unix replacement rename without deleting the previous destination first.
+- **Documentation:** README, man page, OCD, SRS, and SDD updated; historical test results preserved with a supersession note and a new execution record.
+- **Verification:** Root and nested development builds pass; 15 executable CLI tests and Ada core/qpdf/SVG bridge tests pass. Repeated Letter/A4 combined generation replaces both outputs, and all generated verification PDFs pass qpdf checks. Man-page rendering and diff whitespace checks pass.
+- **Limitations:** Fixed-suffix temporary ownership and transactional combined-output commits remain separate hardening work. Path normalization resolves symbolic links but does not equate distinct hard links.
+- **Configuration:** CHG-013 resolved. This implementation is self-evaluated; user review of the revised interface and representative physical output remains invited.

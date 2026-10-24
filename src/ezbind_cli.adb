@@ -10,7 +10,11 @@ package body Ezbind_CLI is
       Ada.Text_IO.Put_Line
         ("  --help, -h       Show this help text.");
       Ada.Text_IO.Put_Line
-        ("  -o PATH, --output PATH  Write the imposed PDF to PATH.");
+        ("  INPUT.pdf OUTPUT.pdf  Read INPUT.pdf; write the imposed PDF.");
+      Ada.Text_IO.Put_Line
+        ("  Existing folio and cover outputs are replaced without prompting.");
+      Ada.Text_IO.Put_Line
+        ("  --                   End options; remaining arguments are paths.");
       Ada.Text_IO.Put_Line
         ("  -s letter|a4, --sheet letter|a4  Select the physical output sheet.");
       Ada.Text_IO.Put_Line
@@ -28,8 +32,6 @@ package body Ezbind_CLI is
       Ada.Text_IO.Put_Line
         ("                   Minimum clearance; uniform fit, no crop/distortion.");
       Ada.Text_IO.Put_Line
-        ("  -f, --force            Replace an existing output file.");
-      Ada.Text_IO.Put_Line
         ("  --cover-front PATH     SVG artwork for the front cover.");
       Ada.Text_IO.Put_Line
         ("  --cover-back PATH      SVG artwork for the back cover.");
@@ -38,7 +40,7 @@ package body Ezbind_CLI is
       Ada.Text_IO.Put_Line
         ("                         Cover output is back-left/front-right.");
       Ada.Text_IO.Put_Line
-        ("                         Cover-only mode omits INPUT.pdf and --output.");
+        ("                         Cover-only mode omits both positional PDF paths.");
       Ada.Text_IO.Put_Line
         ("Exit statuses: 0 success, 2 usage, 3 input, 4 layout,");
       Ada.Text_IO.Put_Line ("5 output, 6 dependency, 10 internal error.");

@@ -6,7 +6,7 @@
 --  ----------------------------------------------------------------------
 package Ezbind_CLI is
    Usage_Line : constant String :=
-     "Usage: ezbind [OPTIONS] INPUT.pdf --output OUTPUT.pdf";
+     "Usage: ezbind [OPTIONS] INPUT.pdf OUTPUT.pdf";
 
    procedure Print_Help;
    procedure Print_Usage_Error (Message : String);

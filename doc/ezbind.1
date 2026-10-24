@@ -1,104 +1,111 @@
-.TH EZBIND 1 "2026-09-21" "ezbind 0.1.0-dev B2" "User Commands"
+.TH EZBIND 1 "2026-10-24" "ezbind 0.1.0-dev B2" "User Commands"
 .SH NAME
 ezbind \- prepare an ebook PDF for folded-folio home bookbinding
 .SH SYNOPSIS
 .B ezbind
 .RB [ OPTIONS ]
 .I INPUT.pdf
-.B --output
 .I OUTPUT.pdf
 .SH DESCRIPTION
 .B ezbind
-reads one local input PDF and writes a duplex folded-folio arrangement when
-folio mode is selected. Each output sheet has two finished-page positions on
-each side. The nominal folio assignment is front-left 4, front-right 1,
-back-left 2, and back-right 3. Incomplete final folios are padded with blank
-logical pages. Cover-only mode instead reads only the supplied front and back
-SVG files and writes the separate cover PDF without opening a text-block PDF.
+reads a local input PDF and writes a duplex folded-folio arrangement in folio
+mode. Each output sheet has two finished-page positions on each side. The
+nominal folio assignment is front-left 4, front-right 1, back-left 2, and
+back-right 3. Incomplete final folios are padded with blank logical pages.
 .PP
-The current B2 implementation slice supports Letter and A4 sheets, an optional
-margin grid, and explicit overwrite control. Physical cover cards, adhesive,
-and fabric remain user-supplied.
+Cover-only mode reads the supplied front and back SVG files and writes a
+separate cover PDF without opening a text-block PDF. Combined mode generates
+both folio and cover PDFs.
 .PP
-The canonical usage statement is:
+The canonical usage statement for folio mode and the first line of help and usage errors is:
 .PP
 .nf
-Usage: ezbind [OPTIONS] INPUT.pdf --output OUTPUT.pdf
+Usage: ezbind [OPTIONS] INPUT.pdf OUTPUT.pdf
 .fi
+.PP
+Folio and combined modes take exactly two positional paths. Cover-only mode
+takes zero positional paths and requires --cover-front, --cover-back, and
+--cover-output.
+Options may be interspersed with positional paths; \fB--\fR ends option
+parsing. Examples prefer options first. The input PDF and source SVGs must not
+also be destinations, including normalized path aliases; folio and cover
+destinations must differ.
+.PP
+Existing destinations are replaced without prompting only after successful
+generation. The current B2 slice supports Letter and A4 sheets, an optional
+margin grid, and separate SVG cover output. Physical cover cards, adhesive,
+and fabric remain user-supplied.
 .SH OPTIONS
 .TP
 .BR --help , \-h
-Print the usage statement and concise option summary. This operation does not
-require an input PDF and returns status 0.
+Print usage, a concise option summary, and exit-status summary without requiring
+an input PDF; return status 0.
 .TP
-.B --output \fIPATH\fR, -o \fIPATH\fR
-Required output PDF path. The program refuses to replace an existing file
-unless \fB--force\fR is specified.
-.TP
-.BR --sheet\~letter | \-s\~letter | \-\-sheet\~a4 | \-s\~a4
+.BR --sheet\~letter | \-s\~letter | --sheet\~a4 | \-s\~a4
 Select the physical output sheet. Letter is the default. Output is landscape:
 792 x 612 points for Letter and approximately 841.89 x 595.28 points for A4.
 .TP
 .BR --grid , \-g
-Add light-gray vector grid lines in the margin areas. The current default
-spacing is 5 mm. Grid lines are not added unless this option is selected.
+Add light-gray vector grid lines in the margin areas. The default spacing is
+5 mm. Grid lines are not added unless this option is selected.
 .TP
 .B --grid-spacing \fIVALUE\fR, -G \fIVALUE\fR
-Set the grid spacing. Values require a positive \fBmm\fR, \fBin\fR, or \fBpt\fR value; the default is 5 mm.
+Set positive grid spacing in \fBmm\fR, \fBin\fR, or \fBpt\fR; the default is
+5 mm.
 .TP
 .BR --margin-top\~VALUE | \-t\~VALUE | --margin-bottom\~VALUE | \-b\~VALUE
-Set the minimum top or bottom clearance around the uniformly fitted source page. Values require a non-negative \fBmm\fR, \fBin\fR, or \fBpt\fR suffix. The defaults are zero. These are output margins, not source crop values.
+Set top or bottom output clearance. Values require a non-negative \fBmm\fR,
+\fBin\fR, or \fBpt\fR suffix. Defaults are zero.
 .TP
 .BR --crop-top\~VALUE | --crop-bottom\~VALUE | --crop-left\~VALUE | --crop-right\~VALUE
-Remove the specified source-page edge distances before placement. The crop margins may remove source content, but they must leave a positive-width, positive-height page area. Values require a non-negative \fBmm\fR, \fBin\fR, or \fBpt\fR suffix and default to zero. Distances are measured from the effective CropBox, falling back to MediaBox, and top/bottom/left/right refer to visual edges after page rotation. Auto-crop is not enabled.
+Remove source-page edge distances before placement. Cropping may remove source
+content but must leave positive page area. Values require a non-negative
+\fBmm\fR, \fBin\fR, or \fBpt\fR suffix and default to zero. Distances are
+measured from the effective CropBox, falling back to MediaBox; edge names refer
+to visual edges after rotation. Auto-crop is not enabled.
 .TP
 .BR --margin-fore-edge\~VALUE | \-e\~VALUE | --margin-spine\~VALUE | \-i\~VALUE
-Set the minimum fore-edge or spine clearance around the uniformly fitted source page. The spine is the fold-facing inner edge; the fore-edge is outer. Values require a non-negative \fBmm\fR, \fBin\fR, or \fBpt\fR suffix. Both margins default to zero.
-.TP
-.BR --force , \-f
-Replace existing folio and cover output PDFs after successful generation. The
-program refuses replacement unless this option is specified.
+Set fore-edge or spine output clearance. The spine is the fold-facing inner
+edge; the fore-edge is outer. Values require a non-negative \fBmm\fR, \fBin\fR,
+or \fBpt\fR suffix. Both defaults are zero.
 .TP
 .B --cover-front \fIPATH\fR
-SVG artwork for the front cover. It must be supplied together with the
---cover-back and --cover-output options.
+SVG artwork for the front cover. Supply it together with --cover-back and
+--cover-output.
 .TP
 .B --cover-back \fIPATH\fR
-SVG artwork for the back cover. It is rendered on the left half of the
-landscape cardstock sheet.
+SVG artwork for the back cover, rendered on the left half of the landscape
+cover sheet.
 .TP
 .B --cover-output \fIPATH\fR
-Write a separate one-page cover PDF. The front artwork is rendered on the right
-half and the back artwork on the left half, placing both center-cut edges toward
-the spine. A dashed gray center cut guide is drawn over the artwork, 12 points
-short of the top and bottom edges. Artwork is fitted proportionally to each
-half-sheet viewport. When
-cover-only mode is used, no input PDF or folio --output is required; the three
-cover options are sufficient and only --cover-output is written.
+Write a separate one-page cover PDF. Front artwork is rendered on the right
+half and back artwork on the left. A dashed gray center cut guide is drawn over
+the artwork, inset 12 points from the top and bottom edges. Artwork is fitted
+proportionally to each half-sheet viewport.
 .SH DEFAULT LAYOUT
-The default minimum clearances are 36 points at the top, bottom, and
-fore-edge, and 48 points at the spine. The source page is fitted uniformly
-inside the resulting content rectangle without distortion. Source crop options
-are applied before this fit. If the source and content rectangles have different aspect ratios, additional
-letterboxing remains on one pair of edges. The optional grid occupies the
-reserved strips and does not cross the source content. A one-page source produces two
-physical output sides; source counts are padded to multiples of four.
+Default minimum clearances are zero points at the top, bottom, fore-edge, and
+spine. Source pages are fitted uniformly inside the resulting content
+rectangle without distortion. Source crop options are applied before this fit.
+Aspect-ratio differences may leave additional letterboxing. The optional grid
+occupies reserved strips and does not cross source content. A one-page source
+produces two physical output sides; source counts are padded to multiples of
+four.
 .SH OUTPUT AND PHYSICAL WORKFLOW
-Print the output duplex using the printer setting appropriate for the selected
-paper. Fold each sheet once with the fold toward the spine, keep the generated
-folio order, and stack before gluing the spine side. Confirm duplex orientation
-with a small asymmetric fixture before committing a valuable book.
+Print duplex using the printer setting appropriate for the selected paper. Fold
+each sheet once with the fold toward the spine, keep the generated folio order,
+and stack before gluing the spine side. Confirm duplex orientation with a small
+asymmetric fixture before committing a valuable book.
 .PP
 When cover mode is selected, print the separate cover PDF on the selected
 cardstock size. The back artwork is on the left and the front artwork is on the
 right; cut along the dashed gray center guide so both cut edges face the spine.
 The guide is inset 12 points from the sheet edges. Cover artwork is rendered by
-librsvg onto a Cairo PDF surface and is fitted proportionally to each half-sheet
+librsvg onto a Cairo PDF surface and fitted proportionally to each half-sheet
 viewport.
 .PP
-Folio and cover output are first written to sibling temporary files and
-committed after successful generation. A handled failure does not leave the
-temporary output.
+Existing folio and cover outputs are replaced without prompting only after
+successful generation. Outputs are first written to sibling temporary files;
+a handled failure does not leave temporary output.
 .SH EXIT STATUS
 .TP
 .B 0
@@ -128,28 +135,25 @@ source text, passwords, or complete PDF content.
 .SH PDF LIMITATIONS
 The qpdf backend preserves visible page content and selectable text for the
 implemented folio placement path. Cover artwork is rendered through librsvg
-2.58 and Cairo; SVG features outside librsvg's supported static SVG subset,
-external resources, and font availability can affect output and must be
-validated against representative artwork. Spine/fabric guides,
-auto-crop, crop/fold/registration marks, creep, printer safe-area configuration,
-and broad document-feature capability reporting are not yet exposed by this B2
-slice. Source-page annotations and form fields may not follow clipped content.
-Unsupported or degraded backend behavior must be evaluated before production
-use.
+2.58 and Cairo; unsupported SVG features, external resources, and font
+availability can affect output and must be validated against representative
+artwork. Spine/fabric guides, auto-crop, crop/fold/registration marks, creep,
+printer safe-area configuration, and broad document-feature capability
+reporting are not yet exposed by this B2 slice. Source-page annotations and
+form fields may not follow clipped content.
 .SH EXAMPLE
 .nf
-ezbind book.pdf -o book-bound.pdf -s a4 -g
+ezbind --sheet a4 --grid book.pdf book-bound.pdf
 .fi
 .PP
-A separate cardstock cover sheet can be generated with:
+Generate a folio and separate cover sheet:
 .PP
 .nf
-ezbind book.pdf -o book-bound.pdf --sheet letter \\
-  --cover-back back.svg --cover-front front.svg \\
-  --cover-output covers.pdf
+ezbind --sheet letter --cover-back back.svg --cover-front front.svg \\
+  --cover-output covers.pdf book.pdf book-bound.pdf
 .fi
 .PP
-Cover-only generation does not require the text-block PDF:
+Generate a cover without a text-block PDF:
 .PP
 .nf
 ezbind --sheet letter --cover-back back.svg \\

@@ -49,6 +49,19 @@ This record covers the implemented B2 slice: CLI parsing, qpdf input validation,
 
 Spine/fabric guides, crop/fold/registration marks, creep, safe-area configuration, broad PDF feature preservation, encrypted-input policy, capability reporting, deterministic metadata, and physical duplex acceptance remain deferred or incomplete in this implementation slice. SVG compatibility beyond librsvg's supported static SVG subset and font/resource portability remain subject to artwork-specific validation.
 
+## Supersession note — CLI and overwrite policy
+
+The original executed cases are historical records for the interface in effect when executed. Their **Pass** results are preserved and do not verify the subsequently approved CLI. The approved change removes `-o`/`--output` and `-f`/`--force`, uses two positional paths in folio/combined mode and zero in cover-only mode, replaces existing destinations without prompting after successful generation, supports `--` and interspersed options, and rejects normalized source/destination aliases. The following new run verifies the revised behavior rather than changing those historical outcomes.
+
+## CLI replacement-policy verification — 2026-10-24
+
+- Root `alr build --development` and nested `(cd tests && alr build --development)` passed, run sequentially. A final root development build restored generated development configuration after the nested build.
+- `python3 tests/test_cli.py`: **15 tests passed**. Covers canonical help, positional folio generation, cover-only and combined generation, replacement of existing destinations, retired flags, missing/extra/empty/oversized operands, `--`, interspersed options, normalized and symbolic-link collisions, and unchanged destinations on invalid PDF/SVG generation failures.
+- Temporary source PDFs were generated from the checked-in SVG fixtures, with all outputs isolated in temporary directories. Letter and A4 combined invocations with grid and 12 mm spine margin were each executed twice to exercise replacement; all four resulting PDFs passed `qpdf --check`.
+- The nested Ada test executable passed core, qpdf input/placement, and librsvg/Cairo cover bridge checks using those temporary fixtures; both bridge outputs passed `qpdf --check`.
+- `groff -man -Tutf8 doc/ezbind.1` and `git diff --check` passed.
+- This is targeted implementation verification, not full acceptance of the broader B2 requirements. Existing fixed-suffix temporary files and nontransactional two-output commits remain separate hardening work.
+
 ## Independence limitation
 
 The developer executed and evaluated these tests, so independent acceptance-test authority is unavailable. The user should independently review representative output and the physical duplex/fold behavior before treating the product as ready for binding work.

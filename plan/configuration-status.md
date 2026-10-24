@@ -2,7 +2,7 @@
 
 **Project:** EZBIND
 **Status:** Client-acknowledged baseline; B2 implementation slice under project control
-**Date:** 2026-09-21
+**Date:** 2026-10-24
 
 | Configuration item | Identifier | Revision/status | Control level | Notes |
 |---|---|---|---|---|
@@ -10,10 +10,10 @@
 | Problem/Change Log | EZBIND-PCL-001 | Initial | Project | Active |
 | Configuration Status | EZBIND-CS-001 | Initial | Project | Active |
 | Project Development Log | EZBIND-SDF-001 | Initial | Project | Active |
-| Requirements Specification | EZBIND-SRS-001 | Rev 1.2 project update | Project | REQ-CAP-025 extended for the center cut guide under CHG-012; user review pending |
-| Design Description | EZBIND-SDD-001 | Rev 1.1 project update | Project | Cover renderer cut-guide behavior documented under CHG-012; user review pending |
-| Source code | EZBIND-CLI | B2 cover cut-guide increment | Project | Added always-enabled dashed gray center guide to Letter/A4 SVG cover output; root and nested builds and cover bridge tests pass |
-| Test products | EZBIND-TEST | B2 TD Rev 1.1 | Project | Added and passed cover cut-guide verification for Letter/A4 and combined mode; acceptance tests pending |
+| Requirements Specification | EZBIND-SRS-001 | Rev 1.2 project update | Project | CHG-013 records user-approved positional paths and replacement policy; targeted verification passed |
+| Design Description | EZBIND-SDD-001 | Rev 1.1 project update | Project | CHG-013 documents revised CLI, path normalization, and Unix replacement rename |
+| Source code | EZBIND-CLI | B2 positional CLI increment | Project | Removed output/force switches, added positional paths and unconditional replacement; root/nested builds pass |
+| Test products | EZBIND-TEST | B2 TD Rev 1.1 | Project | 15 CLI regressions, core/native bridge tests, and Letter/A4 replacement/qpdf checks pass; physical acceptance pending |
 
 ## Control rules
 
