@@ -3,9 +3,9 @@
 **Project:** ezbind
 **Document:** Software Design Description (SDD)
 **Identifier:** EZBIND-SDD-001
-**Status:** Client-acknowledged baseline
-**Date:** 2026-09-21
-**Revision:** 1.0
+**Status:** Project update to client-acknowledged baseline
+**Date:** 2026-10-24
+**Revision:** 1.1
 
 ## Contents
 
@@ -134,13 +134,15 @@ Diagnostics identify the category and corrective action without printing extract
 
 ### 3.9 CLI and documentation contract
 
-The canonical first line for help and usage errors is exactly:
+The first line of help, also printed after the diagnostic on usage errors, is exactly:
 
 ```text
 Usage: ezbind [OPTIONS] INPUT.pdf OUTPUT.pdf
 ```
 
 `--help` and `-h` print the usage line, concise option summary, and exit-status summary to standard output and return 0. Folio mode uses two positional paths; cover-only mode uses zero positional paths and the three named cover options; combined mode adds those options to the folio paths. Parsing accepts `--` and interspersed options; examples prefer options first. `-o`/`--output` and `-f`/`--force` are unsupported. Invalid invocations print a diagnostic and the canonical usage line to standard error and return 2. The command manual is `doc/ezbind.1`; the installable form is `ezbind(1)`.
+
+Status 6 remains part of the required interface, but the current application has no dependency-error return path. Dynamic-loader errors occur before `Run`.
 
 ### 3.10 Reproducibility and capability reporting
 
@@ -187,8 +189,8 @@ The application reports selected non-default layout options in a concise summary
 7. For each output sheet side, `UNIT-QPDF` creates a destination page and places the two source Form XObjects.
 8. `UNIT-GRD` emits enabled vector guides into permitted regions.
 9. `UNIT-QPDF` writes and closes the temporary output.
-10. `UNIT-APP` atomically renames the temporary folio output to the requested path.
-11. If cover options are enabled, `UNIT-SVG` renders back-left/front-right artwork to a separate temporary cardstock PDF and `UNIT-APP` commits that output.
+10. If cover options are enabled, `UNIT-SVG` renders back-left/front-right artwork to a separate temporary cardstock PDF; only after both outputs are generated does `UNIT-APP` commit the cover.
+11. `UNIT-APP` atomically renames the temporary folio output to the requested path. The two commits are separate; a failed folio commit does not roll back the cover. In cover-only mode, the PDF input/imposition steps are skipped and only the cover is rendered and committed.
 12. `UNIT-CLI` prints a concise success summary and returns 0.
 
 Any expected failure closes backend handles, removes temporary output, prints a content-free diagnostic, and returns the mapped status.
@@ -234,7 +236,7 @@ The public command is `ezbind`. Folio mode takes exactly INPUT.pdf OUTPUT.pdf; c
 
 #### PDF backend interface
 
-The only native dependency is qpdf through the project bridge. Build-time requirements include qpdf headers, C++ compiler/linker, and Ada/C interoperability support. Runtime requirements include the qpdf shared library or a statically linked bridge arrangement selected during build packaging.
+Native dependencies are qpdf through `UNIT-QPDF` and librsvg/Cairo through `UNIT-SVG`, including the GLib/GIO, GDK-Pixbuf, and Pango/Cairo libraries linked in `ezbind.gpr`. Builds require their development headers/libraries, a C++17 compiler/linker, and Ada/C interoperability support. Runtime requires the corresponding shared libraries for the current dynamic-link configuration.
 
 #### Filesystem interface
 
@@ -382,8 +384,8 @@ Purpose: define stable command behavior.
 Rules:
 
 - parse `--help` and `-h` before requiring positional input;
-- accept the documented short aliases for every existing long option;
-- emit the exact canonical usage first line;
+- accept documented short aliases where provided; crop and cover options have no short aliases;
+- emit the exact canonical usage as the first help line and after the diagnostic for usage errors;
 - reject unknown flags and missing values;
 - route diagnostics to standard error;
 - map all expected errors to the SRS status codes;

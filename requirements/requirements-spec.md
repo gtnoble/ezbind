@@ -3,9 +3,9 @@
 **Project:** ezbind
 **Document:** Software Requirements Specification (SRS)
 **Identifier:** EZBIND-SRS-001
-**Status:** Client-acknowledged baseline
-**Date:** 2026-09-21
-**Revision:** 1.1
+**Status:** Project update to client-acknowledged baseline
+**Date:** 2026-10-24
+**Revision:** 1.2
 
 ## Contents
 

@@ -4,8 +4,8 @@
 **Document:** B2 Test Description  
 **Identifier:** EZBIND-B2-TD-001  
 **Status:** B2 implementation-slice execution record  
-**Date:** 2026-09-21  
-**Revision:** 1.0
+**Date:** 2026-10-24
+**Revision:** 1.1
 
 ## Scope
 
@@ -19,7 +19,9 @@ This record covers the implemented B2 slice: CLI parsing, qpdf input validation,
 - `qpdf --check`, `pdfinfo`, `pdftotext`, `pdftoppm`, and GNU roff tools.
 - Sequential root and nested Alire development builds.
 
-## Executed cases
+## Historical executed cases
+
+These cases describe the pre-2026-10-24 interface. See the supersession note and CLI replacement-policy verification below for the current interface; old output/force flags are no longer accepted.
 
 | ID | Procedure | Expected/result |
 |---|---|---|

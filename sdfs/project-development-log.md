@@ -157,3 +157,12 @@ Requirements and operational-concept products are in draft review. No implementa
 - **Verification:** Root and nested development builds pass; 15 executable CLI tests and Ada core/qpdf/SVG bridge tests pass. Repeated Letter/A4 combined generation replaces both outputs, and all generated verification PDFs pass qpdf checks. Man-page rendering and diff whitespace checks pass.
 - **Limitations:** Fixed-suffix temporary ownership and transactional combined-output commits remain separate hardening work. Path normalization resolves symbolic links but does not equate distinct hard links.
 - **Configuration:** CHG-013 resolved. This implementation is self-evaluated; user review of the revised interface and representative physical output remains invited.
+
+
+## Entry 017 — CLI documentation follow-up
+
+- **Date:** 2026-10-24
+- **Activity:** Documentation-only audit and corrections under CHG-014 after implementation commit `f9f88e8`.
+- **Changes:** Added folio/combined/cover-only/dash-leading examples, migration notes, cover-only synopsis, parser limitations, overwrite caveats, and regression-suite instructions. Clarified reserved status 6, output streams, combined commit order, and rendering dependencies. Aligned SRS/SDD/TD headers with the configuration index and labeled superseded test cases before their historical table.
+- **Verification:** All four README conversion examples ran in temporary directories with checked-in SVG fixtures, and all generated PDFs passed `qpdf --check`. Man-page rendering and whitespace checks pass. No source or runtime behavior changed.
+- **Evaluation:** Current examples and statements were checked against implementation and independently audited for discrepancies. Historical execution results were not rewritten. This documentation is self-evaluated; independent user review remains invited.

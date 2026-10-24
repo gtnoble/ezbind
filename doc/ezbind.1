@@ -6,6 +6,15 @@ ezbind \- prepare an ebook PDF for folded-folio home bookbinding
 .RB [ OPTIONS ]
 .I INPUT.pdf
 .I OUTPUT.pdf
+.PP
+.B ezbind
+.RB [ OPTIONS ]
+.B --cover-back
+.I BACK.svg
+.B --cover-front
+.I FRONT.svg
+.B --cover-output
+.I COVERS.pdf
 .SH DESCRIPTION
 .B ezbind
 reads a local input PDF and writes a duplex folded-folio arrangement in folio
@@ -17,7 +26,8 @@ Cover-only mode reads the supplied front and back SVG files and writes a
 separate cover PDF without opening a text-block PDF. Combined mode generates
 both folio and cover PDFs.
 .PP
-The canonical usage statement for folio mode and the first line of help and usage errors is:
+The canonical usage statement for folio mode is the first line of help.
+Usage errors print a diagnostic followed by this same line:
 .PP
 .nf
 Usage: ezbind [OPTIONS] INPUT.pdf OUTPUT.pdf
@@ -27,19 +37,23 @@ Folio and combined modes take exactly two positional paths. Cover-only mode
 takes zero positional paths and requires --cover-front, --cover-back, and
 --cover-output.
 Options may be interspersed with positional paths; \fB--\fR ends option
-parsing. Examples prefer options first. The input PDF and source SVGs must not
+parsing. Examples prefer options first. Supply values as separate arguments,
+such as \fB--sheet a4\fR, not \fB--sheet=a4\fR. Attached short values and
+grouped short flags are not supported. The input PDF and source SVGs must not
 also be destinations, including normalized path aliases; folio and cover
 destinations must differ.
 .PP
 Existing destinations are replaced without prompting only after successful
 generation. The current B2 slice supports Letter and A4 sheets, an optional
-margin grid, and separate SVG cover output. Physical cover cards, adhesive,
+margin grid, and separate SVG cover output. The former \fB-o\fR/\fB--output\fR
+and \fB-f\fR/\fB--force\fR options are no longer accepted; name the folio
+output as the second positional argument. Physical cover cards, adhesive,
 and fabric remain user-supplied.
 .SH OPTIONS
 .TP
 .BR --help , \-h
 Print usage, a concise option summary, and exit-status summary without requiring
-an input PDF; return status 0.
+an input PDF; return status 0. Invoke --help or -h on its own.
 .TP
 .BR --sheet\~letter | \-s\~letter | --sheet\~a4 | \-s\~a4
 Select the physical output sheet. Letter is the default. Output is landscape:
@@ -51,7 +65,7 @@ Add light-gray vector grid lines in the margin areas. The default spacing is
 .TP
 .B --grid-spacing \fIVALUE\fR, -G \fIVALUE\fR
 Set positive grid spacing in \fBmm\fR, \fBin\fR, or \fBpt\fR; the default is
-5 mm.
+5 mm. This option does not enable the grid; also supply --grid.
 .TP
 .BR --margin-top\~VALUE | \-t\~VALUE | --margin-bottom\~VALUE | \-b\~VALUE
 Set top or bottom output clearance. Values require a non-negative \fBmm\fR,
@@ -104,8 +118,15 @@ librsvg onto a Cairo PDF surface and fitted proportionally to each half-sheet
 viewport.
 .PP
 Existing folio and cover outputs are replaced without prompting only after
-successful generation. Outputs are first written to sibling temporary files;
-a handled failure does not leave temporary output.
+successful generation. Outputs are first written to sibling temporary files
+named DESTINATION.ezbind.tmp. Do not use those names for source files or other
+data, or run concurrent invocations targeting the same destination.
+.PP
+Combined output is not transactional: the cover is committed first, then the
+folio. If the folio commit fails, the cover may already have been replaced even
+though the command returns an error. Generation failures before commit leave
+existing destinations unchanged. Path checks resolve relative components and
+symbolic links but do not identify distinct hard links to the same file.
 .SH EXIT STATUS
 .TP
 .B 0
@@ -121,17 +142,20 @@ Input PDF error, including unreadable, malformed, or empty input.
 Impossible layout.
 .TP
 .B 5
-Output or filesystem error.
+Output, filesystem, or SVG-rendering error.
 .TP
 .B 6
-Missing or unusable runtime dependency.
+Reserved for missing or unusable runtime dependencies by the interface
+contract. The current application does not return this status; shared-library
+loader failures occur before application error handling.
 .TP
 .B 10
 Unexpected internal processing error.
 .SH DIAGNOSTICS
 Usage errors are written to standard error and include the diagnostic followed
 by the canonical usage line. Ordinary diagnostics do not include extracted
-source text, passwords, or complete PDF content.
+source text, passwords, or complete PDF content. Success messages identifying
+written destinations are printed to standard output.
 .SH PDF LIMITATIONS
 The qpdf backend preserves visible page content and selectable text for the
 implemented folio placement path. Cover artwork is rendered through librsvg
@@ -158,6 +182,12 @@ Generate a cover without a text-block PDF:
 .nf
 ezbind --sheet letter --cover-back back.svg \\
   --cover-front front.svg --cover-output covers.pdf
+.fi
+.PP
+Handle dash-leading positional filenames by ending option parsing:
+.PP
+.nf
+ezbind --sheet a4 -- -book.pdf -bound.pdf
 .fi
 .SH SEE ALSO
 .BR qpdf (1)

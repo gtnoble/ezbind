@@ -21,6 +21,8 @@ Every entry must include a category and one priority. Categories: Plans, Concept
 
 | CHG-013 | 2026-10-24 | Requirements, Concept, Design, Code, Test, Manuals | 3 — Moderate | User approved two positional folio paths, removal of output/force switches, and unconditional destination replacement after generation. | CLI/application source; tests/test_cli.py; README; man page; OCD/SRS/SDD; B2 test record | Implement the revised CLI, synchronize controlled documentation, and verify replacement and invalid-invocation behavior. | Parser/help and Unix replacement rename implemented; normalized source/destination guards added. Root/nested builds, 15 CLI regressions, core/native bridge tests, Letter/A4 qpdf checks, man rendering, and diff checks pass. Historical results preserved. Fixed-suffix temporary ownership and multi-output rollback remain separate hardening work. | resolved | 2026-10-24 |
 
+| CHG-014 | 2026-10-24 | Manuals, Design, Test | 4 — Minor | Follow-up documentation audit found incomplete workflow examples, misleading usage-error ordering, and undocumented current overwrite limits. | README; man page; SDD; SRS/TD headers; development log | Clarify supported syntax, migration, examples, test execution, commit order, dependencies, and reserved status 6; preserve historical outcomes. | Documentation checked against implementation; all four README conversion examples execute successfully in temporary directories and generated PDFs pass qpdf checks; man-page rendering and whitespace checks pass. Historical results preserved. | resolved | 2026-10-24 |
+
 ## CHG-001 rationale
 
 The priority is 3 because the change affects project scope and baseline status but has a known, controlled resolution and does not block the accepted capability.
